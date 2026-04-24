@@ -763,7 +763,7 @@ function toggleCheck(i) {
 function openModal(day) {
   modalDay = day;
   const w = getWeek(currentWeek);
-  const current = w.seances[day][slot];
+  const current = w.seances[day].s1;
   const opts = document.getElementById('modal-options');
   opts.innerHTML = '';
   SEANCES.forEach(s => {
