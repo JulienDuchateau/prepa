@@ -59,7 +59,7 @@
 
   /* DAY CARDS */
   .days-grid { display: flex; flex-direction: column; gap: 6px; }
-  .day-card { background: var(--card); border: none; border-radius: 14px; padding: 11px 12px; display: flex; align-items: center; gap: 10px; transition: all 0.2s; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+  .day-card { background: var(--card); border: none; border-radius: 14px; padding: 11px 12px; display: flex; align-items: center; gap: 10px; transition: all 0.2s; box-shadow: 0 2px 8px rgba(0,0,0,0.06); cursor: pointer; -webkit-tap-highlight-color: rgba(0,194,255,0.1); }
   .day-card.validated { border: none; background: rgba(0,135,90,0.07); box-shadow: 0 2px 8px rgba(0,135,90,0.15), inset 0 0 0 1.5px var(--accent2); }
   .day-name { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--muted); width: 26px; flex-shrink: 0; }
   .day-content { flex: 1; min-width: 0; }
@@ -526,19 +526,26 @@ function renderDays() {
     s1Badge.className = 'badge ' + badgeClass(s.s1);
     const icon = SEANCE_ICONS[s.s1] || '';
     s1Badge.textContent = (icon ? icon + ' ' : '') + s.s1;
-    const openDay = (e) => { e.stopPropagation(); e.preventDefault(); openModal(i); };
-    s1Badge.onclick = openDay;
-    s1Badge.addEventListener('touchend', openDay, { passive: false });
     s1El.appendChild(s1Badge);
     contentEl.appendChild(s1El);
-
     div.appendChild(contentEl);
+
+    // Make entire card tappable on iOS Safari
+    const idx = i;
+    div.onclick = (e) => {
+      // Don't trigger if tapping on input or toggle
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'LABEL' || 
+          e.target.closest('.ios-toggle') || e.target.closest('.day-run-inputs')) return;
+      openModal(idx);
+    };
 
     // right control
     if (isRun) {
       const wrap = document.createElement('div');
       wrap.className = 'day-run-inputs';
-      wrap.onclick = (e) => e.stopPropagation();
+      const stopProp = (e) => e.stopPropagation();
+      wrap.onclick = stopProp;
+      wrap.addEventListener('touchend', stopProp);
 
       // KM row
       const kmRow = document.createElement('div');
@@ -601,7 +608,9 @@ function renderDays() {
     } else if (isRenfo) {
       const label = document.createElement('label');
       label.className = 'ios-toggle';
-      label.onclick = (e) => e.stopPropagation();
+      const stopToggle = (e) => e.stopPropagation();
+      label.onclick = stopToggle;
+      label.addEventListener('touchend', stopToggle);
       const cb = document.createElement('input');
       cb.type = 'checkbox';
       cb.checked = !!w.checked[i];
@@ -762,7 +771,7 @@ function openModal(day) {
     div.className = 'seance-option' + (s === current ? ' selected' : '');
     div.innerHTML = `<span class="badge ${badgeClass(s)}">${s}</span> ${s}`;
     div.onclick = () => { selectSeance(s); };
-    div.addEventListener('touchend', (e) => { e.preventDefault(); selectSeance(s); }, { passive: false });
+    div.addEventListener('touchend', (e) => { e.preventDefault(); e.stopPropagation(); selectSeance(s); }, { passive: false });
     opts.appendChild(div);
   });
   document.getElementById('modal').classList.add('open');
