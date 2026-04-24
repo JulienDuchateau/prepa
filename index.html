@@ -74,7 +74,7 @@
   .day-field-unit { font-family: 'DM Mono', monospace; font-size: 9px; color: var(--muted); flex-shrink: 0; }
 
   /* SEANCE BADGE */
-  .badge { display: inline-flex; align-items: center; gap: 4px; padding: 3px 8px; border-radius: 20px; font-size: 10px; font-family: 'DM Mono', monospace; letter-spacing: 0.05em; font-weight: 500; }
+  .badge { display: inline-flex; align-items: center; gap: 4px; padding: 3px 8px; border-radius: 20px; font-size: 10px; font-family: 'DM Mono', monospace; letter-spacing: 0.05em; font-weight: 500; cursor: pointer; -webkit-tap-highlight-color: rgba(0,0,0,0.1); }
   .badge-run { background: rgba(0,118,184,0.08); color: var(--accent); border: 1px solid rgba(0,118,184,0.2); }
   .badge-intense { background: rgba(0,40,100,0.12); color: #0047AB; border: 1px solid rgba(0,40,100,0.25); }
   .badge-renfo { background: rgba(224,85,32,0.1); color: var(--accent3); border: 1px solid rgba(224,85,32,0.25); }
@@ -173,7 +173,7 @@
   /* PLANNING MODAL */
   .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 150; display: none; align-items: flex-end; }
   .modal-overlay.open { display: flex; }
-  .modal { background: var(--surface); border-radius: 20px 20px 0 0; width: 100%; padding: 20px 20px calc(20px + env(safe-area-inset-bottom)); max-height: 80vh; overflow-y: auto; }
+  .modal { background: var(--surface); border-radius: 20px 20px 0 0; width: 100%; padding: 20px 20px calc(20px + env(safe-area-inset-bottom)); max-height: 80vh; overflow-y: auto; -webkit-overflow-scrolling: touch; }
   .modal-handle { width: 36px; height: 4px; background: var(--border); border-radius: 2px; margin: 0 auto 16px; }
   .modal-title { font-family: 'Bebas Neue', sans-serif; font-size: 22px; letter-spacing: 0.05em; margin-bottom: 14px; }
   .seance-option { padding: 12px 14px; border-radius: 10px; border: 1px solid var(--border); margin-bottom: 6px; cursor: pointer; font-size: 14px; display: flex; align-items: center; gap: 10px; }
@@ -526,7 +526,9 @@ function renderDays() {
     s1Badge.className = 'badge ' + badgeClass(s.s1);
     const icon = SEANCE_ICONS[s.s1] || '';
     s1Badge.textContent = (icon ? icon + ' ' : '') + s.s1;
-    s1Badge.onclick = (e) => { e.stopPropagation(); openModal(i); };
+    const openDay = (e) => { e.stopPropagation(); e.preventDefault(); openModal(i); };
+    s1Badge.onclick = openDay;
+    s1Badge.addEventListener('touchend', openDay, { passive: false });
     s1El.appendChild(s1Badge);
     contentEl.appendChild(s1El);
 
@@ -760,6 +762,7 @@ function openModal(day) {
     div.className = 'seance-option' + (s === current ? ' selected' : '');
     div.innerHTML = `<span class="badge ${badgeClass(s)}">${s}</span> ${s}`;
     div.onclick = () => { selectSeance(s); };
+    div.addEventListener('touchend', (e) => { e.preventDefault(); selectSeance(s); }, { passive: false });
     opts.appendChild(div);
   });
   document.getElementById('modal').classList.add('open');
@@ -778,6 +781,9 @@ function closeModal() {
 }
 
 document.getElementById('modal').addEventListener('click', function(e) {
+  if (e.target === this) closeModal();
+});
+document.getElementById('modal').addEventListener('touchend', function(e) {
   if (e.target === this) closeModal();
 });
 
