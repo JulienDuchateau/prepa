@@ -197,7 +197,7 @@
 <!-- PAGE: SEMAINE -->
 <div class="page active" id="page-semaine">
   <div class="header">
-    <div class="header-eyebrow">Prépa Marathon · Objectif sub 3h40</div>
+    <div class="header-eyebrow">Prépa Marathon · Objectif sub 3h45</div>
     <div class="header-title">JULIEN DUCHATEAU</div>
     <div class="countdown-row" id="countdown-row"></div>
   </div>
@@ -285,7 +285,7 @@
   <div class="section">
     <div class="section-title">Charge kilométrique</div>
     <div style="background:var(--card);border-radius:18px;padding:16px 10px 12px;box-shadow:0 2px 10px rgba(0,0,0,0.07);">
-      <canvas id="chart-km" height="180"></canvas>
+      <canvas id="chart-km" style="width:100%;display:block;"></canvas>
     </div>
     <div style="display:flex;gap:10px;margin-top:10px;">
       <div class="stat-card" style="flex:1">
@@ -306,7 +306,7 @@
   <div class="section">
     <div class="section-title">Forme & bien-être</div>
     <div style="background:var(--card);border-radius:18px;padding:16px 10px 12px;box-shadow:0 2px 10px rgba(0,0,0,0.07);">
-      <canvas id="chart-kpi" height="180"></canvas>
+      <canvas id="chart-kpi" style="width:100%;display:block;"></canvas>
     </div>
     <div style="display:flex;gap:10px;margin-top:10px;">
       <div class="stat-card" style="flex:1">
@@ -977,19 +977,25 @@ function drawChart(canvasId, labels, rawData, color, unit, isLine, fixedMin, fix
   if (!canvas) return;
   const ctx = canvas.getContext('2d');
   const dpr = window.devicePixelRatio || 1;
-  const W = canvas.offsetWidth || 340;
-  const H = canvas.offsetHeight || 200;
+
+  // Responsive: read CSS width, compute height from ratio
+  const W = canvas.parentElement.clientWidth - 20 || 320;
+  const H = Math.round(W * 0.48); // ~16:7.5 ratio — taller on narrow screens
   canvas.width = W * dpr;
   canvas.height = H * dpr;
+  canvas.style.width = W + 'px';
+  canvas.style.height = H + 'px';
   ctx.scale(dpr, dpr);
 
+  const isMobile = W < 380;
   const dataVals = rawData;
   const hasData = dataVals.some(v => v !== null && v > 0);
   const maxVal = fixedMax !== undefined ? fixedMax : (hasData ? Math.max(...dataVals.filter(v=>v>0)) * 1.2 : 10);
   const minVal = fixedMin !== undefined ? fixedMin : 0;
   const range = maxVal - minVal || 1;
 
-  const pad = { top: 16, right: 14, bottom: 30, left: 38 };
+  // Adaptive padding based on screen width
+  const pad = { top: 14, right: 10, bottom: 26, left: isMobile ? 28 : 34 };
   const chartW = W - pad.left - pad.right;
   const chartH = H - pad.top - pad.bottom;
   const barW = chartW / labels.length;
@@ -1001,9 +1007,10 @@ function drawChart(canvasId, labels, rawData, color, unit, isLine, fixedMin, fix
   ctx.roundRect(pad.left, pad.top, chartW, chartH, 6);
   ctx.fill();
 
-  // Grid lines (dashed)
-  for (let i = 0; i <= 4; i++) {
-    const y = pad.top + chartH - (i / 4) * chartH;
+  // Grid lines — fewer on mobile (3 instead of 4)
+  const gridLines = isMobile ? 3 : 4;
+  for (let i = 0; i <= gridLines; i++) {
+    const y = pad.top + chartH - (i / gridLines) * chartH;
     ctx.beginPath();
     ctx.setLineDash([3, 4]);
     ctx.strokeStyle = 'rgba(0,0,0,0.07)';
@@ -1012,14 +1019,14 @@ function drawChart(canvasId, labels, rawData, color, unit, isLine, fixedMin, fix
     ctx.lineTo(pad.left + chartW, y);
     ctx.stroke();
     ctx.setLineDash([]);
-    const val = minVal + (i/4) * range;
+    const val = minVal + (i / gridLines) * range;
     ctx.fillStyle = '#8BA4B8';
-    ctx.font = '9px DM Mono, monospace';
+    ctx.font = `${isMobile ? 8 : 9}px DM Mono, monospace`;
     ctx.textAlign = 'right';
-    ctx.fillText(val.toFixed(0), pad.left - 5, y + 3);
+    ctx.fillText(val.toFixed(0), pad.left - 3, y + 3);
   }
 
-  // Objective line (km only, 40km)
+  // Objective line (km chart only)
   if (!isLine) {
     const objY = pad.top + chartH - ((30 - minVal) / range) * chartH;
     ctx.beginPath();
@@ -1030,14 +1037,13 @@ function drawChart(canvasId, labels, rawData, color, unit, isLine, fixedMin, fix
     ctx.lineTo(pad.left + chartW, objY);
     ctx.stroke();
     ctx.setLineDash([]);
-    ctx.fillStyle = color + '88';
-    ctx.font = '8px DM Mono, monospace';
+    ctx.fillStyle = color + '99';
+    ctx.font = `${isMobile ? 7 : 8}px DM Mono, monospace`;
     ctx.textAlign = 'left';
     ctx.fillText('obj. 30km', pad.left + 4, objY - 3);
   }
 
   if (isLine) {
-    // SMOOTH LINE CHART with dots and value labels
     const points = [];
     dataVals.forEach((v, i) => {
       if (v && v > 0) {
@@ -1054,7 +1060,6 @@ function drawChart(canvasId, labels, rawData, color, unit, isLine, fixedMin, fix
       grad.addColorStop(1, color + '00');
       ctx.beginPath();
       ctx.moveTo(points[0].x, pad.top + chartH);
-      // Smooth bezier
       for (let j = 0; j < points.length - 1; j++) {
         const cpX = (points[j].x + points[j+1].x) / 2;
         if (j === 0) ctx.lineTo(points[j].x, points[j].y);
@@ -1072,38 +1077,40 @@ function drawChart(canvasId, labels, rawData, color, unit, isLine, fixedMin, fix
         ctx.bezierCurveTo(cpX, points[j].y, cpX, points[j+1].y, points[j+1].x, points[j+1].y);
       }
       ctx.strokeStyle = color;
-      ctx.lineWidth = 2.5;
+      ctx.lineWidth = 2;
       ctx.lineJoin = 'round';
       ctx.stroke();
 
-      // Dots with value labels
-      points.forEach(p => {
+      // Dots — smaller on mobile, show values only every other point
+      points.forEach((p, idx) => {
+        const r = isMobile ? 3 : 4;
         ctx.beginPath();
-        ctx.arc(p.x, p.y, 5, 0, Math.PI * 2);
+        ctx.arc(p.x, p.y, r + 1, 0, Math.PI * 2);
         ctx.fillStyle = '#fff';
         ctx.fill();
         ctx.beginPath();
-        ctx.arc(p.x, p.y, 3.5, 0, Math.PI * 2);
+        ctx.arc(p.x, p.y, r, 0, Math.PI * 2);
         ctx.fillStyle = color;
         ctx.fill();
-        // Value label
-        ctx.fillStyle = color;
-        ctx.font = 'bold 9px DM Mono, monospace';
-        ctx.textAlign = 'center';
-        ctx.fillText(p.v.toFixed(1), p.x, p.y - 9);
+        // Show value label every other point on mobile
+        if (!isMobile || idx % 2 === 0) {
+          ctx.fillStyle = color;
+          ctx.font = `bold ${isMobile ? 8 : 9}px DM Mono, monospace`;
+          ctx.textAlign = 'center';
+          ctx.fillText(p.v.toFixed(1), p.x, p.y - 8);
+        }
       });
     }
   } else {
-    // BAR CHART with rounded tops, highlight current week
-    const gap = barW > 12 ? 3 : 1.5;
+    // BAR CHART
+    const gap = barW > 10 ? 2 : 1;
     dataVals.forEach((v, i) => {
       const x = pad.left + i * barW + gap;
-      const bw = barW - gap * 2;
+      const bw = Math.max(barW - gap * 2, 1);
       if (!v || v <= 0) {
-        // Empty bar ghost
         ctx.beginPath();
-        ctx.roundRect(x, pad.top + chartH - 4, bw, 4, [2, 2, 0, 0]);
-        ctx.fillStyle = 'rgba(0,0,0,0.05)';
+        ctx.roundRect(x, pad.top + chartH - 3, bw, 3, [1, 1, 0, 0]);
+        ctx.fillStyle = 'rgba(0,0,0,0.04)';
         ctx.fill();
         return;
       }
@@ -1111,41 +1118,33 @@ function drawChart(canvasId, labels, rawData, color, unit, isLine, fixedMin, fix
       const y = pad.top + chartH - bh;
       const isHighlight = i === highlightIdx;
       const grad = ctx.createLinearGradient(0, y, 0, y + bh);
-      if (isHighlight) {
-        grad.addColorStop(0, '#FFB800');
-        grad.addColorStop(1, '#FFB80070');
-      } else {
-        grad.addColorStop(0, color);
-        grad.addColorStop(1, color + '55');
-      }
+      grad.addColorStop(0, isHighlight ? '#FFB800' : color);
+      grad.addColorStop(1, isHighlight ? '#FFB80070' : color + '55');
       ctx.beginPath();
-      ctx.roundRect(x, y, bw, bh, [5, 5, 0, 0]);
+      ctx.roundRect(x, y, bw, bh, [3, 3, 0, 0]);
       ctx.fillStyle = grad;
       ctx.fill();
-      // Value on top
-      if (v && v > 0) {
-        ctx.fillStyle = isHighlight ? '#B87800' : color;
-        ctx.font = 'bold 8px DM Mono, monospace';
-        ctx.textAlign = 'center';
-        ctx.fillText(v.toFixed(0), x + bw/2, y - 3);
+      // Show value only on highlighted bar or every other bar on mobile
+      if (!isMobile || i === highlightIdx || i % 2 === 0) {
+        if (bh > 12) { // Only if bar is tall enough
+          ctx.fillStyle = isHighlight ? '#B87800' : color;
+          ctx.font = `bold ${isMobile ? 7 : 8}px DM Mono, monospace`;
+          ctx.textAlign = 'center';
+          ctx.fillText(v.toFixed(0), x + bw/2, y - 2);
+        }
       }
     });
   }
 
-  // X labels — every label, smaller font
-  ctx.fillStyle = '#8BA4B8';
-  ctx.font = '8px DM Mono, monospace';
-  ctx.textAlign = 'center';
+  // X labels — show every other label on mobile to avoid overlap
   labels.forEach((l, i) => {
+    const showLabel = isMobile ? (i % 2 === 0) : true;
+    if (!showLabel && i !== highlightIdx) return;
     const isHighlight = i === highlightIdx;
-    if (isHighlight) {
-      ctx.fillStyle = '#B87800';
-      ctx.font = 'bold 9px DM Mono, monospace';
-    } else {
-      ctx.fillStyle = '#8BA4B8';
-      ctx.font = '8px DM Mono, monospace';
-    }
-    ctx.fillText(l, pad.left + i * barW + barW/2, H - 8);
+    ctx.fillStyle = isHighlight ? '#B87800' : '#8BA4B8';
+    ctx.font = `${isHighlight ? 'bold ' : ''}${isMobile ? 7 : 8}px DM Mono, monospace`;
+    ctx.textAlign = 'center';
+    ctx.fillText(l, pad.left + i * barW + barW/2, H - 6);
   });
 }
 
@@ -1229,6 +1228,22 @@ function showPage(name, btn) {
   if (name === 'stats') { save(); renderStatsPage(); }
   if (name === 'donnees') updateStorageInfo();
 }
+
+// Redraw charts on resize/orientation change
+if (window.ResizeObserver) {
+  const chartObserver = new ResizeObserver(() => {
+    if (document.getElementById('page-stats').classList.contains('active')) {
+      renderStatsPage();
+    }
+  });
+  const kmCanvas = document.getElementById('chart-km');
+  if (kmCanvas) chartObserver.observe(kmCanvas.parentElement);
+}
+window.addEventListener('orientationchange', () => {
+  setTimeout(() => {
+    if (document.getElementById('page-stats').classList.contains('active')) renderStatsPage();
+  }, 300);
+});
 
 load();
 renderAll();
