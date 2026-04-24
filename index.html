@@ -1,0 +1,1223 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>PREPA — Julien</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #F0F4F8;
+    --surface: #FFFFFF;
+    --card: #FFFFFF;
+    --border: #D4DCE6;
+    --accent: #0076B8;
+    --accent2: #00875A;
+    --accent3: #E05520;
+    --warn: #B87800;
+    --text: #111820;
+    --muted: #7A90A4;
+    --soft: #4A6070;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; min-height: 100vh; overflow-x: hidden; }
+
+  /* NAV */
+  .nav { position: fixed; bottom: 0; left: 0; right: 0; background: var(--surface); border-top: 1px solid var(--border); display: flex; z-index: 100; padding-bottom: env(safe-area-inset-bottom); }
+  .nav-btn { flex: 1; padding: 10px 4px 8px; display: flex; flex-direction: column; align-items: center; gap: 3px; font-size: 9px; color: var(--muted); font-family: 'DM Mono', monospace; letter-spacing: 0.05em; cursor: pointer; transition: color 0.2s; border: none; background: none; }
+  .nav-btn.active { color: var(--accent); }
+  .nav-btn svg { width: 20px; height: 20px; }
+
+  /* PAGES */
+  .page { display: none; padding: 0 0 calc(80px + env(safe-area-inset-bottom)); min-height: 100vh; }
+  .page.active { display: block; }
+
+  /* HEADER */
+  .header { padding: env(safe-area-inset-top, 44px) 16px 14px; padding-top: max(44px, env(safe-area-inset-top)); background: linear-gradient(180deg, #DDE5EF 0%, var(--bg) 100%); }
+  .header-eyebrow { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--accent); letter-spacing: 0.2em; text-transform: uppercase; margin-bottom: 6px; }
+  .header-title { font-family: 'Bebas Neue', sans-serif; font-size: 44px; letter-spacing: 0.05em; line-height: 1; }
+  .header-sub { font-size: 12px; color: var(--soft); margin-top: 4px; }
+
+  /* WEEK SELECTOR */
+  .week-selector { display: flex; align-items: center; gap: 10px; padding: 0 14px 12px; }
+  .week-arrow { width: 36px; height: 36px; border-radius: 50%; border: 1px solid var(--border); background: var(--card); color: var(--text); font-size: 18px; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; }
+  .week-label { flex: 1; text-align: center; font-family: 'Bebas Neue', sans-serif; font-size: 22px; letter-spacing: 0.1em; color: var(--accent); }
+
+  /* CONCLUSION BANNER */
+  .conclusion { margin: 0 14px 12px; padding: 12px 14px; border-radius: 16px; border: none; background: var(--card); display: flex; align-items: center; justify-content: space-between; box-shadow: 0 2px 8px rgba(0,0,0,0.07); }
+  .conclusion-status { font-size: 14px; font-weight: 500; }
+  .conclusion-score { font-family: 'DM Mono', monospace; font-size: 13px; color: var(--soft); }
+  .status-ok { color: var(--accent2); }
+  .status-mid { color: var(--warn); }
+  .status-bad { color: var(--accent3); }
+
+  /* SECTION */
+  .section { padding: 0 14px; margin-bottom: 16px; }
+  .section-title { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--accent); letter-spacing: 0.2em; text-transform: uppercase; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1.5px solid var(--accent); opacity: 0.7; }
+
+  /* DAY CARDS */
+  .days-grid { display: flex; flex-direction: column; gap: 6px; }
+  .day-card { background: var(--card); border: none; border-radius: 14px; padding: 11px 12px; display: flex; align-items: center; gap: 10px; transition: all 0.2s; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+  .day-card.validated { border: none; background: rgba(0,135,90,0.07); box-shadow: 0 2px 8px rgba(0,135,90,0.15), inset 0 0 0 1.5px var(--accent2); }
+  .day-name { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--muted); width: 26px; flex-shrink: 0; }
+  .day-content { flex: 1; min-width: 0; }
+  .day-seance1 { font-size: 12px; font-weight: 500; }
+  .day-run-inputs { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; flex-shrink: 0; }
+  .day-input-row { display: flex; align-items: center; gap: 4px; }
+  .day-field-input { font-family: 'DM Mono', monospace; font-size: 11px; background: transparent; border: none; border-bottom: 1px solid var(--border); outline: none; padding: 1px 0; text-align: right; }
+  .day-field-input:focus { border-bottom-color: var(--accent); }
+  .day-field-input.km { color: var(--accent); width: 36px; }
+  .day-field-input.allure { color: var(--accent3); width: 38px; }
+  .day-field-input.deniv { color: var(--accent2); width: 38px; }
+  .day-field-unit { font-family: 'DM Mono', monospace; font-size: 9px; color: var(--muted); flex-shrink: 0; }
+
+  /* SEANCE BADGE */
+  .badge { display: inline-flex; align-items: center; gap: 4px; padding: 3px 8px; border-radius: 20px; font-size: 10px; font-family: 'DM Mono', monospace; letter-spacing: 0.05em; font-weight: 500; }
+  .badge-run { background: rgba(0,118,184,0.08); color: var(--accent); border: 1px solid rgba(0,118,184,0.2); }
+  .badge-intense { background: rgba(0,40,100,0.12); color: #0047AB; border: 1px solid rgba(0,40,100,0.25); }
+  .badge-renfo { background: rgba(224,85,32,0.1); color: var(--accent3); border: 1px solid rgba(224,85,32,0.25); }
+  .badge-repos { background: rgba(120,80,200,0.08); color: #6030A8; border: 1px solid rgba(120,80,200,0.2); }
+
+  /* STATS ROW */
+  .stats-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .stat-card { background: var(--card); border: none; border-radius: 14px; padding: 11px 8px; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+  .stat-val { font-family: 'Bebas Neue', sans-serif; font-size: 24px; letter-spacing: 0.05em; }
+  .stat-val.run { color: var(--accent); }
+  .stat-label { font-family: 'DM Mono', monospace; font-size: 9px; color: var(--muted); letter-spacing: 0.1em; margin-top: 2px; }
+
+  /* KPI STARS */
+  .kpi-list { display: flex; flex-direction: column; gap: 6px; }
+  .kpi-row { background: var(--card); border: none; border-radius: 12px; padding: 10px 12px; display: flex; align-items: center; box-shadow: 0 2px 6px rgba(0,0,0,0.05); }
+  .kpi-name { font-size: 12px; flex: 1; }
+  .stars { display: flex; gap: 4px; }
+  .star { font-size: 20px; cursor: pointer; transition: transform 0.15s; color: var(--border); }
+  .star.filled { color: var(--warn); filter: drop-shadow(0 1px 2px rgba(184,120,0,0.3)); }
+  .star:active { transform: scale(1.3); }
+
+  /* DISTANCE INPUT */
+  .dist-unit { font-size: 10px; color: var(--muted); margin-top: 2px; }
+
+  /* NOTES */
+  .notes-area { width: 100%; background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 12px; color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 13px; line-height: 1.5; resize: none; outline: none; min-height: 90px; }
+  .notes-area:focus { border-color: var(--accent); }
+
+  /* RECAP PAGE */
+  .recap-list { display: flex; flex-direction: column; gap: 8px; }
+  .recap-row { background: var(--card); border: none; border-radius: 14px; padding: 12px 14px 12px 18px; margin-bottom: 4px; cursor: pointer; box-shadow: 0 2px 10px rgba(0,0,0,0.07); transition: box-shadow 0.2s; position: relative; overflow: hidden; }
+  .recap-row::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 5px; border-radius: 4px 0 0 4px; background: var(--border); }
+  .recap-row.done::before { background: var(--accent2); }
+  .recap-row.inprogress::before { background: var(--warn); }
+  .recap-row.empty::before { background: var(--border); }
+  .recap-week { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--muted); margin-bottom: 3px; letter-spacing: 0.1em; }
+  .recap-title { font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 600; color: var(--text); }
+  .recap-content { flex: 1; }
+  .recap-km { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--soft); margin-top: 3px; }
+  .recap-badge { font-family: 'DM Mono', monospace; font-size: 9px; padding: 3px 8px; border-radius: 20px; font-weight: 500; flex-shrink: 0; align-self: center; }
+  .recap-badge-ok { background: rgba(0,135,90,0.1); color: var(--accent2); }
+  .recap-badge-mid { background: rgba(184,120,0,0.1); color: var(--warn); }
+  .recap-badge-empty { background: rgba(122,144,164,0.08); color: var(--muted); }
+  .recap-status { font-size: 12px; }
+
+  /* COURSES PAGE */
+  .course-card { background: var(--card); border: none; border-radius: 14px; padding: 14px 14px 14px 18px; margin-bottom: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.07); position: relative; overflow: hidden; }
+  .course-card::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 5px; border-radius: 4px 0 0 4px; }
+  .course-type-trail::before { background: var(--accent3); }
+  .course-type-route::before { background: var(--accent); }
+  .course-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }
+  .course-name { font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 600; color: var(--text); letter-spacing: -0.01em; line-height: 1.2; }
+  .course-status { font-family: 'DM Mono', monospace; font-size: 9px; padding: 3px 8px; border-radius: 20px; font-weight: 500; flex-shrink: 0; }
+  .status-trail { background: rgba(224,85,32,0.1); color: var(--accent3); }
+  .status-route { background: rgba(0,118,184,0.1); color: var(--accent); }
+  .course-date { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--muted); margin-top: 4px; }
+  .course-inline-details { display: flex; align-items: center; gap: 6px; margin-top: 10px; font-family: 'DM Mono', monospace; font-size: 11px; color: var(--soft); }
+  .course-sep { color: var(--border); }
+  .course-pr-block { margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+  .pr-label { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--muted); letter-spacing: 0.1em; }
+  .pr-input { background: transparent; border: none; color: var(--accent2); font-family: 'Bebas Neue', sans-serif; font-size: 26px; width: 120px; outline: none; text-align: right; padding: 0; }
+  .pr-input:focus { opacity: 0.8; }
+  .pr-input::placeholder { color: var(--border); }
+
+  /* iOS Toggle */
+  .ios-toggle { position: relative; width: 44px; height: 26px; flex-shrink: 0; }
+  .ios-toggle input { opacity: 0; width: 0; height: 0; position: absolute; }
+  .ios-toggle-track { position: absolute; inset: 0; background: var(--border); border-radius: 13px; transition: background 0.25s; cursor: pointer; }
+  .ios-toggle input:checked + .ios-toggle-track { background: var(--accent2); }
+  .ios-toggle-thumb { position: absolute; top: 3px; left: 3px; width: 20px; height: 20px; background: white; border-radius: 50%; transition: transform 0.25s; pointer-events: none; box-shadow: 0 1px 3px rgba(0,0,0,0.2); }
+  .ios-toggle input:checked ~ .ios-toggle-thumb { transform: translateX(18px); }
+
+  /* Countdown chips */
+  .countdown-row { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
+  .chip { display: inline-flex; align-items: center; gap: 5px; padding: 4px 9px; border-radius: 20px; font-family: 'DM Mono', monospace; font-size: 10px; font-weight: 500; }
+  .chip-trail { background: rgba(224,85,32,0.1); color: var(--accent3); border: 1px solid rgba(224,85,32,0.25); }
+  .chip-marathon { background: rgba(0,118,184,0.1); color: var(--accent); border: 1px solid rgba(0,118,184,0.25); }
+
+  /* Today highlight */
+
+  /* Progress bar */
+  .progress-wrap { margin: 0 14px 12px; }
+  .progress-track { height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; }
+  .progress-fill { height: 100%; border-radius: 3px; transition: width 0.6s cubic-bezier(0.34,1.56,0.64,1); background: linear-gradient(90deg, var(--accent) 0%, var(--accent2) 100%); }
+  .progress-fill.full { background: var(--accent2); }
+  .progress-labels { display: flex; justify-content: space-between; margin-top: 5px; font-family: 'DM Mono', monospace; font-size: 10px; color: var(--muted); }
+
+  /* SAVE BTN */
+  .save-btn { display: flex; align-items: center; justify-content: center; gap: 8px; width: calc(100% - 28px); margin: 0 14px 14px; padding: 13px; background: var(--accent); border-radius: 12px; border: none; color: var(--bg); font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 600; cursor: pointer; letter-spacing: 0.02em; transition: opacity 0.2s; }
+  .save-btn:active { opacity: 0.8; }
+
+  /* TOAST */
+  .toast { position: fixed; top: 60px; left: 50%; transform: translateX(-50%) translateY(-20px); background: var(--accent2); color: var(--bg); padding: 10px 20px; border-radius: 20px; font-size: 13px; font-weight: 600; opacity: 0; transition: all 0.3s; z-index: 200; pointer-events: none; }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  /* PLANNING MODAL */
+  .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 150; display: none; align-items: flex-end; }
+  .modal-overlay.open { display: flex; }
+  .modal { background: var(--surface); border-radius: 20px 20px 0 0; width: 100%; padding: 20px 20px calc(20px + env(safe-area-inset-bottom)); max-height: 80vh; overflow-y: auto; }
+  .modal-handle { width: 36px; height: 4px; background: var(--border); border-radius: 2px; margin: 0 auto 16px; }
+  .modal-title { font-family: 'Bebas Neue', sans-serif; font-size: 22px; letter-spacing: 0.05em; margin-bottom: 14px; }
+  .seance-option { padding: 12px 14px; border-radius: 10px; border: 1px solid var(--border); margin-bottom: 6px; cursor: pointer; font-size: 14px; display: flex; align-items: center; gap: 10px; }
+  .seance-option:active { background: var(--card); }
+  .seance-option.selected { border-color: var(--accent); color: var(--accent); }
+</style>
+</head>
+<body>
+
+<div class="toast" id="toast">Sauvegardé ✓</div>
+
+<!-- MODAL SÉANCE -->
+<div class="modal-overlay" id="modal">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Choisir une séance</div>
+    <div id="modal-options"></div>
+  </div>
+</div>
+
+<!-- PAGE: SEMAINE -->
+<div class="page active" id="page-semaine">
+  <div class="header">
+    <div class="header-eyebrow">Prépa Marathon · Objectif sub 3h40</div>
+    <div class="header-title">JULIEN DUCHATEAU</div>
+    <div class="countdown-row" id="countdown-row"></div>
+  </div>
+
+  <div class="week-selector">
+    <button class="week-arrow" onclick="changeWeek(-1)">‹</button>
+    <div class="week-label" id="week-label">SEMAINE 1</div>
+    <button class="week-arrow" onclick="changeWeek(1)">›</button>
+  </div>
+
+  <div class="conclusion" id="conclusion">
+    <div class="conclusion-status" id="conclusion-status">⏳ In process</div>
+    <div class="conclusion-score" id="conclusion-score">0/4</div>
+  </div>
+  <div class="progress-wrap">
+    <div class="progress-track">
+      <div class="progress-fill" id="progress-fill" style="width:0%"></div>
+    </div>
+    <div class="progress-labels">
+      <span id="progress-label-left">0%</span>
+      <span id="progress-label-right">Objectif : 4 séances</span>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Planning & Réalisation</div>
+    <div class="days-grid" id="days-grid"></div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Récapitulatif</div>
+    <div class="stats-row" id="stats-row"></div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">KPIs — Bilan de semaine</div>
+    <div class="kpi-list" id="kpi-list"></div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Notes</div>
+    <textarea class="notes-area" id="notes-area" placeholder="Ressenti, contexte, points clés de la semaine..."></textarea>
+  </div>
+
+  <button class="save-btn" onclick="saveWeek()">
+    <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+    Sauvegarder la semaine
+  </button>
+</div>
+
+<!-- PAGE: RÉCAP -->
+<div class="page" id="page-recap">
+  <div class="header">
+    <div class="header-eyebrow">Vue globale</div>
+    <div class="header-title">RÉCAPITULATIF</div>
+    <div class="header-sub">Toutes les semaines</div>
+  </div>
+  <div class="section">
+    <div class="section-title">Progression</div>
+    <div class="recap-list" id="recap-list"></div>
+  </div>
+</div>
+
+<!-- PAGE: COURSES -->
+<div class="page" id="page-courses">
+  <div class="header">
+    <div class="header-eyebrow">Objectifs</div>
+    <div class="header-title">MES COURSES</div>
+    <div class="header-sub">Saison 2026</div>
+  </div>
+  <div class="section">
+    <div class="section-title">Calendrier</div>
+    <div id="courses-list"></div>
+  </div>
+</div>
+
+<!-- PAGE: STATS -->
+<div class="page" id="page-stats">
+  <div class="header">
+    <div class="header-eyebrow">Progression</div>
+    <div class="header-title">STATISTIQUES</div>
+    <div class="header-sub">Charge kilométrique sur 20 semaines</div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Charge kilométrique</div>
+    <div style="background:var(--card);border-radius:18px;padding:16px 10px 12px;box-shadow:0 2px 10px rgba(0,0,0,0.07);">
+      <canvas id="chart-km" height="180"></canvas>
+    </div>
+    <div style="display:flex;gap:10px;margin-top:10px;">
+      <div class="stat-card" style="flex:1">
+        <div class="stat-val run" id="stat-km-max">—</div>
+        <div class="stat-label">MAX KM</div>
+      </div>
+      <div class="stat-card" style="flex:1">
+        <div class="stat-val run" id="stat-km-total">—</div>
+        <div class="stat-label">TOTAL KM</div>
+      </div>
+      <div class="stat-card" style="flex:1">
+        <div class="stat-val run" id="stat-km-avg">—</div>
+        <div class="stat-label">MOY/SEM</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Forme & bien-être</div>
+    <div style="background:var(--card);border-radius:18px;padding:16px 10px 12px;box-shadow:0 2px 10px rgba(0,0,0,0.07);">
+      <canvas id="chart-kpi" height="180"></canvas>
+    </div>
+    <div style="display:flex;gap:10px;margin-top:10px;">
+      <div class="stat-card" style="flex:1">
+        <div class="stat-val" style="color:var(--accent2)" id="stat-kpi-max">—</div>
+        <div class="stat-label">MAX /5</div>
+      </div>
+      <div class="stat-card" style="flex:1">
+        <div class="stat-val" style="color:var(--accent3)" id="stat-kpi-min">—</div>
+        <div class="stat-label">MIN /5</div>
+      </div>
+      <div class="stat-card" style="flex:1">
+        <div class="stat-val" style="color:var(--soft)" id="stat-kpi-avg">—</div>
+        <div class="stat-label">MOY /5</div>
+      </div>
+    </div>
+  </div>
+  </div>
+</div>
+
+<!-- PAGE: DONNÉES -->
+<div class="page" id="page-donnees">
+  <div class="header">
+    <div class="header-eyebrow">Sécurité</div>
+    <div class="header-title">DONNÉES</div>
+    <div class="header-sub">Sauvegarde & restauration</div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Exporter mes données</div>
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:20px;">
+      <p style="font-size:13px;color:var(--soft);line-height:1.6;margin-bottom:16px;">Génère un fichier <code style="background:var(--surface);padding:2px 6px;border-radius:4px;font-size:12px;color:var(--accent);">.json</code> avec toutes tes données. Conserve-le précieusement — il permet de tout restaurer en cas de perte.</p>
+      <button onclick="exportData()" style="width:100%;padding:14px;background:var(--accent);color:#000;border:none;border-radius:10px;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:600;cursor:pointer;letter-spacing:0.02em;">⬇ Télécharger la sauvegarde</button>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Importer une sauvegarde</div>
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:20px;">
+      <p style="font-size:13px;color:var(--soft);line-height:1.6;margin-bottom:16px;">Sélectionne un fichier de sauvegarde <code style="background:var(--surface);padding:2px 6px;border-radius:4px;font-size:12px;color:var(--accent2);">.json</code> précédemment exporté pour restaurer toutes tes données.</p>
+      <label style="display:block;width:100%;padding:14px;background:var(--accent2);color:#000;border:none;border-radius:10px;font-size:15px;font-weight:600;cursor:pointer;text-align:center;letter-spacing:0.02em;">
+        ⬆ Charger une sauvegarde
+        <input type="file" accept=".json" onchange="importData(event)" style="display:none;">
+      </label>
+      <div id="import-status" style="margin-top:12px;font-size:13px;text-align:center;min-height:20px;"></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Infos stockage</div>
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:20px;">
+      <div id="storage-info" style="font-size:13px;color:var(--soft);line-height:2;"></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title" style="color:var(--accent3);">Zone de danger</div>
+    <div style="background:var(--card);border:1px solid rgba(224,85,32,0.25);border-radius:14px;padding:20px;">
+      <p style="font-size:13px;color:var(--soft);line-height:1.6;margin-bottom:16px;">Supprime <strong style="color:var(--text);">toutes</strong> les données enregistrées. Action irréversible — exporte d'abord ta sauvegarde.</p>
+      <button onclick="resetData()" style="width:100%;padding:14px;background:transparent;color:var(--accent3);border:1px solid var(--accent3);border-radius:10px;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:600;cursor:pointer;">🗑 Tout effacer</button>
+    </div>
+  </div>
+</div>
+
+<!-- NAV -->
+<nav class="nav">
+  <button class="nav-btn active" onclick="showPage('semaine', this)">
+    <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+    SEMAINE
+  </button>
+  <button class="nav-btn" onclick="showPage('recap', this)">
+    <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+    RÉCAP
+  </button>
+  <button class="nav-btn" onclick="showPage('courses', this)">
+    <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+    COURSES
+  </button>
+  <button class="nav-btn" onclick="showPage('stats', this)">
+    <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+    STATS
+  </button>
+  <button class="nav-btn" onclick="showPage('donnees', this)">
+    <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v6c0 1.66 4.03 3 9 3s9-1.34 9-3V5"/><path d="M3 11v6c0 1.66 4.03 3 9 3s9-1.34 9-3v-6"/></svg>
+    DONNÉES
+  </button>
+</nav>
+
+<script>
+const DAYS = ['LUN','MAR','MER','JEU','VEN','SAM','DIM'];
+
+const SEANCE_ICONS = {
+  'RUNNING FACILE': '🏃',
+  'RUNNING INTENSE': '⚡',
+  'RENFO': '💪',
+  'REPOS': '😴',
+  '-': ''
+};
+
+const SEANCES = ['RUNNING FACILE','RUNNING INTENSE','RENFO','REPOS','-'];
+const KPIS = ['Motivation','Forme générale','Forme des jambes','Sommeil','Respect du plan'];
+const COURSES = [
+  { name: 'TRAIL DES GORETS', date: '31 Mai 2026', dist: '18 km', dplus: '1000m', type: 'trail', pr: '' },
+  { name: 'UTCAM', date: '2026', dist: '30 km', dplus: '', type: 'trail', pr: '' },
+  { name: 'SEMI MARATHON DE NICE', date: '2026', dist: '21,1 km', dplus: '', type: 'route', pr: '1h49' },
+  { name: 'PROM CLASSIC', date: '2026', dist: '10 km', dplus: '', type: 'route', pr: '' },
+  { name: 'MARATHON NICE-CANNES', date: 'Novembre 2026', dist: '42,2 km', dplus: '', type: 'route', pr: '' },
+];
+
+let currentWeek = 1;
+let modalDay = null;
+let data = {};
+
+function getKey(w) { return 'week_' + w; }
+
+function defaultWeek(w) {
+  return {
+    seances: DAYS.map(() => ({ s1: 'REPOS' })),
+    checked: DAYS.map(() => false),
+    distances: DAYS.map(() => ''),
+    allures: DAYS.map(() => ''),
+    denivelés: DAYS.map(() => ''),
+    kpis: KPIS.map(() => 0),
+    notes: ''
+  };
+}
+
+function load() {
+  try { data = JSON.parse(localStorage.getItem('prepa_data') || '{}'); } catch(e) { data = {}; }
+}
+
+function save() {
+  localStorage.setItem('prepa_data', JSON.stringify(data));
+}
+
+function getWeek(w) {
+  if (!data[getKey(w)]) data[getKey(w)] = defaultWeek(w);
+  const wd = data[getKey(w)];
+  if (!wd.allures) wd.allures = DAYS.map(() => '');
+  if (!wd.denivelés) wd.denivelés = DAYS.map(() => '');
+  return wd;
+}
+
+function isRunning(seance) {
+  return seance === 'RUNNING FACILE' || seance === 'RUNNING INTENSE';
+}
+
+function badgeClass(s) {
+  if (!s || s === '-') return 'badge-repos';
+  if (s === 'REPOS') return 'badge-repos';
+  s = s.toUpperCase();
+  if (s === 'RUNNING FACILE') return 'badge-run';
+  if (s === 'RUNNING INTENSE') return 'badge-intense';
+  if (s === 'RENFO') return 'badge-renfo';
+
+  return 'badge-repos';
+}
+
+function renderCountdown() {
+  const now = new Date();
+  const trail = new Date('2026-05-31');
+  const marathon = new Date('2026-11-08');
+  const dTrail = Math.ceil((trail - now) / 86400000);
+  const dMarathon = Math.ceil((marathon - now) / 86400000);
+  const row = document.getElementById('countdown-row');
+  if (!row) return;
+  row.innerHTML = '';
+  if (dTrail > 0) {
+    const c = document.createElement('div');
+    c.className = 'chip chip-trail';
+    c.innerHTML = `<span>J-${dTrail}</span><span>Trail des Gorets</span>`;
+    row.appendChild(c);
+  }
+  if (dMarathon > 0) {
+    const c = document.createElement('div');
+    c.className = 'chip chip-marathon';
+    c.innerHTML = `<span>J-${dMarathon}</span><span>Marathon Nice-Cannes</span>`;
+    row.appendChild(c);
+  }
+}
+
+function animateCounter(el, from, to, suffix) {
+  const dur = 400;
+  const start = performance.now();
+  function step(now) {
+    const p = Math.min((now - start) / dur, 1);
+    const ease = 1 - Math.pow(1 - p, 3);
+    el.textContent = Math.round(from + (to - from) * ease) + suffix;
+    if (p < 1) requestAnimationFrame(step);
+  }
+  requestAnimationFrame(step);
+}
+
+function renderDays() {
+  const w = getWeek(currentWeek);
+  const grid = document.getElementById('days-grid');
+  grid.innerHTML = '';
+  DAYS.forEach((day, i) => {
+    const s = w.seances[i];
+    const isRun = isRunning(s.s1);
+    const isRenfo = s.s1 === 'RENFO';
+    const isValidated = isRun ? (parseFloat(w.distances[i]) > 0) : (isRenfo ? !!w.checked[i] : false);
+    const div = document.createElement('div');
+    div.className = 'day-card' + (isValidated ? ' validated' : '');
+
+    // day name
+    const nameEl = document.createElement('div');
+    nameEl.className = 'day-name';
+    nameEl.textContent = day;
+    div.appendChild(nameEl);
+
+    // content (seances)
+    const contentEl = document.createElement('div');
+    contentEl.className = 'day-content';
+    const s1El = document.createElement('div');
+    s1El.className = 'day-seance1';
+    const s1Badge = document.createElement('span');
+    s1Badge.className = 'badge ' + badgeClass(s.s1);
+    const icon = SEANCE_ICONS[s.s1] || '';
+    s1Badge.textContent = (icon ? icon + ' ' : '') + s.s1;
+    s1Badge.onclick = (e) => { e.stopPropagation(); openModal(i); };
+    s1El.appendChild(s1Badge);
+    contentEl.appendChild(s1El);
+
+    div.appendChild(contentEl);
+
+    // right control
+    if (isRun) {
+      const wrap = document.createElement('div');
+      wrap.className = 'day-run-inputs';
+      wrap.onclick = (e) => e.stopPropagation();
+
+      // KM row
+      const kmRow = document.createElement('div');
+      kmRow.className = 'day-input-row';
+      const kmInp = document.createElement('input');
+      kmInp.className = 'day-field-input km';
+      kmInp.type = 'text';
+      kmInp.inputMode = 'decimal';
+      kmInp.placeholder = '0';
+      kmInp.value = (w.distances[i] && parseFloat(w.distances[i]) !== 0) ? w.distances[i] : '';
+      kmInp.oninput = function() { updateDist(i, this.value); };
+      const kmUnit = document.createElement('span');
+      kmUnit.className = 'day-field-unit';
+      kmUnit.textContent = 'km';
+      kmRow.appendChild(kmInp);
+      kmRow.appendChild(kmUnit);
+
+      // Allure row
+      const allureRow = document.createElement('div');
+      allureRow.className = 'day-input-row';
+      const allureInp = document.createElement('input');
+      allureInp.className = 'day-field-input allure';
+      allureInp.type = 'text';
+      allureInp.inputMode = 'numeric';
+      allureInp.placeholder = '0:00';
+      allureInp.value = w.allures[i] || '';
+      allureInp.oninput = function() {
+        const raw = this.value.replace(/[^0-9]/g, '').slice(0, 4);
+        if (raw.length === 0) { this.value = ''; }
+        else if (raw.length <= 2) { this.value = raw; }
+        else { this.value = raw.slice(0, raw.length - 2) + ':' + raw.slice(-2); }
+        updateAllure(i, this.value);
+      };
+      const allureUnit = document.createElement('span');
+      allureUnit.className = 'day-field-unit';
+      allureUnit.textContent = '/km';
+      allureRow.appendChild(allureInp);
+      allureRow.appendChild(allureUnit);
+
+      // Dénivelé row
+      const denivRow = document.createElement('div');
+      denivRow.className = 'day-input-row';
+      const denivInp = document.createElement('input');
+      denivInp.className = 'day-field-input deniv';
+      denivInp.type = 'text';
+      denivInp.inputMode = 'numeric';
+      denivInp.placeholder = '0';
+      denivInp.value = w.denivelés[i] || '';
+      denivInp.oninput = function() { updateDeniv(i, this.value); };
+      const denivUnit = document.createElement('span');
+      denivUnit.className = 'day-field-unit';
+      denivUnit.textContent = 'm↑';
+      denivRow.appendChild(denivInp);
+      denivRow.appendChild(denivUnit);
+
+      wrap.appendChild(kmRow);
+      wrap.appendChild(allureRow);
+      wrap.appendChild(denivRow);
+      div.appendChild(wrap);
+    } else if (isRenfo) {
+      const label = document.createElement('label');
+      label.className = 'ios-toggle';
+      label.onclick = (e) => e.stopPropagation();
+      const cb = document.createElement('input');
+      cb.type = 'checkbox';
+      cb.checked = !!w.checked[i];
+      cb.onchange = function() { toggleCheck(i); };
+      const track = document.createElement('div');
+      track.className = 'ios-toggle-track';
+      const thumb = document.createElement('div');
+      thumb.className = 'ios-toggle-thumb';
+      label.appendChild(cb);
+      label.appendChild(track);
+      label.appendChild(thumb);
+      div.appendChild(label);
+    }
+
+    if (isValidated) {
+      const check = document.createElement('div');
+      check.className = 'validated-check';
+      check.style.cssText = 'font-size:16px;color:var(--accent2);flex-shrink:0;';
+      check.textContent = '✓';
+      div.appendChild(check);
+    }
+    grid.appendChild(div);
+  });
+  renderConclusion();
+  renderStats();
+}
+
+function updateDist(i, val) {
+  const w = getWeek(currentWeek);
+  w.distances[i] = val;
+  const cards = document.querySelectorAll('.day-card');
+  if (cards[i]) {
+    const isValidated = parseFloat(val) > 0;
+    cards[i].className = 'day-card' + (isValidated ? ' validated' : '');
+    // Update ✓ checkmark
+    const existing = cards[i].querySelector('.validated-check');
+    if (isValidated && !existing) {
+      const check = document.createElement('div');
+      check.className = 'validated-check';
+      check.style.cssText = 'font-size:16px;color:var(--accent2);flex-shrink:0;';
+      check.textContent = '✓';
+      cards[i].appendChild(check);
+    } else if (!isValidated && existing) {
+      existing.remove();
+    }
+  }
+  renderStats();
+  renderConclusion();
+}
+
+function updateDeniv(i, val) {
+  const w = getWeek(currentWeek);
+  if (!w.denivelés) w.denivelés = DAYS.map(() => '');
+  w.denivelés[i] = val;
+}
+
+function updateAllure(i, val) {
+  const w = getWeek(currentWeek);
+  if (!w.allures) w.allures = DAYS.map(() => '');
+  w.allures[i] = val;
+}
+
+function renderStats() {
+  const w = getWeek(currentWeek);
+  let kmFacile = 0, kmIntense = 0;
+  w.seances.forEach((s, i) => {
+    const km = parseFloat(w.distances[i]) || 0;
+    if (s.s1 === 'RUNNING FACILE') kmFacile += km;
+    if (s.s1 === 'RUNNING INTENSE') kmIntense += km;
+  });
+  const totalKm = kmFacile + kmIntense;
+  document.getElementById('stats-row').innerHTML = `
+    <div class="stat-card"><div class="stat-val run">${kmFacile.toFixed(1)}</div><div class="stat-label">🏃 FACILE</div></div>
+    <div class="stat-card"><div class="stat-val" style="color:var(--accent3)">${kmIntense.toFixed(1)}</div><div class="stat-label">⚡ INTENSE</div></div>
+    <div class="stat-card"><div class="stat-val run">${totalKm.toFixed(1)}</div><div class="stat-label">KM TOTAL</div></div>`;
+}
+
+function renderKpis() {
+  const w = getWeek(currentWeek);
+  const list = document.getElementById('kpi-list');
+  list.innerHTML = '';
+  KPIS.forEach((kpi, i) => {
+    const div = document.createElement('div');
+    div.className = 'kpi-row';
+    let stars = '';
+    for (let s = 1; s <= 5; s++) {
+      stars += `<span class="star ${w.kpis[i] >= s ? 'filled' : ''}" onclick="setKpi(${i}, ${s})">★</span>`;
+    }
+    div.innerHTML = `<div class="kpi-name">${kpi}</div><div class="stars">${stars}</div>`;
+    list.appendChild(div);
+  });
+}
+
+function setKpi(i, val) {
+  const w = getWeek(currentWeek);
+  w.kpis[i] = val;
+  renderKpis();
+}
+
+let _lastPct = 0;
+function renderConclusion() {
+  const w = getWeek(currentWeek);
+  let validated = 0;
+  w.seances.forEach((seance, i) => {
+    const s = seance.s1.toUpperCase();
+    if (isRunning(s) && parseFloat(w.distances[i]) > 0) validated++;
+    else if (s === 'RENFO' && !!w.checked[i]) validated++;
+  });
+  const capped = Math.min(validated, 4);
+  const pct = capped * 25;
+  let status, cls;
+  if (pct === 100) { status = '✅ Semaine réussie'; cls = 'status-ok'; }
+  else if (pct >= 50) { status = '⚠️ In process'; cls = 'status-mid'; }
+  else { status = '❌ Semaine difficile'; cls = 'status-bad'; }
+  document.getElementById('conclusion-status').innerHTML = `<span class="${cls}">${status}</span>`;
+  document.getElementById('conclusion-score').textContent = `${validated}/4`;
+
+  // Progress bar
+  const fill = document.getElementById('progress-fill');
+  const labelLeft = document.getElementById('progress-label-left');
+  if (fill) {
+    fill.style.width = pct + '%';
+    fill.className = 'progress-fill' + (pct === 100 ? ' full' : '');
+  }
+  if (labelLeft) animateCounter(labelLeft, _lastPct, pct, '%');
+  _lastPct = pct;
+}
+
+function toggleCheck(i) {
+  const w = getWeek(currentWeek);
+  w.checked[i] = !w.checked[i];
+  const isValidated = !!w.checked[i];
+  const cards = document.querySelectorAll('.day-card');
+  if (cards[i]) {
+    cards[i].className = 'day-card' + (isValidated ? ' validated' : '');
+    const existing = cards[i].querySelector('.validated-check');
+    if (isValidated && !existing) {
+      const check = document.createElement('div');
+      check.className = 'validated-check';
+      check.style.cssText = 'font-size:16px;color:var(--accent2);flex-shrink:0;';
+      check.textContent = '✓';
+      cards[i].appendChild(check);
+    } else if (!isValidated && existing) {
+      existing.remove();
+    }
+  }
+  renderConclusion();
+}
+
+function openModal(day) {
+  modalDay = day;
+  const w = getWeek(currentWeek);
+  const current = w.seances[day][slot];
+  const opts = document.getElementById('modal-options');
+  opts.innerHTML = '';
+  SEANCES.forEach(s => {
+    const div = document.createElement('div');
+    div.className = 'seance-option' + (s === current ? ' selected' : '');
+    div.innerHTML = `<span class="badge ${badgeClass(s)}">${s}</span> ${s}`;
+    div.onclick = () => { selectSeance(s); };
+    opts.appendChild(div);
+  });
+  document.getElementById('modal').classList.add('open');
+}
+
+function selectSeance(s) {
+  const w = getWeek(currentWeek);
+  w.seances[modalDay].s1 = s;
+  closeModal();
+  renderDays();
+  renderStats();
+}
+
+function closeModal() {
+  document.getElementById('modal').classList.remove('open');
+}
+
+document.getElementById('modal').addEventListener('click', function(e) {
+  if (e.target === this) closeModal();
+});
+
+function renderNotes() {
+  const w = getWeek(currentWeek);
+  document.getElementById('notes-area').value = w.notes || '';
+}
+
+document.getElementById('notes-area').addEventListener('input', function() {
+  getWeek(currentWeek).notes = this.value;
+});
+
+function saveWeek() {
+  save();
+  if (document.getElementById('page-stats').classList.contains('active')) renderStatsPage();
+  const toast = document.getElementById('toast');
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 2000);
+  renderRecap();
+}
+
+function changeWeek(d) {
+  saveWeek();
+  currentWeek = Math.max(1, Math.min(20, currentWeek + d));
+  document.getElementById('week-label').textContent = 'SEMAINE ' + currentWeek;
+  renderAll();
+}
+
+function renderAll() {
+  renderCountdown();
+  renderDays();
+  renderKpis();
+  renderNotes();
+}
+
+function paceToSeconds(str) {
+  if (!str || !str.includes(':')) return null;
+  const parts = str.split(':');
+  if (parts.length !== 2) return null;
+  const m = parseInt(parts[0]);
+  const s = parseInt(parts[1]);
+  if (isNaN(m) || isNaN(s) || s > 59) return null;
+  return m * 60 + s;
+}
+
+function secondsToPace(secs) {
+  const m = Math.floor(secs / 60);
+  const s = Math.round(secs % 60);
+  return `${m}:${s.toString().padStart(2, '0')}`;
+}
+
+function renderRecap() {
+  const list = document.getElementById('recap-list');
+  list.innerHTML = '';
+  for (let w = 1; w <= 20; w++) {
+    const wd = data[getKey(w)];
+    let kmTotal = 0, alluresFacile = [], alluresIntense = [];
+    if (wd) {
+      const allures = wd.allures || [];
+      wd.seances.forEach((s, i) => {
+        const km = parseFloat(wd.distances[i]) || 0;
+        const secs = paceToSeconds(allures[i]);
+        if (s.s1 === 'RUNNING FACILE') {
+          kmTotal += km;
+          if (secs) alluresFacile.push(secs);
+        }
+        if (s.s1 === 'RUNNING INTENSE') {
+          kmTotal += km;
+          if (secs) alluresIntense.push(secs);
+        }
+      });
+    }
+    const km = kmTotal.toFixed(1);
+    const avgFacile = alluresFacile.length ? secondsToPace(alluresFacile.reduce((a,b)=>a+b,0)/alluresFacile.length) : null;
+    const avgIntense = alluresIntense.length ? secondsToPace(alluresIntense.reduce((a,b)=>a+b,0)/alluresIntense.length) : null;
+    const avgKpi = wd ? (wd.kpis.reduce((a,b)=>a+b,0)/KPIS.length).toFixed(1) : '-';
+    let validated = 0;
+    if (wd) {
+      wd.seances.forEach((s, i) => {
+        if (isRunning(s.s1) && parseFloat(wd.distances[i]) > 0) validated++;
+        else if (s.s1 === 'RENFO' && !!wd.checked[i]) validated++;
+      });
+    }
+
+    const pct = Math.min(validated, 4) * 25;
+    let statusIcon = !wd ? '○' : pct === 100 ? '✅' : pct >= 50 ? '⚠️' : '❌';
+    const div = document.createElement('div');
+    const rowCls = !wd ? 'empty' : pct === 100 ? 'done' : pct >= 50 ? 'inprogress' : 'empty';
+    const badgeCls = !wd ? 'recap-badge-empty' : pct === 100 ? 'recap-badge-ok' : pct >= 50 ? 'recap-badge-mid' : 'recap-badge-empty';
+    const badgeTxt = !wd ? 'À VENIR' : pct === 100 ? '✓ RÉUSSIE' : pct >= 50 ? `${pct}%` : pct > 0 ? `${pct}%` : 'À VENIR';
+    // Total D+
+    const totalDeniv = wd ? (wd.denivelés || []).reduce((a,b) => a+(parseInt(b)||0), 0) : 0;
+    const kmTxt = km !== '0.0' && km !== '0' ? `${km} km` : '';
+    const denivTxt = totalDeniv > 0 ? `D+ ${totalDeniv}m` : '';
+    const paceTxt = [
+      avgFacile ? `🏃 ${avgFacile}/km` : '',
+      avgIntense ? `⚡ ${avgIntense}/km` : ''
+    ].filter(Boolean).join(' · ');
+    const kpiTxt = avgKpi !== '-' && avgKpi !== '0.0' ? `KPI ${avgKpi}/5` : '';
+    const details = [kmTxt, denivTxt, paceTxt, kpiTxt].filter(Boolean).join(' · ');
+    div.className = 'recap-row ' + rowCls;
+    div.onclick = () => { currentWeek = w; document.getElementById('week-label').textContent = 'SEMAINE '+w; renderAll(); showPage('semaine', document.querySelector('.nav-btn')); };
+    div.innerHTML = `
+      <div style="flex:1">
+        <div class="recap-week">SEMAINE ${w}</div>
+        <div class="recap-title">${statusIcon} ${pct > 0 ? pct+'% réalisé' : 'Non démarrée'}</div>
+        <div class="recap-km">${details || `${validated}/4 séances`}</div>
+      </div>
+      <span class="recap-badge ${badgeCls}">${badgeTxt}</span>`;
+    list.appendChild(div);
+  }
+}
+
+function renderCourses() {
+  const list = document.getElementById('courses-list');
+  list.innerHTML = '';
+  COURSES.forEach((c, i) => {
+    const stored = data['course_'+i] || {};
+    const div = document.createElement('div');
+    div.className = 'course-card course-type-' + c.type;
+    const typeLabel = c.type === 'trail' ? 'TRAIL' : 'ROUTE';
+    const statusCls = c.type === 'trail' ? 'status-trail' : 'status-route';
+    const details = [c.dist, c.dplus, typeLabel].filter(Boolean).join(' <span class="course-sep">·</span> ');
+    div.innerHTML = `
+      <div class="course-header">
+        <div>
+          <div class="course-name">${c.name}</div>
+          <div class="course-date">${c.date}</div>
+        </div>
+        <span class="course-status ${statusCls}">${typeLabel}</span>
+      </div>
+      <div class="course-inline-details">${details}</div>
+      <div class="course-pr-block">
+        <span class="pr-label">MON PR</span>
+        <input class="pr-input" placeholder="—h——" value="${stored.pr||c.pr||''}" oninput="updatePR(${i}, this.value)">
+      </div>`;
+    list.appendChild(div);
+  });
+}
+
+function updatePR(i, val) {
+  if (!data['course_'+i]) data['course_'+i] = {};
+  data['course_'+i].pr = val;
+}
+
+function renderStatsPage() {
+  const kmData = [];
+  const labels = [];
+  for (let w = 1; w <= 20; w++) {
+    labels.push(''+w);
+    const wd = data[getKey(w)];
+    const km = wd ? wd.distances.reduce((a,b) => a+(parseFloat(b)||0), 0) : 0;
+    kmData.push(parseFloat(km.toFixed(1)));
+  }
+
+  const kmFilled = kmData.filter(v => v > 0);
+  document.getElementById('stat-km-max').textContent = kmFilled.length ? Math.max(...kmFilled).toFixed(1) : '—';
+  document.getElementById('stat-km-total').textContent = kmFilled.length ? kmFilled.reduce((a,b)=>a+b,0).toFixed(0) : '—';
+  document.getElementById('stat-km-avg').textContent = kmFilled.length ? (kmFilled.reduce((a,b)=>a+b,0)/kmFilled.length).toFixed(1) : '—';
+  drawChart('chart-km', labels, kmData, '#0076B8', 'km', false, 0, 50, currentWeek - 1);
+
+  // KPI chart
+  const kpiData = [];
+  for (let w = 1; w <= 20; w++) {
+    const wd = data[getKey(w)];
+    if (wd && wd.kpis && wd.kpis.some(v => v > 0)) {
+      const avg = wd.kpis.reduce((a,b) => a+b, 0) / wd.kpis.length;
+      kpiData.push(parseFloat(avg.toFixed(2)));
+    } else {
+      kpiData.push(null);
+    }
+  }
+  const kpiFilled = kpiData.filter(v => v !== null);
+  document.getElementById('stat-kpi-max').textContent = kpiFilled.length ? Math.max(...kpiFilled).toFixed(1) : '—';
+  document.getElementById('stat-kpi-min').textContent = kpiFilled.length ? Math.min(...kpiFilled).toFixed(1) : '—';
+  document.getElementById('stat-kpi-avg').textContent = kpiFilled.length ? (kpiFilled.reduce((a,b)=>a+b,0)/kpiFilled.length).toFixed(1) : '—';
+  drawChart('chart-kpi', labels, kpiData, '#A78BFA', 'kpi', true, 0, 5, currentWeek - 1);
+}
+
+function drawChart(canvasId, labels, rawData, color, unit, isLine, fixedMin, fixedMax, highlightIdx) {
+  const canvas = document.getElementById(canvasId);
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const dpr = window.devicePixelRatio || 1;
+  const W = canvas.offsetWidth || 340;
+  const H = canvas.offsetHeight || 200;
+  canvas.width = W * dpr;
+  canvas.height = H * dpr;
+  ctx.scale(dpr, dpr);
+
+  const dataVals = rawData;
+  const hasData = dataVals.some(v => v !== null && v > 0);
+  const maxVal = fixedMax !== undefined ? fixedMax : (hasData ? Math.max(...dataVals.filter(v=>v>0)) * 1.2 : 10);
+  const minVal = fixedMin !== undefined ? fixedMin : 0;
+  const range = maxVal - minVal || 1;
+
+  const pad = { top: 16, right: 14, bottom: 30, left: 38 };
+  const chartW = W - pad.left - pad.right;
+  const chartH = H - pad.top - pad.bottom;
+  const barW = chartW / labels.length;
+
+  ctx.clearRect(0, 0, W, H);
+
+  // Background tint
+  ctx.fillStyle = 'rgba(0,0,0,0.015)';
+  ctx.roundRect(pad.left, pad.top, chartW, chartH, 6);
+  ctx.fill();
+
+  // Grid lines (dashed)
+  for (let i = 0; i <= 4; i++) {
+    const y = pad.top + chartH - (i / 4) * chartH;
+    ctx.beginPath();
+    ctx.setLineDash([3, 4]);
+    ctx.strokeStyle = 'rgba(0,0,0,0.07)';
+    ctx.lineWidth = 1;
+    ctx.moveTo(pad.left, y);
+    ctx.lineTo(pad.left + chartW, y);
+    ctx.stroke();
+    ctx.setLineDash([]);
+    const val = minVal + (i/4) * range;
+    ctx.fillStyle = '#8BA4B8';
+    ctx.font = '9px DM Mono, monospace';
+    ctx.textAlign = 'right';
+    ctx.fillText(val.toFixed(0), pad.left - 5, y + 3);
+  }
+
+  // Objective line (km only, 40km)
+  if (!isLine) {
+    const objY = pad.top + chartH - ((30 - minVal) / range) * chartH;
+    ctx.beginPath();
+    ctx.setLineDash([5, 4]);
+    ctx.strokeStyle = color + '55';
+    ctx.lineWidth = 1.5;
+    ctx.moveTo(pad.left, objY);
+    ctx.lineTo(pad.left + chartW, objY);
+    ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle = color + '88';
+    ctx.font = '8px DM Mono, monospace';
+    ctx.textAlign = 'left';
+    ctx.fillText('obj. 30km', pad.left + 4, objY - 3);
+  }
+
+  if (isLine) {
+    // SMOOTH LINE CHART with dots and value labels
+    const points = [];
+    dataVals.forEach((v, i) => {
+      if (v && v > 0) {
+        const x = pad.left + i * barW + barW / 2;
+        const y = pad.top + chartH - ((v - minVal) / range) * chartH;
+        points.push({ x, y, v, i });
+      }
+    });
+
+    if (points.length >= 2) {
+      // Gradient fill
+      const grad = ctx.createLinearGradient(0, pad.top, 0, pad.top + chartH);
+      grad.addColorStop(0, color + '35');
+      grad.addColorStop(1, color + '00');
+      ctx.beginPath();
+      ctx.moveTo(points[0].x, pad.top + chartH);
+      // Smooth bezier
+      for (let j = 0; j < points.length - 1; j++) {
+        const cpX = (points[j].x + points[j+1].x) / 2;
+        if (j === 0) ctx.lineTo(points[j].x, points[j].y);
+        ctx.bezierCurveTo(cpX, points[j].y, cpX, points[j+1].y, points[j+1].x, points[j+1].y);
+      }
+      ctx.lineTo(points[points.length-1].x, pad.top + chartH);
+      ctx.fillStyle = grad;
+      ctx.fill();
+
+      // Line
+      ctx.beginPath();
+      for (let j = 0; j < points.length - 1; j++) {
+        const cpX = (points[j].x + points[j+1].x) / 2;
+        if (j === 0) ctx.moveTo(points[j].x, points[j].y);
+        ctx.bezierCurveTo(cpX, points[j].y, cpX, points[j+1].y, points[j+1].x, points[j+1].y);
+      }
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 2.5;
+      ctx.lineJoin = 'round';
+      ctx.stroke();
+
+      // Dots with value labels
+      points.forEach(p => {
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, 5, 0, Math.PI * 2);
+        ctx.fillStyle = '#fff';
+        ctx.fill();
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, 3.5, 0, Math.PI * 2);
+        ctx.fillStyle = color;
+        ctx.fill();
+        // Value label
+        ctx.fillStyle = color;
+        ctx.font = 'bold 9px DM Mono, monospace';
+        ctx.textAlign = 'center';
+        ctx.fillText(p.v.toFixed(1), p.x, p.y - 9);
+      });
+    }
+  } else {
+    // BAR CHART with rounded tops, highlight current week
+    const gap = barW > 12 ? 3 : 1.5;
+    dataVals.forEach((v, i) => {
+      const x = pad.left + i * barW + gap;
+      const bw = barW - gap * 2;
+      if (!v || v <= 0) {
+        // Empty bar ghost
+        ctx.beginPath();
+        ctx.roundRect(x, pad.top + chartH - 4, bw, 4, [2, 2, 0, 0]);
+        ctx.fillStyle = 'rgba(0,0,0,0.05)';
+        ctx.fill();
+        return;
+      }
+      const bh = (v / maxVal) * chartH;
+      const y = pad.top + chartH - bh;
+      const isHighlight = i === highlightIdx;
+      const grad = ctx.createLinearGradient(0, y, 0, y + bh);
+      if (isHighlight) {
+        grad.addColorStop(0, '#FFB800');
+        grad.addColorStop(1, '#FFB80070');
+      } else {
+        grad.addColorStop(0, color);
+        grad.addColorStop(1, color + '55');
+      }
+      ctx.beginPath();
+      ctx.roundRect(x, y, bw, bh, [5, 5, 0, 0]);
+      ctx.fillStyle = grad;
+      ctx.fill();
+      // Value on top
+      if (v && v > 0) {
+        ctx.fillStyle = isHighlight ? '#B87800' : color;
+        ctx.font = 'bold 8px DM Mono, monospace';
+        ctx.textAlign = 'center';
+        ctx.fillText(v.toFixed(0), x + bw/2, y - 3);
+      }
+    });
+  }
+
+  // X labels — every label, smaller font
+  ctx.fillStyle = '#8BA4B8';
+  ctx.font = '8px DM Mono, monospace';
+  ctx.textAlign = 'center';
+  labels.forEach((l, i) => {
+    const isHighlight = i === highlightIdx;
+    if (isHighlight) {
+      ctx.fillStyle = '#B87800';
+      ctx.font = 'bold 9px DM Mono, monospace';
+    } else {
+      ctx.fillStyle = '#8BA4B8';
+      ctx.font = '8px DM Mono, monospace';
+    }
+    ctx.fillText(l, pad.left + i * barW + barW/2, H - 8);
+  });
+}
+
+function exportData() {
+  const exportObj = { version: 1, exportedAt: new Date().toISOString(), data: {} };
+  for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i);
+    exportObj.data[key] = localStorage.getItem(key);
+  }
+  const now = new Date();
+  const pad = n => String(n).padStart(2, '0');
+  const date = `${pad(now.getDate())}-${pad(now.getMonth()+1)}-${now.getFullYear()}`;
+  const blob = new Blob([JSON.stringify(exportObj, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `${date}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function importData(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const status = document.getElementById('import-status');
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    try {
+      const obj = JSON.parse(e.target.result);
+      if (!obj.data) throw new Error('Format invalide');
+      Object.entries(obj.data).forEach(([k, v]) => localStorage.setItem(k, v));
+      load();
+      renderAll();
+      renderRecap();
+      updateStorageInfo();
+      status.style.color = 'var(--accent2)';
+      status.textContent = '✅ Données restaurées avec succès !';
+    } catch(err) {
+      status.style.color = 'var(--accent3)';
+      status.textContent = '❌ Fichier invalide ou corrompu.';
+    }
+  };
+  reader.readAsText(file);
+}
+
+function resetData() {
+  if (!confirm('Effacer TOUTES les données ? Cette action est irréversible.')) return;
+  localStorage.clear();
+  data = {};
+  renderAll();
+  renderRecap();
+  updateStorageInfo();
+  alert('Données effacées.');
+}
+
+function updateStorageInfo() {
+  const el = document.getElementById('storage-info');
+  if (!el) return;
+  const keys = localStorage.length;
+  let size = 0;
+  for (let i = 0; i < localStorage.length; i++) {
+    size += (localStorage.key(i).length + (localStorage.getItem(localStorage.key(i)) || '').length) * 2;
+  }
+  const kb = (size / 1024).toFixed(1);
+  const weeksWithData = Array.from({length:20},(_,i)=>i+1).filter(w => data[getKey(w)]).length;
+  el.innerHTML = `
+    <div style="display:flex;justify-content:space-between"><span>Clés stockées</span><span style="color:var(--text);font-weight:500">${keys}</span></div>
+    <div style="display:flex;justify-content:space-between"><span>Semaines remplies</span><span style="color:var(--accent);font-weight:500">${weeksWithData} / 20</span></div>
+    <div style="display:flex;justify-content:space-between"><span>Taille estimée</span><span style="color:var(--accent2);font-weight:500">${kb} Ko</span></div>
+    <div style="display:flex;justify-content:space-between"><span>Dernière export</span><span style="color:var(--soft)">voir fichier</span></div>
+  `;
+}
+
+function showPage(name, btn) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('page-'+name).classList.add('active');
+  btn.classList.add('active');
+  if (name === 'recap') renderRecap();
+  if (name === 'courses') renderCourses();
+  if (name === 'stats') { save(); renderStatsPage(); }
+  if (name === 'donnees') updateStorageInfo();
+}
+
+load();
+renderAll();
+renderRecap();
+</script>
+</body>
+</html>
