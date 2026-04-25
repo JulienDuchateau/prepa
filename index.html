@@ -944,7 +944,9 @@ function renderStatsPage() {
   for (let w = 1; w <= 20; w++) {
     labels.push(''+w);
     const wd = data[getKey(w)];
-    const km = wd ? wd.distances.reduce((a,b) => a+(parseFloat(b)||0), 0) : 0;
+    const km = wd ? wd.seances.reduce((total, s, i) => {
+      return isRunning(s.s1) ? total + (parseFloat(wd.distances[i]) || 0) : total;
+    }, 0) : 0;
     kmData.push(parseFloat(km.toFixed(1)));
   }
 
