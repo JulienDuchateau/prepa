@@ -162,6 +162,13 @@
   .progress-fill.full { background: var(--accent2); }
   .progress-labels { display: flex; justify-content: space-between; margin-top: 5px; font-family: 'DM Mono', monospace; font-size: 10px; color: var(--muted); }
 
+  /* SUNDAY OBJECTIVE */
+  .objective-block { background: linear-gradient(135deg, rgba(0,118,184,0.08) 0%, rgba(0,194,255,0.05) 100%); border: 1px solid rgba(0,194,255,0.2); border-radius: 14px; padding: 12px 14px; margin-bottom: 12px; }
+  .objective-eyebrow { font-family: 'DM Mono', monospace; font-size: 9px; color: var(--accent); letter-spacing: 0.2em; text-transform: uppercase; margin-bottom: 6px; }
+  .objective-main { font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 600; color: var(--text); }
+  .objective-note { font-size: 11px; color: var(--soft); margin-top: 4px; font-style: italic; }
+  .objective-date { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--muted); margin-top: 6px; }
+
   /* SAVE BTN */
   .save-btn { display: flex; align-items: center; justify-content: center; gap: 8px; width: calc(100% - 28px); margin: 0 14px 14px; padding: 13px; background: var(--accent); border-radius: 12px; border: none; color: var(--bg); font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 600; cursor: pointer; letter-spacing: 0.02em; transition: opacity 0.2s; }
   .save-btn:active { opacity: 0.8; }
@@ -238,6 +245,12 @@
   </div>
 
   <div class="section">
+    <div id="objective-block" class="objective-block" style="display:none">
+      <div class="objective-eyebrow" id="objective-eyebrow">🗓 Objectif dimanche</div>
+      <div class="objective-main" id="objective-main"></div>
+      <div class="objective-note" id="objective-note"></div>
+      <div class="objective-date" id="objective-date"></div>
+    </div>
     <div class="section-title">Notes</div>
     <textarea class="notes-area" id="notes-area" placeholder="Ressenti, contexte, points clés de la semaine..."></textarea>
   </div>
@@ -447,6 +460,27 @@ function getWeek(w) {
   if (!wd.allures) wd.allures = DAYS.map(() => '');
   if (!wd.denivelés) wd.denivelés = DAYS.map(() => '');
   return wd;
+}
+
+
+const SUNDAY_PLAN = [
+  { week: 1, date: '27 avril',  label: '45 min allure tranquille', icon: '🟡', km: null, dplus: null, note: 'Récup post-semi — jambes légères' },
+  { week: 2, date: '4 mai',     label: '12km / 350m D+',           icon: '🏃', km: 12,   dplus: 350,  note: 'Reprise trail — allure confortable' },
+  { week: 3, date: '11 mai',    label: '15km / 500m D+',           icon: '🏃', km: 15,   dplus: 500,  note: 'Montée en charge' },
+  { week: 4, date: '18 mai',    label: '18km / 700m D+',           icon: '⚡', km: 18,   dplus: 700,  note: 'Simulation course — séance clé' },
+  { week: 5, date: '25 mai',    label: '10km / 200m D+',           icon: '🟢', km: 10,   dplus: 200,  note: 'Affûtage — jambes fraîches' },
+  { week: 6, date: '31 mai',    label: 'TRAIL DES GORETS 🏁',      icon: '🏆', km: 18,   dplus: 1000, note: 'Objectif sub 2h30 — bonne hydratation !' },
+];
+
+// S1 = week 1 in the app = currentWeek mapping
+// We fix S1 = currentWeek at time of coding
+// Store the reference week in localStorage
+const TRAIL_START_WEEK = 1; // app week number when trail prep starts
+
+function getSundayObjective() {
+  const offset = currentWeek - TRAIL_START_WEEK;
+  if (offset < 0 || offset >= SUNDAY_PLAN.length) return null;
+  return SUNDAY_PLAN[offset];
 }
 
 function isRunning(seance) {
@@ -796,6 +830,29 @@ document.getElementById('modal').addEventListener('touchend', function(e) {
   if (e.target === this) closeModal();
 });
 
+function renderObjective() {
+  const obj = getSundayObjective();
+  const block = document.getElementById('objective-block');
+  if (!obj) { block.style.display = 'none'; return; }
+  block.style.display = 'block';
+  document.getElementById('objective-main').textContent = obj.icon + ' ' + obj.label;
+  document.getElementById('objective-note').textContent = obj.note;
+  document.getElementById('objective-date').textContent = 'Dimanche ' + obj.date;
+  // Special style for race week
+  if (obj.week === 6) {
+    block.style.background = 'linear-gradient(135deg, rgba(0,135,90,0.1) 0%, rgba(0,255,140,0.05) 100%)';
+    block.style.borderColor = 'rgba(0,255,140,0.3)';
+    document.getElementById('objective-eyebrow').style.color = 'var(--accent2)';
+  } else if (obj.week === 4) {
+    block.style.background = 'linear-gradient(135deg, rgba(255,107,53,0.08) 0%, rgba(255,184,0,0.05) 100%)';
+    block.style.borderColor = 'rgba(255,107,53,0.25)';
+  } else {
+    block.style.background = 'linear-gradient(135deg, rgba(0,118,184,0.08) 0%, rgba(0,194,255,0.05) 100%)';
+    block.style.borderColor = 'rgba(0,194,255,0.2)';
+    document.getElementById('objective-eyebrow').style.color = 'var(--accent)';
+  }
+}
+
 function renderNotes() {
   const w = getWeek(currentWeek);
   document.getElementById('notes-area').value = w.notes || '';
@@ -823,6 +880,7 @@ function changeWeek(d) {
 
 function renderAll() {
   renderCountdown();
+  renderObjective();
   renderDays();
   renderKpis();
   renderNotes();
