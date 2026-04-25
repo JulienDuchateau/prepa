@@ -55,7 +55,7 @@
 
   /* SECTION */
   .section { padding: 0 14px; margin-bottom: 16px; }
-  .section-title { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--accent); letter-spacing: 0.2em; text-transform: uppercase; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1.5px solid var(--accent); opacity: 0.7; }
+  .section-title { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--accent); letter-spacing: 0.2em; text-transform: uppercase; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1.5px solid var(--accent); }
 
   /* DAY CARDS */
   .days-grid { display: flex; flex-direction: column; gap: 6px; }
@@ -232,6 +232,12 @@
   <div class="section">
     <div class="section-title">Planning & Réalisation</div>
     <div class="days-grid" id="days-grid"></div>
+    <div id="objective-block" class="objective-block" style="display:none;margin-top:10px;">
+      <div class="objective-eyebrow" id="objective-eyebrow">🗓 Objectif dimanche</div>
+      <div class="objective-main" id="objective-main"></div>
+      <div class="objective-note" id="objective-note"></div>
+      <div class="objective-date" id="objective-date"></div>
+    </div>
   </div>
 
   <div class="section">
@@ -245,12 +251,6 @@
   </div>
 
   <div class="section">
-    <div id="objective-block" class="objective-block" style="display:none">
-      <div class="objective-eyebrow" id="objective-eyebrow">🗓 Objectif dimanche</div>
-      <div class="objective-main" id="objective-main"></div>
-      <div class="objective-note" id="objective-note"></div>
-      <div class="objective-date" id="objective-date"></div>
-    </div>
     <div class="section-title">Notes</div>
     <textarea class="notes-area" id="notes-area" placeholder="Ressenti, contexte, points clés de la semaine..."></textarea>
   </div>
@@ -462,7 +462,6 @@ function getWeek(w) {
   return wd;
 }
 
-
 const SUNDAY_PLAN = [
   { week: 1, date: '27 avril',  label: '45 min allure tranquille', icon: '🟡', km: null, dplus: null, note: 'Récup post-semi — jambes légères' },
   { week: 2, date: '4 mai',     label: '12km / 350m D+',           icon: '🏃', km: 12,   dplus: 350,  note: 'Reprise trail — allure confortable' },
@@ -472,11 +471,7 @@ const SUNDAY_PLAN = [
   { week: 6, date: '31 mai',    label: 'TRAIL DES GORETS 🏁',      icon: '🏆', km: 18,   dplus: 1000, note: 'Objectif sub 2h30 — bonne hydratation !' },
 ];
 
-// S1 = week 1 in the app = currentWeek mapping
-// We fix S1 = currentWeek at time of coding
-// Store the reference week in localStorage
-const TRAIL_START_WEEK = 1; // app week number when trail prep starts
-
+const TRAIL_START_WEEK = 1; 
 function getSundayObjective() {
   const offset = currentWeek - TRAIL_START_WEEK;
   if (offset < 0 || offset >= SUNDAY_PLAN.length) return null;
@@ -813,10 +808,19 @@ function openModal(day) {
 
 function selectSeance(s) {
   const w = getWeek(currentWeek);
+  // Reset toggle if changing away from RENFO
+  if (w.seances[modalDay].s1 === 'RENFO' && s !== 'RENFO') {
+    w.checked[modalDay] = false;
+  }
+  // Reset distance if changing away from running
+  if (isRunning(w.seances[modalDay].s1) && !isRunning(s)) {
+    w.distances[modalDay] = '';
+  }
   w.seances[modalDay].s1 = s;
   closeModal();
   renderDays();
   renderStats();
+  renderConclusion();
 }
 
 function closeModal() {
