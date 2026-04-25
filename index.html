@@ -36,9 +36,9 @@
 
   /* HEADER */
   .header { padding: env(safe-area-inset-top, 44px) 16px 14px; padding-top: max(44px, env(safe-area-inset-top)); background: linear-gradient(180deg, #DDE5EF 0%, var(--bg) 100%); }
-  .header-eyebrow { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--accent); letter-spacing: 0.2em; text-transform: uppercase; margin-bottom: 6px; }
-  .header-title { font-family: 'Bebas Neue', sans-serif; font-size: 44px; letter-spacing: 0.05em; line-height: 1; }
-  .header-sub { font-size: 12px; color: var(--soft); margin-top: 4px; }
+  .header-eyebrow { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--accent); letter-spacing: 0.2em; text-transform: uppercase; margin-bottom: 6px; text-align: center; }
+  .header-title { font-family: 'Bebas Neue', sans-serif; font-size: 44px; letter-spacing: 0.05em; line-height: 1; text-align: center; }
+  .header-sub { font-size: 12px; color: var(--soft); margin-top: 4px; text-align: center; }
 
   /* WEEK SELECTOR */
   .week-selector { display: flex; align-items: center; gap: 10px; padding: 0 14px 12px; }
@@ -148,7 +148,7 @@
   .ios-toggle input:checked ~ .ios-toggle-thumb { transform: translateX(18px); }
 
   /* Countdown chips */
-  .countdown-row { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
+  .countdown-row { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; justify-content: center; }
   .chip { display: inline-flex; align-items: center; gap: 5px; padding: 4px 9px; border-radius: 20px; font-family: 'DM Mono', monospace; font-size: 10px; font-weight: 500; }
   .chip-trail { background: rgba(224,85,32,0.1); color: var(--accent3); border: 1px solid rgba(224,85,32,0.25); }
   .chip-marathon { background: rgba(0,118,184,0.1); color: var(--accent); border: 1px solid rgba(0,118,184,0.25); }
