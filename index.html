@@ -452,6 +452,7 @@ function load() {
 
 function save() {
   localStorage.setItem('prepa_data', JSON.stringify(data));
+  localStorage.setItem('prepa_current_week', currentWeek);
 }
 
 function getWeek(w) {
@@ -878,6 +879,7 @@ function saveWeek() {
 function changeWeek(d) {
   saveWeek();
   currentWeek = Math.max(1, Math.min(20, currentWeek + d));
+  localStorage.setItem('prepa_current_week', currentWeek);
   document.getElementById('week-label').textContent = 'SEMAINE ' + currentWeek;
   renderAll();
 }
@@ -956,7 +958,7 @@ function renderRecap() {
     const kpiTxt = avgKpi !== '-' && avgKpi !== '0.0' ? `KPI ${avgKpi}/5` : '';
     const details = [kmTxt, denivTxt, paceTxt, kpiTxt].filter(Boolean).join(' · ');
     div.className = 'recap-row ' + rowCls;
-    div.onclick = () => { currentWeek = w; document.getElementById('week-label').textContent = 'SEMAINE '+w; renderAll(); showPage('semaine', document.querySelector('.nav-btn')); };
+    div.onclick = () => { currentWeek = w; localStorage.setItem('prepa_current_week', w); document.getElementById('week-label').textContent = 'SEMAINE '+w; renderAll(); showPage('semaine', document.querySelector('.nav-btn')); };
     div.innerHTML = `
       <div style="flex:1">
         <div class="recap-week">SEMAINE ${w}</div>
@@ -1310,6 +1312,9 @@ window.addEventListener('orientationchange', () => {
 });
 
 load();
+const savedWeek = parseInt(localStorage.getItem('prepa_current_week'));
+if (savedWeek && savedWeek >= 1 && savedWeek <= 20) currentWeek = savedWeek;
+document.getElementById('week-label').textContent = 'SEMAINE ' + currentWeek;
 renderAll();
 renderRecap();
 </script>
