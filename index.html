@@ -89,8 +89,14 @@
 
   /* KPI STARS */
   .kpi-list { display: flex; flex-direction: column; gap: 6px; }
+  /* KPI CIRCLES */
+  .kpi-list { display: flex; flex-direction: column; gap: 6px; }
   .kpi-row { background: #FFFFFF; border: none; border-radius: 6px; padding: 10px 12px; display: flex; align-items: center; box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
   .kpi-name { font-size: 12px; flex: 1; color: #111111; }
+  .circles { display: flex; gap: 6px; align-items: center; }
+  .circle { width: 20px; height: 20px; border-radius: 50%; border: 2px solid #CCCCCC; background: transparent; cursor: pointer; transition: all 0.15s; flex-shrink: 0; }
+  .circle.filled { background: #FFFFFF; border: 3px solid #111111; }
+  .circle:active { transform: scale(1.2); }
   .stars { display: flex; gap: 4px; }
   .star { font-size: 20px; cursor: pointer; transition: transform 0.15s; color: #E0E0E0; }
   .star.filled { color: #111111; filter: none; }
@@ -421,11 +427,11 @@ const SEANCE_ICONS = {
 const SEANCES = ['RUNNING FACILE','RUNNING INTENSE','RENFO','REPOS','-'];
 const KPIS = ['Motivation','Forme générale','Forme des jambes','Sommeil','Respect du plan'];
 const COURSES = [
-  { name: 'TRAIL DES GORETS', date: '31 Mai 2026', dist: '18 km', dplus: '1000m', type: 'trail', pr: '' },
-  { name: 'UTCAM', date: '2026', dist: '30 km', dplus: '', type: 'trail', pr: '' },
-  { name: 'SEMI MARATHON DE NICE', date: '2026', dist: '21,1 km', dplus: '', type: 'route', pr: '1h49' },
-  { name: 'PROM CLASSIC', date: '2026', dist: '10 km', dplus: '', type: 'route', pr: '' },
-  { name: 'MARATHON NICE-CANNES', date: 'Novembre 2026', dist: '42,2 km', dplus: '', type: 'route', pr: '' },
+  { name: 'TRAIL DES GORETS', date: '31 Mai 2026', iso: '2026-05-31', dist: '18 km', dplus: '1000m', type: 'trail', pr: '' },
+  { name: 'UTCAM', date: '5 Juillet 2026', iso: '2026-07-05', dist: '30 km', dplus: '2150m', type: 'trail', pr: '' },
+  { name: 'SEMI MARATHON DE NICE', date: '19 Avril 2026', iso: '2026-04-19', dist: '21,1 km', dplus: '', type: 'route', pr: '1h49' },
+  { name: 'PROM CLASSIC', date: '4 Janvier 2026', iso: '2026-01-04', dist: '10 km', dplus: '', type: 'route', pr: '' },
+  { name: 'MARATHON NICE-CANNES', date: '8 Novembre 2026', iso: '2026-11-08', dist: '42,2 km', dplus: '', type: 'route', pr: '' },
 ];
 
 let currentWeek = 1;
@@ -496,17 +502,23 @@ function badgeClass(s) {
 
 function renderCountdown() {
   const now = new Date();
-  const trail = new Date('2026-05-31');
-  const marathon = new Date('2026-11-08');
-  const dTrail = Math.ceil((trail - now) / 86400000);
-  const dMarathon = Math.ceil((marathon - now) / 86400000);
   const row = document.getElementById('countdown-row');
   if (!row) return;
   row.innerHTML = '';
-  if (dTrail > 0) {
+  const marathon = new Date('2026-11-08');
+  const dMarathon = Math.ceil((marathon - now) / 86400000);
+
+  // Find next upcoming race (excluding marathon)
+  const upcoming = COURSES
+    .filter(c => c.iso && c.iso !== '2026-11-08')
+    .map(c => ({ ...c, days: Math.ceil((new Date(c.iso) - now) / 86400000) }))
+    .filter(c => c.days > 0)
+    .sort((a, b) => a.days - b.days)[0];
+
+  if (upcoming) {
     const c = document.createElement('div');
     c.className = 'chip chip-trail';
-    c.innerHTML = `<span>J-${dTrail}</span><span>Trail des Gorets</span>`;
+    c.innerHTML = `<span>J-${upcoming.days}</span><span>${upcoming.name}</span>`;
     row.appendChild(c);
   }
   if (dMarathon > 0) {
@@ -520,8 +532,8 @@ function renderCountdown() {
 function animateCounter(el, from, to, suffix) {
   const dur = 400;
   const start = performance.now();
-  function step(now) {
-    const p = Math.min((now - start) / dur, 1);
+  function step(ts) {
+    const p = Math.min((ts - start) / dur, 1);
     const ease = 1 - Math.pow(1 - p, 3);
     el.textContent = Math.round(from + (to - from) * ease) + suffix;
     if (p < 1) requestAnimationFrame(step);
@@ -675,16 +687,14 @@ function updateDist(i, val) {
   if (cards[i]) {
     const isValidated = parseFloat(val) > 0;
     cards[i].className = 'day-card' + (isValidated ? ' validated' : '');
-    // Update ✓ checkmark
-    const existing = cards[i].querySelector('.validated-check');
-    if (isValidated && !existing) {
+    // Remove all existing checkmarks first
+    cards[i].querySelectorAll('.validated-check').forEach(el => el.remove());
+    if (isValidated) {
       const check = document.createElement('div');
       check.className = 'validated-check';
       check.style.cssText = 'font-size:16px;color:#111111;flex-shrink:0;';
       check.textContent = '✓';
       cards[i].appendChild(check);
-    } else if (!isValidated && existing) {
-      existing.remove();
     }
   }
   renderStats();
@@ -725,11 +735,20 @@ function renderKpis() {
   KPIS.forEach((kpi, i) => {
     const div = document.createElement('div');
     div.className = 'kpi-row';
-    let stars = '';
-    for (let s = 1; s <= 5; s++) {
-      stars += `<span class="star ${w.kpis[i] >= s ? 'filled' : ''}" onclick="setKpi(${i}, ${s})">★</span>`;
+    const nameEl = document.createElement('div');
+    nameEl.className = 'kpi-name';
+    nameEl.textContent = kpi;
+    const circlesEl = document.createElement('div');
+    circlesEl.className = 'circles';
+    for (let c = 1; c <= 5; c++) {
+      const dot = document.createElement('div');
+      dot.className = 'circle' + (w.kpis[i] >= c ? ' filled' : '');
+      dot.onclick = () => setKpi(i, c);
+      dot.addEventListener('touchend', (e) => { e.preventDefault(); setKpi(i, c); }, { passive: false });
+      circlesEl.appendChild(dot);
     }
-    div.innerHTML = `<div class="kpi-name">${kpi}</div><div class="stars">${stars}</div>`;
+    div.appendChild(nameEl);
+    div.appendChild(circlesEl);
     list.appendChild(div);
   });
 }
@@ -745,9 +764,8 @@ function renderConclusion() {
   const w = getWeek(currentWeek);
   let validated = 0;
   w.seances.forEach((seance, i) => {
-    const s = seance.s1.toUpperCase();
-    if (isRunning(s) && parseFloat(w.distances[i]) > 0) validated++;
-    else if (s === 'RENFO' && !!w.checked[i]) validated++;
+    if (isRunning(seance.s1) && parseFloat(w.distances[i]) > 0) validated++;
+    else if (seance.s1 === 'RENFO' && !!w.checked[i]) validated++;
   });
   const capped = Math.min(validated, 4);
   const pct = capped * 25;
@@ -767,6 +785,8 @@ function renderConclusion() {
   }
   if (labelLeft) animateCounter(labelLeft, _lastPct, pct, '%');
   _lastPct = pct;
+  const labelRight = document.getElementById('progress-label-right');
+  if (labelRight) labelRight.textContent = pct === 100 ? '✓ Semaine réussie' : `Objectif : 4 séances`;
 }
 
 function toggleCheck(i) {
@@ -776,15 +796,13 @@ function toggleCheck(i) {
   const cards = document.querySelectorAll('.day-card');
   if (cards[i]) {
     cards[i].className = 'day-card' + (isValidated ? ' validated' : '');
-    const existing = cards[i].querySelector('.validated-check');
-    if (isValidated && !existing) {
+    cards[i].querySelectorAll('.validated-check').forEach(el => el.remove());
+    if (isValidated) {
       const check = document.createElement('div');
       check.className = 'validated-check';
       check.style.cssText = 'font-size:16px;color:#111111;flex-shrink:0;';
       check.textContent = '✓';
       cards[i].appendChild(check);
-    } else if (!isValidated && existing) {
-      existing.remove();
     }
   }
   renderConclusion();
@@ -958,6 +976,7 @@ function renderRecap() {
     const kpiTxt = avgKpi !== '-' && avgKpi !== '0.0' ? `KPI ${avgKpi}/5` : '';
     const details = [kmTxt, denivTxt, paceTxt, kpiTxt].filter(Boolean).join(' · ');
     div.className = 'recap-row ' + rowCls;
+    if (rowCls === 'empty' && !wd) div.style.opacity = '0.45';
     div.onclick = () => { currentWeek = w; localStorage.setItem('prepa_current_week', w); document.getElementById('week-label').textContent = 'SEMAINE '+w; renderAll(); showPage('semaine', document.querySelector('.nav-btn')); };
     div.innerHTML = `
       <div style="flex:1">
@@ -973,24 +992,57 @@ function renderRecap() {
 function renderCourses() {
   const list = document.getElementById('courses-list');
   list.innerHTML = '';
-  COURSES.forEach((c, i) => {
+  const now = new Date();
+  // Sort by date: upcoming first, past last
+  const sorted = COURSES
+    .map((c, i) => ({ ...c, originalIndex: i }))
+    .sort((a, b) => {
+      const dA = a.iso ? new Date(a.iso) : new Date('9999-12-31');
+      const dB = b.iso ? new Date(b.iso) : new Date('9999-12-31');
+      const pastA = dA < now;
+      const pastB = dB < now;
+      // Past courses go to the bottom
+      if (pastA && !pastB) return 1;
+      if (!pastA && pastB) return -1;
+      // Among upcoming: closest first
+      // Among past: most recent first
+      return pastA ? dB - dA : dA - dB;
+    });
+  sorted.forEach((c) => {
+    const i = c.originalIndex;
     const stored = data['course_'+i] || {};
     const div = document.createElement('div');
     div.className = 'course-card course-type-' + c.type;
     const typeLabel = c.type === 'trail' ? 'TRAIL' : 'ROUTE';
     const statusCls = c.type === 'trail' ? 'status-trail' : 'status-route';
     const details = [c.dist, c.dplus, typeLabel].filter(Boolean).join(' <span class="course-sep">·</span> ');
+    const daysLeft = c.iso ? Math.ceil((new Date(c.iso) - now) / 86400000) : null;
+    if (daysLeft !== null && daysLeft < 0) div.classList.add('course-past');
+    const doneBadge = (daysLeft !== null && daysLeft < 0) ? `<span style="display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:50%;border:1.5px solid #22C55E;color:#22C55E;font-size:10px;font-weight:700;margin-left:6px;">✓</span>` : '';
+    let countdownHtml = '';
+    if (daysLeft !== null) {
+      if (daysLeft > 0) {
+        countdownHtml = `<span style="font-family:'DM Mono',monospace;font-size:10px;color:#888888;">J-${daysLeft}</span>`;
+      } else if (daysLeft === 0) {
+        countdownHtml = `<span style="font-family:'DM Mono',monospace;font-size:10px;color:#111111;font-weight:600;">AUJOURD'HUI 🏁</span>`;
+      } else {
+        countdownHtml = `<span style="font-family:'DM Mono',monospace;font-size:10px;color:#AAAAAA;">Terminée</span>`;
+      }
+    }
     div.innerHTML = `
       <div class="course-header">
         <div>
-          <div class="course-name">${c.name}</div>
+          <div class="course-name" style="display:flex;align-items:center;gap:6px;">${c.name}${doneBadge}</div>
           <div class="course-date">${c.date}</div>
         </div>
-        <span class="course-status ${statusCls}">${typeLabel}</span>
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;">
+          <span class="course-status ${statusCls}">${typeLabel}</span>
+          ${countdownHtml}
+        </div>
       </div>
       <div class="course-inline-details">${details}</div>
       <div class="course-pr-block">
-        <span class="pr-label">MON PR</span>
+        <span class="pr-label">TEMPS</span>
         <input class="pr-input" placeholder="—h——" value="${stored.pr||c.pr||''}" oninput="updatePR(${i}, this.value)">
       </div>`;
     list.appendChild(div);
@@ -1297,13 +1349,14 @@ function showPage(name, btn) {
 
 // Redraw charts on resize/orientation change
 if (window.ResizeObserver) {
-  const chartObserver = new ResizeObserver(() => {
-    if (document.getElementById('page-stats').classList.contains('active')) {
-      renderStatsPage();
-    }
-  });
   const kmCanvas = document.getElementById('chart-km');
-  if (kmCanvas) chartObserver.observe(kmCanvas.parentElement);
+  if (kmCanvas) {
+    new ResizeObserver(() => {
+      if (document.getElementById('page-stats').classList.contains('active')) {
+        renderStatsPage();
+      }
+    }).observe(kmCanvas.parentElement);
+  }
 }
 window.addEventListener('orientationchange', () => {
   setTimeout(() => {
@@ -1312,8 +1365,8 @@ window.addEventListener('orientationchange', () => {
 });
 
 load();
-const savedWeek = parseInt(localStorage.getItem('prepa_current_week'));
-if (savedWeek && savedWeek >= 1 && savedWeek <= 20) currentWeek = savedWeek;
+const savedWeek = parseInt(localStorage.getItem('prepa_current_week') || '1');
+if (savedWeek >= 1 && savedWeek <= 20) currentWeek = savedWeek;
 document.getElementById('week-label').textContent = 'SEMAINE ' + currentWeek;
 renderAll();
 renderRecap();
