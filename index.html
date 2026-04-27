@@ -37,7 +37,7 @@
   /* HEADER */
   .header { padding: env(safe-area-inset-top, 44px) 16px 18px; padding-top: max(44px, env(safe-area-inset-top)); background: #FFFFFF; position: relative; }
   .header-eyebrow { font-family: 'DM Mono', monospace; font-size: 9px; color: #888888; letter-spacing: 0.25em; text-transform: uppercase; margin-bottom: 8px; text-align: center; font-weight: 500; }
-  .header-title { font-family: 'Bebas Neue', sans-serif; font-size: 52px; letter-spacing: 0.08em; line-height: 1; text-align: center; color: #111111; }
+  .header-title { font-family: 'Bebas Neue', sans-serif; font-size: clamp(36px, 11vw, 64px); letter-spacing: 0.08em; line-height: 1; text-align: center; color: #111111; white-space: nowrap; }
   .header-sub { font-size: 12px; color: #666666; margin-top: 4px; text-align: center; }
 
   /* WEEK SELECTOR */
@@ -58,9 +58,9 @@
   .section-title { font-family: 'DM Mono', monospace; font-size: 9px; color: #111111; letter-spacing: 0.25em; text-transform: uppercase; margin-bottom: 12px; padding-bottom: 6px; border-bottom: 2px solid #111111; }
 
   /* DAY CARDS */
-  .days-grid { display: flex; flex-direction: column; gap: 6px; }
-  .day-card { background: #FFFFFF; border: none; border-radius: 6px; padding: 11px 12px; display: flex; align-items: center; gap: 10px; transition: all 0.2s; box-shadow: 0 1px 4px rgba(0,0,0,0.08); cursor: pointer; -webkit-tap-highlight-color: rgba(0,0,0,0.05); border-left: 3px solid #E0E0E0; }
-  .day-card.validated { background: #FAFAFA; box-shadow: 0 1px 4px rgba(0,0,0,0.08); border-left: 3px solid #111111; }
+  .days-grid { display: flex; flex-direction: column; gap: 5px; }
+  .day-card { background: #F7F7F7; border: none; border-radius: 6px; padding: 11px 12px; display: flex; align-items: center; gap: 10px; transition: all 0.2s; cursor: pointer; -webkit-tap-highlight-color: rgba(0,0,0,0.05); border-left: 3px solid #E0E0E0; }
+  .day-card.validated { background: #F0F0F0; border-left: 3px solid #111111; }
   .day-name { font-family: 'DM Mono', monospace; font-size: 10px; color: #888888; width: 26px; flex-shrink: 0; }
   .day-content { flex: 1; min-width: 0; }
   .day-seance1 { font-size: 12px; font-weight: 500; }
@@ -75,23 +75,23 @@
 
   /* SEANCE BADGE */
   .badge { display: inline-flex; align-items: center; gap: 4px; padding: 3px 8px; border-radius: 4px; font-size: 10px; font-family: 'DM Mono', monospace; letter-spacing: 0.05em; font-weight: 600; cursor: pointer; -webkit-tap-highlight-color: rgba(0,0,0,0.05); text-transform: uppercase; }
-  .badge-run { background: #F5F5F5; color: #333333; border: 1px solid #CCCCCC; }
+  .badge-run { background: #111111; color: #FFFFFF; border: 1px solid #111111; }
   .badge-intense { background: #111111; color: #FFFFFF; border: 1px solid #111111; }
   .badge-renfo { background: #F0F0F0; color: #555555; border: 1px solid #DDDDDD; }
   .badge-repos { background: rgba(120,80,200,0.08); color: #6030A8; border: 1px solid rgba(120,80,200,0.2); }
 
   /* STATS ROW */
   .stats-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
-  .stat-card { background: #FFFFFF; border: none; border-radius: 6px; padding: 11px 8px; text-align: center; box-shadow: 0 1px 4px rgba(0,0,0,0.08); border-top: 2px solid #111111; }
+  .stat-card { background: #F7F7F7; border: none; border-radius: 6px; padding: 11px 8px; text-align: center; border-top: 2px solid #111111; }
   .stat-val { font-family: 'Bebas Neue', sans-serif; font-size: 26px; letter-spacing: 0.05em; color: #111111; }
   .stat-val.run { color: #111111; }
   .stat-label { font-family: 'DM Mono', monospace; font-size: 9px; color: #888888; letter-spacing: 0.1em; margin-top: 2px; }
 
   /* KPI STARS */
-  .kpi-list { display: flex; flex-direction: column; gap: 6px; }
+  .kpi-list { display: flex; flex-direction: column; gap: 5px; }
   /* KPI CIRCLES */
-  .kpi-list { display: flex; flex-direction: column; gap: 6px; }
-  .kpi-row { background: #FFFFFF; border: none; border-radius: 6px; padding: 10px 12px; display: flex; align-items: center; box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
+  .kpi-list { display: flex; flex-direction: column; gap: 5px; }
+  .kpi-row { background: #F7F7F7; border: none; border-radius: 6px; padding: 10px 12px; display: flex; align-items: center; }
   .kpi-name { font-size: 12px; flex: 1; color: #111111; }
   .circles { display: flex; gap: 6px; align-items: center; }
   .circle { width: 20px; height: 20px; border-radius: 50%; border: 2px solid #CCCCCC; background: transparent; cursor: pointer; transition: all 0.15s; flex-shrink: 0; }
@@ -175,6 +175,10 @@
   .objective-note { font-size: 11px; color: #666666; margin-top: 4px; font-style: italic; }
   .objective-date { font-family: 'DM Mono', monospace; font-size: 10px; color: #999999; margin-top: 6px; }
 
+  /* BLOCK CARDS */
+  .block { background: #FFFFFF; border-radius: 12px; padding: 14px; margin: 0 14px 12px; box-shadow: 0 1px 4px rgba(0,0,0,0.07); }
+  .block .section-title { margin-bottom: 10px; }
+
   /* SAVE BTN */
   .save-btn { display: flex; align-items: center; justify-content: center; gap: 8px; width: calc(100% - 28px); margin: 0 14px 14px; padding: 14px; background: #111111; border-radius: 6px; border: none; color: #FFFFFF; font-family: 'DM Mono', monospace; font-size: 13px; font-weight: 600; cursor: pointer; letter-spacing: 0.15em; text-transform: uppercase; transition: opacity 0.2s; }
   .save-btn:active { opacity: 0.8; }
@@ -211,7 +215,7 @@
 <div class="page active" id="page-semaine">
   <div class="header">
     <div class="header-eyebrow">Prépa Marathon · Objectif sub 3h45</div>
-    <div class="header-title">JULIEN DUCHATEAU</div>
+    <div class="header-title">J.DUCHATEAU</div>
     <div class="countdown-row" id="countdown-row"></div>
   </div>
 
@@ -235,7 +239,7 @@
     </div>
   </div>
 
-  <div class="section">
+  <div class="block">
     <div class="section-title">Planning & Réalisation</div>
     <div class="days-grid" id="days-grid"></div>
     <div id="objective-block" class="objective-block" style="display:none;margin-top:10px;">
@@ -246,17 +250,17 @@
     </div>
   </div>
 
-  <div class="section">
+  <div class="block">
     <div class="section-title">Récapitulatif</div>
     <div class="stats-row" id="stats-row"></div>
   </div>
 
-  <div class="section">
+  <div class="block">
     <div class="section-title">KPIs — Bilan de semaine</div>
     <div class="kpi-list" id="kpi-list"></div>
   </div>
 
-  <div class="section">
+  <div class="block">
     <div class="section-title">Notes</div>
     <textarea class="notes-area" id="notes-area" placeholder="Ressenti, contexte, points clés de la semaine..."></textarea>
   </div>
