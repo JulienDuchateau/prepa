@@ -46,12 +46,11 @@
   .week-label { flex: 1; text-align: center; font-family: 'Bebas Neue', sans-serif; font-size: 22px; letter-spacing: 0.15em; color: #111111; }
 
   /* CONCLUSION BANNER */
-  .conclusion { margin: 0 14px 12px; padding: 12px 14px; border-radius: 6px; border: none; background: #FFFFFF; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 1px 4px rgba(0,0,0,0.08); border-left: 3px solid #111111; }
+  .conclusion { margin: 0 14px 12px; padding: 12px 14px; border-radius: 6px; border: 1px solid #E8E8E8; background: #FFFFFF; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 2px 12px rgba(0,0,0,0.10); border-left: 3px solid #111111; }
   .conclusion-status { font-size: 14px; font-weight: 500; }
   .conclusion-score { font-family: 'DM Mono', monospace; font-size: 13px; color: #666666; }
   .status-ok { color: #111111; font-weight: 600; }
   .status-mid { color: #666666; }
-  .status-bad { color: #999999; }
 
   /* SECTION */
   .section { padding: 0 14px; margin-bottom: 16px; }
@@ -111,7 +110,7 @@
 
   /* RECAP PAGE */
   .recap-list { display: flex; flex-direction: column; gap: 8px; }
-  .recap-row { background: #FFFFFF; border: none; border-radius: 6px; padding: 12px 14px 12px 18px; margin-bottom: 4px; cursor: pointer; box-shadow: 0 1px 4px rgba(0,0,0,0.08); transition: box-shadow 0.2s; position: relative; overflow: hidden; }
+  .recap-row { background: #FFFFFF; border: 1px solid #E8E8E8; border-radius: 6px; padding: 12px 14px 12px 18px; margin-bottom: 6px; cursor: pointer; box-shadow: 0 2px 12px rgba(0,0,0,0.10); transition: box-shadow 0.2s; position: relative; overflow: hidden; }
   .recap-row::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 5px; border-radius: 4px 0 0 4px; background: #E0E0E0; }
   .recap-row.done::before { background: #111111; }
   .recap-row.inprogress::before { background: #888888; }
@@ -127,7 +126,7 @@
   .recap-status { font-size: 12px; }
 
   /* COURSES PAGE */
-  .course-card { background: #FFFFFF; border: none; border-radius: 6px; padding: 14px 14px 14px 18px; margin-bottom: 10px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); position: relative; overflow: hidden; }
+  .course-card { background: #FFFFFF; border: 1px solid #E8E8E8; border-radius: 6px; padding: 14px 14px 14px 18px; margin-bottom: 10px; box-shadow: 0 2px 12px rgba(0,0,0,0.10); position: relative; overflow: hidden; }
   .course-card::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 5px; border-radius: 4px 0 0 4px; }
   .course-type-trail::before { background: #555555; }
   .course-type-route::before { background: #111111; }
@@ -176,7 +175,7 @@
   .objective-date { font-family: 'DM Mono', monospace; font-size: 10px; color: #999999; margin-top: 6px; }
 
   /* BLOCK CARDS */
-  .block { background: #FFFFFF; border-radius: 12px; padding: 14px; margin: 0 14px 12px; box-shadow: 0 1px 4px rgba(0,0,0,0.07); }
+  .block { background: #FFFFFF; border-radius: 12px; padding: 16px; margin: 0 14px 14px; box-shadow: 0 2px 12px rgba(0,0,0,0.10); border: 1px solid #E8E8E8; }
   .block .section-title { margin-bottom: 10px; }
 
   /* SAVE BTN */
@@ -226,7 +225,7 @@
   </div>
 
   <div class="conclusion" id="conclusion">
-    <div class="conclusion-status" id="conclusion-status">⏳ In process</div>
+    <div class="conclusion-status" id="conclusion-status"><span class="status-mid">En cours</span></div>
     <div class="conclusion-score" id="conclusion-score">0/4</div>
   </div>
   <div class="progress-wrap">
@@ -774,10 +773,11 @@ function renderConclusion() {
   const capped = Math.min(validated, 4);
   const pct = capped * 25;
   let status, cls;
-  if (pct === 100) { status = '✅ Semaine réussie'; cls = 'status-ok'; }
-  else if (pct >= 50) { status = '⚠️ In process'; cls = 'status-mid'; }
-  else { status = '❌ Semaine difficile'; cls = 'status-bad'; }
-  document.getElementById('conclusion-status').innerHTML = `<span class="${cls}">${status}</span>`;
+  if (pct === 100) {
+    document.getElementById('conclusion-status').innerHTML = '<span class="status-ok">✅ Semaine réussie</span>';
+  } else {
+    document.getElementById('conclusion-status').innerHTML = '<span class="status-mid">En cours</span>';
+  }
   document.getElementById('conclusion-score').textContent = `${validated}/4`;
 
   // Progress bar
