@@ -86,8 +86,6 @@
   .stat-val.run { color: #1A1A1A; }
   .stat-label { font-family: 'DM Mono', monospace; font-size: 9px; color: #888888; letter-spacing: 0.1em; margin-top: 2px; }
 
-  /* KPI STARS */
-  .kpi-list { display: flex; flex-direction: column; gap: 5px; }
   /* KPI CIRCLES */
   .kpi-list { display: flex; flex-direction: column; gap: 5px; }
   .kpi-row { background: #FAFAF8; border: none; border-radius: 2px; padding: 10px 12px; display: flex; align-items: center; border-bottom: 1px solid #F0EDE8; }
@@ -147,7 +145,7 @@
   /* iOS Toggle */
   .ios-toggle { position: relative; width: 44px; height: 26px; flex-shrink: 0; }
   .ios-toggle input { opacity: 0; width: 0; height: 0; position: absolute; }
-  .ios-toggle-track { position: absolute; inset: 0; background: #E0E0E0; border-radius: 13px; transition: background 0.25s; cursor: pointer; }
+  .ios-toggle-track { position: absolute; inset: 0; background: #E0DDD8; border-radius: 13px; transition: background 0.25s; cursor: pointer; }
   .ios-toggle input:checked + .ios-toggle-track { background: #1A1A1A; }
   .ios-toggle-thumb { position: absolute; top: 3px; left: 3px; width: 20px; height: 20px; background: white; border-radius: 50%; transition: transform 0.25s; pointer-events: none; box-shadow: 0 1px 3px rgba(0,0,0,0.2); }
   .ios-toggle input:checked ~ .ios-toggle-thumb { transform: translateX(18px); }
@@ -177,6 +175,14 @@
   /* BLOCK CARDS */
   .block { background: #FFFFFF; border-radius: 4px; padding: 16px; margin: 0 14px 14px; box-shadow: none; border: 1px solid #E0DDD8; }
   .block .section-title { margin-bottom: 10px; }
+
+  /* VFC */
+  .vfc-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 12px; background: #FAFAF8; border-radius: 2px; border-bottom: 1px solid #F0EDE8; }
+  .vfc-label { font-size: 12px; color: #1A1A1A; }
+  .vfc-sublabel { font-size: 10px; color: #999999; font-family: 'DM Mono', monospace; margin-top: 1px; }
+  .vfc-input { font-family: 'Bebas Neue', sans-serif; font-size: 22px; color: #1A1A1A; background: transparent; border: none; border-bottom: 1.5px solid #C8C4BE; outline: none; width: 70px; text-align: right; padding: 0; }
+  .vfc-input:focus { border-bottom-color: #1A1A1A; }
+  .vfc-unit { font-family: 'DM Mono', monospace; font-size: 10px; color: #999999; margin-left: 4px; }
 
   /* SAVE BTN */
   .save-btn { display: flex; align-items: center; justify-content: center; gap: 8px; width: calc(100% - 28px); margin: 0 14px 14px; padding: 14px; background: #1A1A1A; border-radius: 2px; border: none; color: #FFFFFF; font-family: 'DM Mono', monospace; font-size: 12px; font-weight: 500; cursor: pointer; letter-spacing: 0.2em; text-transform: uppercase; transition: opacity 0.2s; }
@@ -214,7 +220,6 @@
 <div class="page active" id="page-semaine">
   <div class="header">
     <div class="header-eyebrow">Prépa Marathon · Objectif sub 3h45</div>
-    <div class="header-title">J.DUCHATEAU</div>
     <div class="countdown-row" id="countdown-row"></div>
   </div>
 
@@ -260,6 +265,20 @@
   </div>
 
   <div class="block">
+    <div class="section-title">VFC — Variabilité Fréquence Cardiaque</div>
+    <div class="vfc-row">
+      <div>
+        <div class="vfc-label">VFC du dimanche</div>
+        <div class="vfc-sublabel">Moyenne 7 jours · ms</div>
+      </div>
+      <div style="display:flex;align-items:baseline;gap:4px;">
+        <input class="vfc-input" type="text" inputmode="numeric" id="vfc-input" placeholder="—" maxlength="4">
+        <span class="vfc-unit">ms</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="block">
     <div class="section-title">Notes</div>
     <textarea class="notes-area" id="notes-area" placeholder="Ressenti, contexte, points clés de la semaine..."></textarea>
   </div>
@@ -301,12 +320,12 @@
   <div class="header">
     <div class="header-eyebrow">Progression</div>
     <div class="header-title">STATISTIQUES</div>
-    <div class="header-sub">Charge kilométrique sur 20 semaines</div>
+    <div class="header-sub">Charge · Forme · VFC sur 20 semaines</div>
   </div>
 
   <div class="section">
     <div class="section-title">Charge kilométrique</div>
-    <div style="background:#FFFFFF;border-radius:18px;padding:16px 10px 12px;box-shadow:0 2px 10px rgba(0,0,0,0.07);">
+    <div style="background:#FFFFFF;border-radius:4px;padding:16px 10px 12px;border:1px solid #E0DDD8;">
       <canvas id="chart-km" style="width:100%;display:block;"></canvas>
     </div>
     <div style="display:flex;gap:10px;margin-top:10px;">
@@ -326,8 +345,29 @@
   </div>
 
   <div class="section">
+    <div class="section-title">VFC — Variabilité Fréquence Cardiaque</div>
+    <div style="background:#FFFFFF;border-radius:4px;padding:16px 10px 12px;border:1px solid #E0DDD8;">
+      <canvas id="chart-vfc" style="width:100%;display:block;"></canvas>
+    </div>
+    <div style="display:flex;gap:10px;margin-top:10px;">
+      <div class="stat-card" style="flex:1">
+        <div class="stat-val" style="color:#1A1A1A" id="stat-vfc-max">—</div>
+        <div class="stat-label">MAX MS</div>
+      </div>
+      <div class="stat-card" style="flex:1">
+        <div class="stat-val" style="color:#888888" id="stat-vfc-min">—</div>
+        <div class="stat-label">MIN MS</div>
+      </div>
+      <div class="stat-card" style="flex:1">
+        <div class="stat-val" style="color:#666666" id="stat-vfc-avg">—</div>
+        <div class="stat-label">MOY MS</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
     <div class="section-title">Forme & bien-être</div>
-    <div style="background:#FFFFFF;border-radius:18px;padding:16px 10px 12px;box-shadow:0 2px 10px rgba(0,0,0,0.07);">
+    <div style="background:#FFFFFF;border-radius:4px;padding:16px 10px 12px;border:1px solid #E0DDD8;">
       <canvas id="chart-kpi" style="width:100%;display:block;"></canvas>
     </div>
     <div style="display:flex;gap:10px;margin-top:10px;">
@@ -398,6 +438,10 @@
     <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
     SEMAINE
   </button>
+  <button class="nav-btn" onclick="showPage('stats', this)">
+    <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+    STATS
+  </button>
   <button class="nav-btn" onclick="showPage('recap', this)">
     <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
     RÉCAP
@@ -405,10 +449,6 @@
   <button class="nav-btn" onclick="showPage('courses', this)">
     <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
     COURSES
-  </button>
-  <button class="nav-btn" onclick="showPage('stats', this)">
-    <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-    STATS
   </button>
   <button class="nav-btn" onclick="showPage('donnees', this)">
     <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v6c0 1.66 4.03 3 9 3s9-1.34 9-3V5"/><path d="M3 11v6c0 1.66 4.03 3 9 3s9-1.34 9-3v-6"/></svg>
@@ -451,6 +491,7 @@ function defaultWeek(w) {
     allures: DAYS.map(() => ''),
     denivelés: DAYS.map(() => ''),
     kpis: KPIS.map(() => 0),
+    vfc: '',
     notes: ''
   };
 }
@@ -469,6 +510,7 @@ function getWeek(w) {
   const wd = data[getKey(w)];
   if (!wd.allures) wd.allures = DAYS.map(() => '');
   if (!wd.denivelés) wd.denivelés = DAYS.map(() => '');
+  if (!wd.vfc) wd.vfc = '';
   return wd;
 }
 
@@ -880,6 +922,11 @@ function renderObjective() {
   }
 }
 
+function renderVfc() {
+  const w = getWeek(currentWeek);
+  document.getElementById('vfc-input').value = w.vfc || '';
+}
+
 function renderNotes() {
   const w = getWeek(currentWeek);
   document.getElementById('notes-area').value = w.notes || '';
@@ -887,6 +934,10 @@ function renderNotes() {
 
 document.getElementById('notes-area').addEventListener('input', function() {
   getWeek(currentWeek).notes = this.value;
+});
+
+document.getElementById('vfc-input').addEventListener('input', function() {
+  getWeek(currentWeek).vfc = this.value;
 });
 
 function saveWeek() {
@@ -911,6 +962,7 @@ function renderAll() {
   renderObjective();
   renderDays();
   renderKpis();
+  renderVfc();
   renderNotes();
 }
 
@@ -964,11 +1016,19 @@ function renderRecap() {
     }
 
     const pct = Math.min(validated, 4) * 25;
-    let statusIcon = !wd ? '○' : pct === 100 ? '✅' : pct >= 50 ? '⚠️' : '❌';
+    // A week is "started" only if it has real data
+    const hasData = wd && (
+      validated > 0 ||
+      (wd.distances && wd.distances.some(d => parseFloat(d) > 0)) ||
+      (wd.kpis && wd.kpis.some(k => k > 0)) ||
+      (wd.notes && wd.notes.trim().length > 0) ||
+      (wd.vfc && wd.vfc.trim().length > 0)
+    );
+    let statusIcon = !hasData ? '○' : pct === 100 ? '✅' : pct >= 50 ? '⚠️' : '❌';
     const div = document.createElement('div');
-    const rowCls = !wd ? 'empty' : pct === 100 ? 'done' : pct >= 50 ? 'inprogress' : 'empty';
-    const badgeCls = !wd ? 'recap-badge-empty' : pct === 100 ? 'recap-badge-ok' : pct >= 50 ? 'recap-badge-mid' : 'recap-badge-empty';
-    const badgeTxt = !wd ? 'À VENIR' : pct === 100 ? '✓ RÉUSSIE' : pct >= 50 ? `${pct}%` : pct > 0 ? `${pct}%` : 'À VENIR';
+    const rowCls = !hasData ? 'empty' : pct === 100 ? 'done' : pct >= 50 ? 'inprogress' : 'empty';
+    const badgeCls = !hasData ? 'recap-badge-empty' : pct === 100 ? 'recap-badge-ok' : pct >= 50 ? 'recap-badge-mid' : 'recap-badge-empty';
+    const badgeTxt = !hasData ? 'À VENIR' : pct === 100 ? '✓ RÉUSSIE' : pct >= 50 ? `${pct}%` : pct > 0 ? `${pct}%` : 'À VENIR';
     // Total D+
     const totalDeniv = wd ? (wd.denivelés || []).reduce((a,b) => a+(parseInt(b)||0), 0) : 0;
     const kmTxt = km !== '0.0' && km !== '0' ? `${km} km` : '';
@@ -980,7 +1040,7 @@ function renderRecap() {
     const kpiTxt = avgKpi !== '-' && avgKpi !== '0.0' ? `KPI ${avgKpi}/5` : '';
     const details = [kmTxt, denivTxt, paceTxt, kpiTxt].filter(Boolean).join(' · ');
     div.className = 'recap-row ' + rowCls;
-    if (rowCls === 'empty' && !wd) div.style.opacity = '0.45';
+    if (rowCls === 'empty' && !hasData) div.style.opacity = '0.45';
     div.onclick = () => { currentWeek = w; localStorage.setItem('prepa_current_week', w); document.getElementById('week-label').textContent = 'SEMAINE '+w; renderAll(); showPage('semaine', document.querySelector('.nav-btn')); };
     div.innerHTML = `
       <div style="flex:1">
@@ -1092,6 +1152,22 @@ function renderStatsPage() {
   document.getElementById('stat-kpi-min').textContent = kpiFilled.length ? Math.min(...kpiFilled).toFixed(1) : '—';
   document.getElementById('stat-kpi-avg').textContent = kpiFilled.length ? (kpiFilled.reduce((a,b)=>a+b,0)/kpiFilled.length).toFixed(1) : '—';
   drawChart('chart-kpi', labels, kpiData, '#333333', 'kpi', true, 0, 5, currentWeek - 1);
+
+  // VFC chart
+  // Abscisse : numéros de semaine (S1→S20)
+  // Ordonnée : ms, échelle fixe 20→100ms (couvre 99% des athlètes amateurs)
+  // Ligne pointillée à 50ms = zone de vigilance
+  const vfcData = [];
+  for (let w = 1; w <= 20; w++) {
+    const wd = data[getKey(w)];
+    const v = wd && wd.vfc ? parseFloat(wd.vfc) : null;
+    vfcData.push(v && v > 0 ? v : null);
+  }
+  const vfcFilled = vfcData.filter(v => v !== null);
+  document.getElementById('stat-vfc-max').textContent = vfcFilled.length ? Math.max(...vfcFilled).toFixed(0) : '—';
+  document.getElementById('stat-vfc-min').textContent = vfcFilled.length ? Math.min(...vfcFilled).toFixed(0) : '—';
+  document.getElementById('stat-vfc-avg').textContent = vfcFilled.length ? (vfcFilled.reduce((a,b)=>a+b,0)/vfcFilled.length).toFixed(0) : '—';
+  drawChart('chart-vfc', labels, vfcData, '#555555', 'ms', true, 20, 100, currentWeek - 1);
 }
 
 function drawChart(canvasId, labels, rawData, color, unit, isLine, fixedMin, fixedMax, highlightIdx) {
