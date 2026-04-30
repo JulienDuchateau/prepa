@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>PREPA — Julien</title>
@@ -184,6 +184,54 @@
   .vfc-input:focus { border-bottom-color: #1A1A1A; }
   .vfc-unit { font-family: 'DM Mono', monospace; font-size: 10px; color: #999999; margin-left: 4px; }
 
+  /* SHARE CARD */
+  .share-card {
+    width: 100%;
+    max-width: 360px;
+    margin: 0 auto;
+    background: #F4F1EC;
+    border: 1px solid #E0DDD8;
+    padding: 28px 24px 24px;
+    position: relative;
+    font-family: 'DM Sans', sans-serif;
+    display: none;
+  }
+  .share-card.visible { display: block; }
+  .sc-eyebrow { font-family: 'DM Mono', monospace; font-size: 8px; color: #999999; letter-spacing: 0.3em; text-transform: uppercase; margin-bottom: 3px; }
+  .sc-title { font-family: 'Bebas Neue', sans-serif; font-size: 42px; letter-spacing: 0.06em; color: #1A1A1A; line-height: 1; }
+  .sc-subtitle { font-family: 'DM Mono', monospace; font-size: 8px; color: #AAAAAA; letter-spacing: 0.1em; margin-top: 3px; text-transform: uppercase; }
+  .sc-divider { height: 1px; background: #E0DDD8; margin: 16px 0; }
+  .sc-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 16px; }
+  .sc-stat { text-align: center; }
+  .sc-stat-val { font-family: 'Bebas Neue', sans-serif; font-size: 28px; color: #1A1A1A; line-height: 1; }
+  .sc-stat-label { font-family: 'DM Mono', monospace; font-size: 7px; color: #AAAAAA; letter-spacing: 0.12em; text-transform: uppercase; margin-top: 2px; }
+  .sc-sessions { margin-bottom: 16px; }
+  .sc-session { display: flex; align-items: center; padding: 6px 0; border-bottom: 1px solid #F0EDE8; gap: 8px; }
+  .sc-session:last-child { border-bottom: none; }
+  .sc-day { font-family: 'DM Mono', monospace; font-size: 8px; color: #BBBBBB; width: 24px; flex-shrink: 0; }
+  .sc-badge { font-family: 'DM Mono', monospace; font-size: 8px; padding: 2px 6px; border-radius: 2px; font-weight: 600; text-transform: uppercase; flex-shrink: 0; }
+  .sc-badge-run { background: #1A1A1A; color: #FFFFFF; }
+  .sc-badge-renfo { background: #F0EDE8; color: #555555; border: 1px solid #E0DDD8; }
+  .sc-badge-repos { color: #CCCCCC; font-size: 8px; }
+  .sc-session-data { font-family: 'DM Mono', monospace; font-size: 8px; color: #AAAAAA; margin-left: auto; }
+  .sc-check { font-size: 10px; color: #1A1A1A; }
+  .sc-kpis { display: flex; gap: 8px; margin-bottom: 16px; }
+  .sc-kpi { flex: 1; text-align: center; }
+  .sc-kpi-name { font-family: 'DM Mono', monospace; font-size: 6px; color: #BBBBBB; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 4px; }
+  .sc-circles { display: flex; gap: 2px; justify-content: center; }
+  .sc-circle { width: 7px; height: 7px; border-radius: 50%; border: 1px solid #C8C4BE; }
+  .sc-circle.filled { border: 1.5px solid #1A1A1A; background: #F4F1EC; }
+  .sc-bottom { display: flex; align-items: flex-end; justify-content: space-between; }
+  .sc-vfc-label { font-family: 'DM Mono', monospace; font-size: 7px; color: #AAAAAA; letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 2px; }
+  .sc-vfc-val { font-family: 'Bebas Neue', sans-serif; font-size: 24px; color: #1A1A1A; line-height: 1; }
+  .sc-vfc-unit { font-family: 'DM Mono', monospace; font-size: 8px; color: #AAAAAA; }
+  .sc-progress-label { font-family: 'DM Mono', monospace; font-size: 7px; color: #AAAAAA; letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 4px; text-align: right; }
+  .sc-bar { width: 100px; height: 2px; background: #E0DDD8; }
+  .sc-bar-fill { height: 100%; background: #1A1A1A; }
+  .sc-pct { font-family: 'Bebas Neue', sans-serif; font-size: 20px; color: #1A1A1A; text-align: right; }
+  .sc-footer { margin-top: 16px; display: flex; justify-content: space-between; align-items: center; }
+  .sc-brand { font-family: 'DM Mono', monospace; font-size: 7px; color: #CCCCCC; letter-spacing: 0.15em; text-transform: uppercase; }
+
   /* SAVE BTN */
   .save-btn { display: flex; align-items: center; justify-content: center; gap: 8px; width: calc(100% - 28px); margin: 0 14px 14px; padding: 14px; background: #1A1A1A; border-radius: 2px; border: none; color: #FFFFFF; font-family: 'DM Mono', monospace; font-size: 12px; font-weight: 500; cursor: pointer; letter-spacing: 0.2em; text-transform: uppercase; transition: opacity 0.2s; }
   .save-btn:active { opacity: 0.8; }
@@ -202,6 +250,7 @@
   .seance-option:active { background: #FFFFFF; }
   .seance-option.selected { border-color: #1A1A1A; color: #1A1A1A; background: #F0EDE8; }
 </style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 </head>
 <body>
 
@@ -265,15 +314,35 @@
   </div>
 
   <div class="block">
-    <div class="section-title">VFC — Variabilité Fréquence Cardiaque</div>
+    <div class="section-title">Données physiologiques — Dimanche soir</div>
     <div class="vfc-row">
       <div>
-        <div class="vfc-label">VFC du dimanche</div>
+        <div class="vfc-label">VFC</div>
         <div class="vfc-sublabel">Moyenne 7 jours · ms</div>
       </div>
       <div style="display:flex;align-items:baseline;gap:4px;">
         <input class="vfc-input" type="text" inputmode="numeric" id="vfc-input" placeholder="—" maxlength="4">
         <span class="vfc-unit">ms</span>
+      </div>
+    </div>
+    <div class="vfc-row">
+      <div>
+        <div class="vfc-label">Score sommeil</div>
+        <div class="vfc-sublabel">Moyenne 7 jours · 0→100</div>
+      </div>
+      <div style="display:flex;align-items:baseline;gap:4px;">
+        <input class="vfc-input" type="text" inputmode="numeric" id="sommeil-input" placeholder="—" maxlength="3">
+        <span class="vfc-unit">/100</span>
+      </div>
+    </div>
+    <div class="vfc-row" style="border-bottom:none;">
+      <div>
+        <div class="vfc-label">RPE sortie longue</div>
+        <div class="vfc-sublabel">Effort perçu · 1→10</div>
+      </div>
+      <div style="display:flex;align-items:baseline;gap:4px;">
+        <input class="vfc-input" type="text" inputmode="numeric" id="rpe-input" placeholder="—" maxlength="2">
+        <span class="vfc-unit">/10</span>
       </div>
     </div>
   </div>
@@ -297,7 +366,13 @@
     <div class="header-sub">Toutes les semaines</div>
   </div>
   <div class="section">
-    <div class="section-title">Progression</div>
+    <div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:12px;padding-bottom:6px;border-bottom:1px solid #E0DDD8;">
+      <div style="font-family:'DM Mono',monospace;font-size:9px;color:#888888;letter-spacing:0.3em;text-transform:uppercase;">Progression</div>
+      <div style="display:flex;align-items:baseline;gap:4px;">
+        <span style="font-family:'DM Mono',monospace;font-size:14px;color:#555555;font-weight:400;" id="recap-total-km">—</span>
+        <span style="font-family:'DM Mono',monospace;font-size:9px;color:#999999;letter-spacing:0.1em;">km</span>
+      </div>
+    </div>
     <div class="recap-list" id="recap-list"></div>
   </div>
 </div>
@@ -424,6 +499,26 @@
   </div>
 
   <div class="section">
+    <div class="section-title">Partager ma semaine</div>
+    <div style="background:#FFFFFF;border:1px solid #E0DDD8;border-radius:6px;padding:20px;">
+      <p style="font-size:13px;color:#666666;line-height:1.6;margin-bottom:14px;">Génère une carte visuelle de ta semaine à partager.</p>
+      <div style="display:flex;gap:8px;margin-bottom:16px;align-items:center;">
+        <label style="font-family:'DM Mono',monospace;font-size:10px;color:#888888;letter-spacing:0.1em;">SEMAINE</label>
+        <select id="share-week-select" style="flex:1;padding:8px 10px;border:1px solid #E0DDD8;border-radius:4px;font-family:'DM Mono',monospace;font-size:12px;color:#1A1A1A;background:#FAFAF8;outline:none;"></select>
+      </div>
+      <button onclick="generateShareCard()" style="width:100%;padding:13px;background:#1A1A1A;color:#FFFFFF;border:none;border-radius:4px;font-family:'DM Mono',monospace;font-size:12px;font-weight:500;cursor:pointer;letter-spacing:0.15em;text-transform:uppercase;">Générer la carte</button>
+    </div>
+  </div>
+
+  <div class="section" id="share-preview-section" style="display:none;">
+    <div class="section-title">Aperçu</div>
+    <div id="share-card-wrap" style="display:flex;flex-direction:column;align-items:center;gap:14px;">
+      <div class="share-card visible" id="share-card"></div>
+      <button onclick="downloadShareCard()" style="width:100%;max-width:360px;padding:13px;background:#1A1A1A;color:#FFFFFF;border:none;border-radius:4px;font-family:'DM Mono',monospace;font-size:12px;font-weight:500;cursor:pointer;letter-spacing:0.15em;text-transform:uppercase;">⬇ Télécharger PNG</button>
+    </div>
+  </div>
+
+  <div class="section">
     <div class="section-title" style="color:#888888;">Zone de danger</div>
     <div style="background:#FFFFFF;border:1px solid #CCCCCC;border-radius:6px;padding:20px;">
       <p style="font-size:13px;color:#666666;line-height:1.6;margin-bottom:16px;">Supprime <strong style="color:#111111;">toutes</strong> les données enregistrées. Action irréversible — exporte d'abord ta sauvegarde.</p>
@@ -492,6 +587,8 @@ function defaultWeek(w) {
     denivelés: DAYS.map(() => ''),
     kpis: KPIS.map(() => 0),
     vfc: '',
+    sommeil: '',
+    rpe: '',
     notes: ''
   };
 }
@@ -511,6 +608,8 @@ function getWeek(w) {
   if (!wd.allures) wd.allures = DAYS.map(() => '');
   if (!wd.denivelés) wd.denivelés = DAYS.map(() => '');
   if (!wd.vfc) wd.vfc = '';
+  if (!wd.sommeil) wd.sommeil = '';
+  if (!wd.rpe) wd.rpe = '';
   return wd;
 }
 
@@ -528,6 +627,22 @@ function getSundayObjective() {
   const offset = currentWeek - TRAIL_START_WEEK;
   if (offset < 0 || offset >= SUNDAY_PLAN.length) return null;
   return SUNDAY_PLAN[offset];
+}
+
+function parseKm(val) {
+  if (!val) return 0;
+  return parseFloat(String(val).replace(',', '.')) || 0;
+}
+
+function parseDeniv(val) {
+  if (!val) return 0;
+  return parseInt(String(val).replace(',', '.')) || 0;
+}
+
+function parseVfc(val) {
+  if (!val) return null;
+  const v = parseFloat(String(val).replace(',', '.'));
+  return isNaN(v) || v <= 0 ? null : v;
 }
 
 function isRunning(seance) {
@@ -594,7 +709,7 @@ function renderDays() {
     const s = w.seances[i];
     const isRun = isRunning(s.s1);
     const isRenfo = s.s1 === 'RENFO';
-    const isValidated = isRun ? (parseFloat(w.distances[i]) > 0) : (isRenfo ? !!w.checked[i] : false);
+    const isValidated = isRun ? (parseKm(w.distances[i]) > 0) : (isRenfo ? !!w.checked[i] : false);
     const div = document.createElement('div');
     div.className = 'day-card' + (isValidated ? ' validated' : '');
 
@@ -642,7 +757,7 @@ function renderDays() {
       kmInp.type = 'text';
       kmInp.inputMode = 'decimal';
       kmInp.placeholder = '0';
-      kmInp.value = (w.distances[i] && parseFloat(w.distances[i]) !== 0) ? w.distances[i] : '';
+      kmInp.value = (w.distances[i] && parseKm(w.distances[i]) !== 0) ? w.distances[i] : '';
       kmInp.oninput = function() { updateDist(i, this.value); };
       const kmUnit = document.createElement('span');
       kmUnit.className = 'day-field-unit';
@@ -730,7 +845,7 @@ function updateDist(i, val) {
   w.distances[i] = val;
   const cards = document.querySelectorAll('.day-card');
   if (cards[i]) {
-    const isValidated = parseFloat(val) > 0;
+    const isValidated = parseKm(val) > 0;
     cards[i].className = 'day-card' + (isValidated ? ' validated' : '');
     // Remove all existing checkmarks first
     cards[i].querySelectorAll('.validated-check').forEach(el => el.remove());
@@ -762,7 +877,7 @@ function renderStats() {
   const w = getWeek(currentWeek);
   let kmFacile = 0, kmIntense = 0;
   w.seances.forEach((s, i) => {
-    const km = parseFloat(w.distances[i]) || 0;
+    const km = parseKm(w.distances[i]);
     if (s.s1 === 'RUNNING FACILE') kmFacile += km;
     if (s.s1 === 'RUNNING INTENSE') kmIntense += km;
   });
@@ -809,14 +924,16 @@ function renderConclusion() {
   const w = getWeek(currentWeek);
   let validated = 0;
   w.seances.forEach((seance, i) => {
-    if (isRunning(seance.s1) && parseFloat(w.distances[i]) > 0) validated++;
+    if (isRunning(seance.s1) && parseKm(w.distances[i]) > 0) validated++;
     else if (seance.s1 === 'RENFO' && !!w.checked[i]) validated++;
   });
   const capped = Math.min(validated, 4);
   const pct = capped * 25;
   let status, cls;
+  const wasFull = _lastPct === 100;
   if (pct === 100) {
     document.getElementById('conclusion-status').innerHTML = '<span class="status-ok">✅ Semaine réussie</span>';
+    if (!wasFull && navigator.vibrate) navigator.vibrate([50, 30, 80]);
   } else {
     document.getElementById('conclusion-status').innerHTML = '<span class="status-mid">En cours</span>';
   }
@@ -925,6 +1042,8 @@ function renderObjective() {
 function renderVfc() {
   const w = getWeek(currentWeek);
   document.getElementById('vfc-input').value = w.vfc || '';
+  document.getElementById('sommeil-input').value = w.sommeil || '';
+  document.getElementById('rpe-input').value = w.rpe || '';
 }
 
 function renderNotes() {
@@ -938,6 +1057,14 @@ document.getElementById('notes-area').addEventListener('input', function() {
 
 document.getElementById('vfc-input').addEventListener('input', function() {
   getWeek(currentWeek).vfc = this.value;
+});
+
+document.getElementById('sommeil-input').addEventListener('input', function() {
+  getWeek(currentWeek).sommeil = this.value;
+});
+
+document.getElementById('rpe-input').addEventListener('input', function() {
+  getWeek(currentWeek).rpe = this.value;
 });
 
 function saveWeek() {
@@ -985,13 +1112,14 @@ function secondsToPace(secs) {
 function renderRecap() {
   const list = document.getElementById('recap-list');
   list.innerHTML = '';
+  let grandTotalKm = 0;
   for (let w = 1; w <= 20; w++) {
     const wd = data[getKey(w)];
     let kmTotal = 0, alluresFacile = [], alluresIntense = [];
     if (wd) {
       const allures = wd.allures || [];
       wd.seances.forEach((s, i) => {
-        const km = parseFloat(wd.distances[i]) || 0;
+        const km = parseKm(wd.distances[i]);
         const secs = paceToSeconds(allures[i]);
         if (s.s1 === 'RUNNING FACILE') {
           kmTotal += km;
@@ -1004,13 +1132,14 @@ function renderRecap() {
       });
     }
     const km = kmTotal.toFixed(1);
+    grandTotalKm += kmTotal;
     const avgFacile = alluresFacile.length ? secondsToPace(alluresFacile.reduce((a,b)=>a+b,0)/alluresFacile.length) : null;
     const avgIntense = alluresIntense.length ? secondsToPace(alluresIntense.reduce((a,b)=>a+b,0)/alluresIntense.length) : null;
     const avgKpi = wd ? (wd.kpis.reduce((a,b)=>a+b,0)/KPIS.length).toFixed(1) : '-';
     let validated = 0;
     if (wd) {
       wd.seances.forEach((s, i) => {
-        if (isRunning(s.s1) && parseFloat(wd.distances[i]) > 0) validated++;
+        if (isRunning(s.s1) && parseKm(wd.distances[i]) > 0) validated++;
         else if (s.s1 === 'RENFO' && !!wd.checked[i]) validated++;
       });
     }
@@ -1019,7 +1148,7 @@ function renderRecap() {
     // A week is "started" only if it has real data
     const hasData = wd && (
       validated > 0 ||
-      (wd.distances && wd.distances.some(d => parseFloat(d) > 0)) ||
+      (wd.distances && wd.distances.some(d => parseKm(d) > 0)) ||
       (wd.kpis && wd.kpis.some(k => k > 0)) ||
       (wd.notes && wd.notes.trim().length > 0) ||
       (wd.vfc && wd.vfc.trim().length > 0)
@@ -1030,7 +1159,7 @@ function renderRecap() {
     const badgeCls = !hasData ? 'recap-badge-empty' : pct === 100 ? 'recap-badge-ok' : pct >= 50 ? 'recap-badge-mid' : 'recap-badge-empty';
     const badgeTxt = !hasData ? 'À VENIR' : pct === 100 ? '✓ RÉUSSIE' : pct >= 50 ? `${pct}%` : pct > 0 ? `${pct}%` : 'À VENIR';
     // Total D+
-    const totalDeniv = wd ? (wd.denivelés || []).reduce((a,b) => a+(parseInt(b)||0), 0) : 0;
+    const totalDeniv = wd ? (wd.denivelés || []).reduce((a,b) => a+parseDeniv(b), 0) : 0;
     const kmTxt = km !== '0.0' && km !== '0' ? `${km} km` : '';
     const denivTxt = totalDeniv > 0 ? `D+ ${totalDeniv}m` : '';
     const paceTxt = [
@@ -1051,6 +1180,8 @@ function renderRecap() {
       <span class="recap-badge ${badgeCls}">${badgeTxt}</span>`;
     list.appendChild(div);
   }
+  const totalEl = document.getElementById('recap-total-km');
+  if (totalEl) totalEl.textContent = grandTotalKm > 0 ? grandTotalKm.toFixed(1) : '—';
 }
 
 function renderCourses() {
@@ -1125,7 +1256,7 @@ function renderStatsPage() {
     labels.push(''+w);
     const wd = data[getKey(w)];
     const km = wd ? wd.seances.reduce((total, s, i) => {
-      return isRunning(s.s1) ? total + (parseFloat(wd.distances[i]) || 0) : total;
+      return isRunning(s.s1) ? total + parseKm(wd.distances[i]) : total;
     }, 0) : 0;
     kmData.push(parseFloat(km.toFixed(1)));
   }
@@ -1160,8 +1291,8 @@ function renderStatsPage() {
   const vfcData = [];
   for (let w = 1; w <= 20; w++) {
     const wd = data[getKey(w)];
-    const v = wd && wd.vfc ? parseFloat(wd.vfc) : null;
-    vfcData.push(v && v > 0 ? v : null);
+    const v = wd && wd.vfc ? parseVfc(wd.vfc) : null;
+    vfcData.push(v);
   }
   const vfcFilled = vfcData.filter(v => v !== null);
   document.getElementById('stat-vfc-max').textContent = vfcFilled.length ? Math.max(...vfcFilled).toFixed(0) : '—';
@@ -1346,6 +1477,123 @@ function drawChart(canvasId, labels, rawData, color, unit, isLine, fixedMin, fix
   });
 }
 
+function initShareWeekSelect() {
+  const sel = document.getElementById('share-week-select');
+  if (!sel) return;
+  sel.innerHTML = '';
+  for (let w = 1; w <= 20; w++) {
+    const opt = document.createElement('option');
+    opt.value = w;
+    opt.textContent = 'Semaine ' + w;
+    if (w === currentWeek) opt.selected = true;
+    sel.appendChild(opt);
+  }
+}
+
+function generateShareCard() {
+  const w = parseInt(document.getElementById('share-week-select').value);
+  const wd = getWeek(w);
+  const card = document.getElementById('share-card');
+  const section = document.getElementById('share-preview-section');
+  section.style.display = 'block';
+
+  // Compute stats
+  let kmFacile = 0, kmIntense = 0, totalDeniv = 0;
+  let allSecsRun = [], validated = 0;
+  wd.seances.forEach((s, i) => {
+    const km = parseKm(wd.distances[i]);
+    const d = parseDeniv((wd.denivelés||[])[i]);
+    if (isRunning(s.s1)) { kmFacile += km; totalDeniv += d; }
+    if (s.s1 === 'RUNNING INTENSE') { kmIntense += km; }
+    const secs = paceToSeconds((wd.allures||[])[i]);
+    if (isRunning(s.s1) && km > 0 && secs) allSecsRun.push(secs);
+    if (isRunning(s.s1) && km > 0) validated++;
+    if (s.s1 === 'RENFO' && wd.checked[i]) validated++;
+  });
+  const totalKm = (kmFacile + kmIntense);
+  const avgPaceSecs = allSecsRun.length ? allSecsRun.reduce((a,b)=>a+b,0)/allSecsRun.length : null;
+  const avgPace = avgPaceSecs ? secondsToPace(avgPaceSecs) : '—';
+  const pct = Math.min(validated, 4) * 25;
+  const avgKpi = wd.kpis.some(k=>k>0) ? (wd.kpis.reduce((a,b)=>a+b,0)/wd.kpis.length).toFixed(1) : null;
+
+  // Sessions HTML
+  const dayNames = ['LUN','MAR','MER','JEU','VEN','SAM','DIM'];
+  let sessionsHtml = '';
+  wd.seances.forEach((s, i) => {
+    const isRun = isRunning(s.s1);
+    const isRenfo = s.s1 === 'RENFO';
+    const km = parseKm(wd.distances[i]);
+    const allure = (wd.allures||[])[i] || '';
+    const deniv = parseDeniv((wd.denivelés||[])[i]);
+    const isVal = isRun ? km > 0 : isRenfo ? wd.checked[i] : false;
+    let badgeHtml = '';
+    if (isRun) badgeHtml = `<span class="sc-badge sc-badge-run">${s.s1 === 'RUNNING FACILE' ? 'R.FACILE' : 'R.INTENSE'}</span>`;
+    else if (isRenfo) badgeHtml = `<span class="sc-badge sc-badge-renfo">RENFO</span>`;
+    else badgeHtml = `<span class="sc-badge sc-badge-repos">REPOS</span>`;
+    let dataStr = '';
+    if (isRun && km > 0) dataStr = `${km.toFixed(1)}km${allure ? ' · '+allure : ''}${deniv > 0 ? ' · '+deniv+'m' : ''}`;
+    const check = isVal ? ' <span class="sc-check">✓</span>' : '';
+    sessionsHtml += `<div class="sc-session"><span class="sc-day">${dayNames[i]}</span>${badgeHtml}<span class="sc-session-data">${dataStr}</span>${check}</div>`;
+  });
+
+  // KPIs HTML
+  const kpiNames = ['Motiv.','Forme','Jambes','Sommeil','Plan'];
+  let kpisHtml = '';
+  KPIS.forEach((kpi, i) => {
+    const val = wd.kpis[i] || 0;
+    let circles = '';
+    for (let c = 1; c <= 5; c++) circles += `<div class="sc-circle${val>=c?' filled':''}"></div>`;
+    kpisHtml += `<div class="sc-kpi"><div class="sc-kpi-name">${kpiNames[i]}</div><div class="sc-circles">${circles}</div></div>`;
+  });
+
+  card.innerHTML = `
+    <div class="sc-eyebrow">Prépa Marathon · Sub 3h45</div>
+    <div class="sc-title">SEMAINE ${w}</div>
+    <div class="sc-subtitle">J.DUCHATEAU · NICE-CANNES NOV. 2026</div>
+    <div class="sc-divider"></div>
+    <div class="sc-stats">
+      <div class="sc-stat"><div class="sc-stat-val">${totalKm.toFixed(1)}</div><div class="sc-stat-label">KM</div></div>
+      <div class="sc-stat"><div class="sc-stat-val">${totalDeniv}</div><div class="sc-stat-label">D+ (m)</div></div>
+      <div class="sc-stat"><div class="sc-stat-val">${avgPace}</div><div class="sc-stat-label">Allure moy</div></div>
+    </div>
+    <div class="sc-divider"></div>
+    <div class="sc-sessions">${sessionsHtml}</div>
+    <div class="sc-divider"></div>
+    <div class="sc-kpis">${kpisHtml}</div>
+    <div class="sc-bottom">
+      <div>
+        <div class="sc-vfc-label">VFC · 7j</div>
+        <div><span class="sc-vfc-val">${wd.vfc || '—'}</span> <span class="sc-vfc-unit">ms</span></div>
+      </div>
+      <div style="text-align:right;">
+        <div class="sc-progress-label">Réussite</div>
+        <div class="sc-bar"><div class="sc-bar-fill" style="width:${pct}%"></div></div>
+        <div class="sc-pct">${pct}%</div>
+      </div>
+    </div>
+    <div class="sc-footer">
+      <span class="sc-brand">J.DUCHATEAU · PRÉPA 2026</span>
+      <span class="sc-brand">${pct === 100 ? '✅ Réussie' : validated+'/4 séances'}</span>
+    </div>
+  `;
+  section.scrollIntoView({ behavior: 'smooth' });
+}
+
+function downloadShareCard() {
+  const card = document.getElementById('share-card');
+  html2canvas(card, {
+    scale: 3,
+    backgroundColor: '#F4F1EC',
+    useCORS: true,
+    logging: false
+  }).then(canvas => {
+    const link = document.createElement('a');
+    link.download = 'semaine-' + document.getElementById('share-week-select').value + '.png';
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+  });
+}
+
 function exportData() {
   const exportObj = { version: 1, exportedAt: new Date().toISOString(), data: {} };
   for (let i = 0; i < localStorage.length; i++) {
@@ -1424,6 +1672,7 @@ function showPage(name, btn) {
   if (name === 'recap') renderRecap();
   if (name === 'courses') renderCourses();
   if (name === 'stats') { save(); renderStatsPage(); }
+  if (name === 'donnees') initShareWeekSelect();
   if (name === 'donnees') updateStorageInfo();
 }
 
