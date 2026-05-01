@@ -63,6 +63,9 @@
   .day-name { font-family: 'DM Mono', monospace; font-size: 10px; color: #888888; width: 26px; flex-shrink: 0; }
   .day-content { flex: 1; min-width: 0; }
   .day-seance1 { font-size: 12px; font-weight: 500; }
+  .day-seance2 { font-size: 11px; margin-top: 4px; display: flex; align-items: center; gap: 6px; }
+  .day-add-btn { font-family: 'DM Mono', monospace; font-size: 9px; color: #BBBBBB; cursor: pointer; letter-spacing: 0.05em; padding: 1px 0; border: none; background: none; }
+  .day-add-btn:hover { color: #888888; }
   .day-run-inputs { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; flex-shrink: 0; }
   .day-input-row { display: flex; align-items: center; gap: 4px; }
   .day-field-input { font-family: 'DM Mono', monospace; font-size: 11px; background: transparent; border: none; border-bottom: 1px solid #C8C4BE; outline: none; padding: 1px 0; text-align: right; color: #1A1A1A; }
@@ -77,6 +80,7 @@
   .badge-run { background: #1A1A1A; color: #FFFFFF; border: 1px solid #1A1A1A; }
   .badge-intense { background: #1A1A1A; color: #FFFFFF; border: 1px solid #1A1A1A; }
   .badge-renfo { background: #F0EDE8; color: #555555; border: 1px solid #E0DDD8; }
+  .badge-stretching { background: #E8F2E8; color: #2D6A2D; border: 1px solid #C5DEC5; }
   .badge-repos { background: rgba(120,80,200,0.08); color: #6030A8; border: 1px solid rgba(120,80,200,0.2); }
 
   /* STATS ROW */
@@ -86,7 +90,7 @@
   .stat-val.run { color: #1A1A1A; }
   .stat-label { font-family: 'DM Mono', monospace; font-size: 9px; color: #888888; letter-spacing: 0.1em; margin-top: 2px; }
 
-  /* KPI CIRCLES */
+    /* KPI CIRCLES */
   .kpi-list { display: flex; flex-direction: column; gap: 5px; }
   .kpi-row { background: #FAFAF8; border: none; border-radius: 2px; padding: 10px 12px; display: flex; align-items: center; border-bottom: 1px solid #F0EDE8; }
   .kpi-name { font-size: 12px; flex: 1; color: #1A1A1A; }
@@ -94,10 +98,6 @@
   .circle { width: 20px; height: 20px; border-radius: 50%; border: 1.5px solid #C8C4BE; background: transparent; cursor: pointer; transition: all 0.15s; flex-shrink: 0; }
   .circle.filled { background: #F4F1EC; border: 2.5px solid #1A1A1A; }
   .circle:active { transform: scale(1.2); }
-  .stars { display: flex; gap: 4px; }
-  .star { font-size: 20px; cursor: pointer; transition: transform 0.15s; color: #E0E0E0; }
-  .star.filled { color: #1A1A1A; filter: none; }
-  .star:active { transform: scale(1.3); }
 
   /* DISTANCE INPUT */
   .dist-unit { font-size: 10px; color: #999999; margin-top: 2px; }
@@ -121,6 +121,7 @@
   .recap-badge-ok { background: #1A1A1A; color: #FFFFFF; }
   .recap-badge-mid { background: #888888; color: #FFFFFF; }
   .recap-badge-empty { background: #F0EDE8; color: #999999; }
+  .recap-badge-injury { background: #FDF0F0; color: #C08080; border: 1px solid #EDD5D5; }
   .recap-status { font-size: 12px; }
 
   /* COURSES PAGE */
@@ -358,6 +359,80 @@
   </button>
 </div>
 
+<!-- PAGE: RENFO -->
+<div class="page" id="page-renfo">
+  <div class="header">
+    <div class="header-eyebrow">Séance type · 22 min</div>
+    <div class="header-title">RENFO</div>
+    <div class="header-sub">Kettlebell 12kg · Tapis</div>
+  </div>
+
+  <div class="block" style="margin-top:0;">
+    <div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:12px;padding-bottom:6px;border-bottom:1px solid #E0DDD8;">
+      <div class="section-title" style="margin:0;padding:0;border:none;">Circuit principal</div>
+      <div style="font-family:'DM Mono',monospace;font-size:11px;color:#999999;" id="renfo-counter">0/5</div>
+    </div>
+    <div id="renfo-list"></div>
+  </div>
+
+  <div class="block">
+    <div class="section-title">Retour au calme</div>
+    <div style="font-family:'DM Sans',sans-serif;font-size:13px;color:#666666;line-height:1.8;">
+      30s étirement ischio-jambiers<br>
+      30s hip flexor stretch<br>
+      30s pigeon au sol<br>
+      30s respiration profonde
+    </div>
+  </div>
+
+  <button class="save-btn" onclick="resetRenfo()">Réinitialiser la séance</button>
+</div>
+
+<!-- PAGE: STATS -->
+<div class="page" id="page-stats">
+  <div class="header">
+    <div class="header-eyebrow">Progression</div>
+    <div class="header-title">STATISTIQUES</div>
+    <div class="header-sub">Charge · Forme · VFC sur 20 semaines</div>
+  </div>
+  <div class="section">
+    <div class="section-title">Charge kilométrique</div>
+    <div style="background:#FFFFFF;border-radius:4px;padding:16px 10px 12px;border:1px solid #E0DDD8;">
+      <canvas id="chart-km" style="width:100%;display:block;"></canvas>
+    </div>
+    <div style="display:flex;gap:10px;margin-top:10px;">
+      <div class="stat-card" style="flex:1"><div class="stat-val" id="stat-km-max">—</div><div class="stat-label">MAX KM</div></div>
+      <div class="stat-card" style="flex:1"><div class="stat-val" id="stat-km-total">—</div><div class="stat-label">TOTAL KM</div></div>
+      <div class="stat-card" style="flex:1"><div class="stat-val" id="stat-km-avg">—</div><div class="stat-label">MOY/SEM</div></div>
+    </div>
+  </div>
+  <div class="section">
+    <div class="section-title">VFC — Variabilité Fréquence Cardiaque</div>
+    <div style="background:#FFFFFF;border-radius:4px;padding:16px 10px 12px;border:1px solid #E0DDD8;">
+      <canvas id="chart-vfc" style="width:100%;display:block;"></canvas>
+    </div>
+    <div style="display:flex;gap:10px;margin-top:10px;">
+      <div class="stat-card" style="flex:1"><div class="stat-val" style="color:#1A1A1A" id="stat-vfc-max">—</div><div class="stat-label">MAX MS</div></div>
+      <div class="stat-card" style="flex:1"><div class="stat-val" style="color:#888888" id="stat-vfc-min">—</div><div class="stat-label">MIN MS</div></div>
+      <div class="stat-card" style="flex:1"><div class="stat-val" style="color:#666666" id="stat-vfc-avg">—</div><div class="stat-label">MOY MS</div></div>
+    </div>
+  </div>
+  <div class="section">
+    <div class="section-title">Forme & bien-être</div>
+    <div style="background:#FFFFFF;border-radius:4px;padding:16px 10px 12px;border:1px solid #E0DDD8;">
+      <canvas id="chart-kpi" style="width:100%;display:block;"></canvas>
+    </div>
+    <div style="display:flex;gap:10px;margin-top:10px;">
+      <div class="stat-card" style="flex:1"><div class="stat-val" style="color:#111111" id="stat-kpi-max">—</div><div class="stat-label">MAX /5</div></div>
+      <div class="stat-card" style="flex:1"><div class="stat-val" style="color:#555555" id="stat-kpi-min">—</div><div class="stat-label">MIN /5</div></div>
+      <div class="stat-card" style="flex:1"><div class="stat-val" style="color:#666666" id="stat-kpi-avg">—</div><div class="stat-label">MOY /5</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- PAGE: RÉCAP -->
+<!-- PAGE: STATS -->
+
 <!-- PAGE: RÉCAP -->
 <div class="page" id="page-recap">
   <div class="header">
@@ -377,124 +452,34 @@
   </div>
 </div>
 
-<!-- PAGE: COURSES -->
-<div class="page" id="page-courses">
+<!-- PAGE: INFOS -->
+<div class="page" id="page-infos">
   <div class="header">
-    <div class="header-eyebrow">Objectifs</div>
-    <div class="header-title">MES COURSES</div>
-    <div class="header-sub">Saison 2026</div>
+    <div class="header-eyebrow">Calendrier & Données</div>
+    <div class="header-title">INFOS</div>
+    <div class="header-sub">Courses · Sauvegarde · Partage</div>
   </div>
   <div class="section">
     <div class="section-title">Calendrier</div>
     <div id="courses-list"></div>
   </div>
-</div>
-
-<!-- PAGE: STATS -->
-<div class="page" id="page-stats">
-  <div class="header">
-    <div class="header-eyebrow">Progression</div>
-    <div class="header-title">STATISTIQUES</div>
-    <div class="header-sub">Charge · Forme · VFC sur 20 semaines</div>
-  </div>
-
-  <div class="section">
-    <div class="section-title">Charge kilométrique</div>
-    <div style="background:#FFFFFF;border-radius:4px;padding:16px 10px 12px;border:1px solid #E0DDD8;">
-      <canvas id="chart-km" style="width:100%;display:block;"></canvas>
-    </div>
-    <div style="display:flex;gap:10px;margin-top:10px;">
-      <div class="stat-card" style="flex:1">
-        <div class="stat-val run" id="stat-km-max">—</div>
-        <div class="stat-label">MAX KM</div>
-      </div>
-      <div class="stat-card" style="flex:1">
-        <div class="stat-val run" id="stat-km-total">—</div>
-        <div class="stat-label">TOTAL KM</div>
-      </div>
-      <div class="stat-card" style="flex:1">
-        <div class="stat-val run" id="stat-km-avg">—</div>
-        <div class="stat-label">MOY/SEM</div>
-      </div>
-    </div>
-  </div>
-
-  <div class="section">
-    <div class="section-title">VFC — Variabilité Fréquence Cardiaque</div>
-    <div style="background:#FFFFFF;border-radius:4px;padding:16px 10px 12px;border:1px solid #E0DDD8;">
-      <canvas id="chart-vfc" style="width:100%;display:block;"></canvas>
-    </div>
-    <div style="display:flex;gap:10px;margin-top:10px;">
-      <div class="stat-card" style="flex:1">
-        <div class="stat-val" style="color:#1A1A1A" id="stat-vfc-max">—</div>
-        <div class="stat-label">MAX MS</div>
-      </div>
-      <div class="stat-card" style="flex:1">
-        <div class="stat-val" style="color:#888888" id="stat-vfc-min">—</div>
-        <div class="stat-label">MIN MS</div>
-      </div>
-      <div class="stat-card" style="flex:1">
-        <div class="stat-val" style="color:#666666" id="stat-vfc-avg">—</div>
-        <div class="stat-label">MOY MS</div>
-      </div>
-    </div>
-  </div>
-
-  <div class="section">
-    <div class="section-title">Forme & bien-être</div>
-    <div style="background:#FFFFFF;border-radius:4px;padding:16px 10px 12px;border:1px solid #E0DDD8;">
-      <canvas id="chart-kpi" style="width:100%;display:block;"></canvas>
-    </div>
-    <div style="display:flex;gap:10px;margin-top:10px;">
-      <div class="stat-card" style="flex:1">
-        <div class="stat-val" style="color:#111111" id="stat-kpi-max">—</div>
-        <div class="stat-label">MAX /5</div>
-      </div>
-      <div class="stat-card" style="flex:1">
-        <div class="stat-val" style="color:#555555" id="stat-kpi-min">—</div>
-        <div class="stat-label">MIN /5</div>
-      </div>
-      <div class="stat-card" style="flex:1">
-        <div class="stat-val" style="color:#666666" id="stat-kpi-avg">—</div>
-        <div class="stat-label">MOY /5</div>
-      </div>
-    </div>
-  </div>
-  </div>
-</div>
-
-<!-- PAGE: DONNÉES -->
-<div class="page" id="page-donnees">
-  <div class="header">
-    <div class="header-eyebrow">Sécurité</div>
-    <div class="header-title">DONNÉES</div>
-    <div class="header-sub">Sauvegarde & restauration</div>
-  </div>
-
   <div class="section">
     <div class="section-title">Exporter mes données</div>
-    <div style="background:#FFFFFF;border:1px solid #E0E0E0;border-radius:6px;padding:20px;">
-      <p style="font-size:13px;color:#666666;line-height:1.6;margin-bottom:16px;">Génère un fichier <code style="background:#FFFFFF;padding:2px 6px;border-radius:4px;font-size:12px;color:#111111;">.json</code> avec toutes tes données. Conserve-le précieusement — il permet de tout restaurer en cas de perte.</p>
-      <button onclick="exportData()" style="width:100%;padding:14px;background:#111111;color:#FFFFFF;border:none;border-radius:10px;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:600;cursor:pointer;letter-spacing:0.02em;">⬇ Télécharger la sauvegarde</button>
+    <div style="background:#FFFFFF;border:1px solid #E0DDD8;border-radius:6px;padding:20px;">
+      <p style="font-size:13px;color:#666666;line-height:1.6;margin-bottom:16px;">Génère un fichier <code style="background:#F4F1EC;padding:2px 6px;border-radius:2px;font-size:12px;">.json</code> avec toutes tes données. Conserve-le précieusement — il permet de tout restaurer en cas de perte.</p>
+      <button onclick="exportData()" style="width:100%;padding:14px;background:#1A1A1A;color:#FFFFFF;border:none;border-radius:4px;font-family:'DM Mono',monospace;font-size:12px;font-weight:500;cursor:pointer;letter-spacing:0.15em;text-transform:uppercase;">⬇ Télécharger la sauvegarde</button>
     </div>
   </div>
 
   <div class="section">
     <div class="section-title">Importer une sauvegarde</div>
-    <div style="background:#FFFFFF;border:1px solid #E0E0E0;border-radius:6px;padding:20px;">
-      <p style="font-size:13px;color:#666666;line-height:1.6;margin-bottom:16px;">Sélectionne un fichier de sauvegarde <code style="background:#FFFFFF;padding:2px 6px;border-radius:4px;font-size:12px;color:#333333;">.json</code> précédemment exporté pour restaurer toutes tes données.</p>
-      <label style="display:block;width:100%;padding:14px;background:#444444;color:#FFFFFF;border:none;border-radius:10px;font-size:15px;font-weight:600;cursor:pointer;text-align:center;letter-spacing:0.02em;">
+    <div style="background:#FFFFFF;border:1px solid #E0DDD8;border-radius:6px;padding:20px;">
+      <p style="font-size:13px;color:#666666;line-height:1.6;margin-bottom:16px;">Sélectionne un fichier de sauvegarde <code style="background:#F4F1EC;padding:2px 6px;border-radius:2px;font-size:12px;">.json</code> précédemment exporté pour restaurer toutes tes données.</p>
+      <label style="display:block;width:100%;padding:14px;background:#444444;color:#FFFFFF;border:none;border-radius:4px;font-size:15px;font-weight:600;cursor:pointer;text-align:center;letter-spacing:0.02em;">
         ⬆ Charger une sauvegarde
         <input type="file" accept=".json" onchange="importData(event)" style="display:none;">
       </label>
       <div id="import-status" style="margin-top:12px;font-size:13px;text-align:center;min-height:20px;"></div>
-    </div>
-  </div>
-
-  <div class="section">
-    <div class="section-title">Infos stockage</div>
-    <div style="background:#FFFFFF;border:1px solid #E0E0E0;border-radius:6px;padding:20px;">
-      <div id="storage-info" style="font-size:13px;color:#666666;line-height:2;"></div>
     </div>
   </div>
 
@@ -533,6 +518,10 @@
     <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
     SEMAINE
   </button>
+  <button class="nav-btn" onclick="showPage('renfo', this)">
+    <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><polygon points="12 2 22 12 12 22 2 12"/></svg>
+    RENFO
+  </button>
   <button class="nav-btn" onclick="showPage('stats', this)">
     <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
     STATS
@@ -541,13 +530,9 @@
     <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
     RÉCAP
   </button>
-  <button class="nav-btn" onclick="showPage('courses', this)">
-    <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-    COURSES
-  </button>
-  <button class="nav-btn" onclick="showPage('donnees', this)">
-    <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v6c0 1.66 4.03 3 9 3s9-1.34 9-3V5"/><path d="M3 11v6c0 1.66 4.03 3 9 3s9-1.34 9-3v-6"/></svg>
-    DONNÉES
+  <button class="nav-btn" onclick="showPage('infos', this)">
+    <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+    INFOS
   </button>
 </nav>
 
@@ -558,11 +543,76 @@ const SEANCE_ICONS = {
   'RUNNING FACILE': '🏃',
   'RUNNING INTENSE': '⚡',
   'RENFO': '💪',
+  'STRETCHING': '🧘',
   'REPOS': '😴',
   '-': ''
 };
 
-const SEANCES = ['RUNNING FACILE','RUNNING INTENSE','RENFO','REPOS','-'];
+const RENFO_EXERCISES = [
+  { id: 'squat',   name: 'Squats kettlebell',   detail: '4×12 reps · Goblet squat · Descente 3s · Repos 60s', sets: '4×12' },
+  { id: 'fente',   name: 'Fentes bulgares',      detail: '3×8 reps/côté · KB main opposée · Repos 60s', sets: '3×8/c' },
+  { id: 'hip',     name: 'Hip thrust',           detail: '4×12 reps · KB sur hanches · 2s contraction · Repos 60s', sets: '4×12' },
+  { id: 'pompes',  name: 'Pompes',               detail: '4×10 reps · Descente 3s / explosion · Repos 45s', sets: '4×10' },
+  { id: 'gainage', name: 'Gainage dynamique',    detail: '3×30s · Planche + taps épaules + mountain climbers · Repos 40s', sets: '3×30s' },
+];
+
+let renfoChecked = {};
+
+function renderRenfo() {
+  const list = document.getElementById('renfo-list');
+  if (!list) return;
+  list.innerHTML = '';
+  let count = 0;
+  RENFO_EXERCISES.forEach(ex => {
+    if (renfoChecked[ex.id]) count++;
+    const row = document.createElement('div');
+    row.style.cssText = 'display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid #F0EDE8;';
+
+    const info = document.createElement('div');
+    info.style.cssText = 'flex:1;';
+    info.innerHTML = `<div style="font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;color:${renfoChecked[ex.id] ? '#AAAAAA' : '#1A1A1A'};${renfoChecked[ex.id] ? 'text-decoration:line-through;' : ''}">${ex.name}</div><div style="font-family:'DM Mono',monospace;font-size:9px;color:#AAAAAA;margin-top:3px;letter-spacing:0.05em;">${ex.sets} · ${ex.detail}</div>`;
+
+    const label = document.createElement('label');
+    label.className = 'ios-toggle';
+    label.onclick = (e) => e.stopPropagation();
+    const cb = document.createElement('input');
+    cb.type = 'checkbox';
+    cb.checked = !!renfoChecked[ex.id];
+    cb.onchange = function() {
+      renfoChecked[ex.id] = this.checked;
+      renderRenfo();
+    };
+    cb.addEventListener('touchend', (e) => e.stopPropagation());
+    const track = document.createElement('div');
+    track.className = 'ios-toggle-track';
+    const thumb = document.createElement('div');
+    thumb.className = 'ios-toggle-thumb';
+    label.appendChild(cb);
+    label.appendChild(track);
+    label.appendChild(thumb);
+
+    row.appendChild(info);
+    row.appendChild(label);
+    list.appendChild(row);
+  });
+
+  // Remove border on last row
+  if (list.lastChild) list.lastChild.style.borderBottom = 'none';
+
+  // Update counter
+  const counter = document.getElementById('renfo-counter');
+  if (counter) {
+    counter.textContent = count + '/' + RENFO_EXERCISES.length;
+    counter.style.color = count === RENFO_EXERCISES.length ? '#2D6A2D' : '#999999';
+  }
+}
+
+function resetRenfo() {
+  renfoChecked = {};
+  renderRenfo();
+}
+
+const SEANCES = ['RUNNING FACILE','RUNNING INTENSE','RENFO','STRETCHING','REPOS','-'];
 const KPIS = ['Motivation','Forme générale','Forme des jambes','Sommeil','Respect du plan'];
 const COURSES = [
   { name: 'TRAIL DES GORETS', date: '31 Mai 2026', iso: '2026-05-31', dist: '18 km', dplus: '1000m', type: 'trail', pr: '' },
@@ -580,7 +630,7 @@ function getKey(w) { return 'week_' + w; }
 
 function defaultWeek(w) {
   return {
-    seances: DAYS.map(() => ({ s1: 'REPOS' })),
+    seances: DAYS.map(() => ({ s1: 'REPOS', s2: null })),
     checked: DAYS.map(() => false),
     distances: DAYS.map(() => ''),
     allures: DAYS.map(() => ''),
@@ -608,6 +658,7 @@ function getWeek(w) {
   if (!wd.allures) wd.allures = DAYS.map(() => '');
   if (!wd.denivelés) wd.denivelés = DAYS.map(() => '');
   if (!wd.vfc) wd.vfc = '';
+  wd.seances.forEach(s => { if (s.s2 === undefined) s.s2 = null; });
   if (!wd.sommeil) wd.sommeil = '';
   if (!wd.rpe) wd.rpe = '';
   return wd;
@@ -656,6 +707,7 @@ function badgeClass(s) {
   if (s === 'RUNNING FACILE') return 'badge-run';
   if (s === 'RUNNING INTENSE') return 'badge-intense';
   if (s === 'RENFO') return 'badge-renfo';
+  if (s === 'STRETCHING') return 'badge-stretching';
 
   return 'badge-repos';
 }
@@ -709,7 +761,8 @@ function renderDays() {
     const s = w.seances[i];
     const isRun = isRunning(s.s1);
     const isRenfo = s.s1 === 'RENFO';
-    const isValidated = isRun ? (parseKm(w.distances[i]) > 0) : (isRenfo ? !!w.checked[i] : false);
+    const isStretching = s.s1 === 'STRETCHING';
+    const isValidated = isRun ? (parseKm(w.distances[i]) > 0) : ((isRenfo || isStretching) ? !!w.checked[i] : false);
     const div = document.createElement('div');
     div.className = 'day-card' + (isValidated ? ' validated' : '');
 
@@ -730,14 +783,41 @@ function renderDays() {
     s1Badge.textContent = (icon ? icon + ' ' : '') + s.s1;
     s1El.appendChild(s1Badge);
     contentEl.appendChild(s1El);
+
+    // Second activity (s2)
+    const s2El = document.createElement('div');
+    s2El.className = 'day-seance2';
+    if (s.s2) {
+      const s2Badge = document.createElement('span');
+      s2Badge.className = 'badge ' + badgeClass(s.s2);
+      const icon2 = SEANCE_ICONS[s.s2] || '';
+      s2Badge.textContent = (icon2 ? icon2 + ' ' : '') + s.s2;
+      s2Badge.onclick = (e) => { e.stopPropagation(); openModal2(i); };
+      s2Badge.addEventListener('touchend', (e) => { e.preventDefault(); e.stopPropagation(); openModal2(i); }, { passive: false });
+      const removeBtn = document.createElement('span');
+      removeBtn.textContent = '×';
+      removeBtn.style.cssText = 'color:#CCCCCC;cursor:pointer;font-size:12px;margin-left:2px;';
+      removeBtn.onclick = (e) => { e.stopPropagation(); w.seances[i].s2 = null; renderDays(); };
+      removeBtn.addEventListener('touchend', (e) => { e.preventDefault(); e.stopPropagation(); w.seances[i].s2 = null; renderDays(); }, { passive: false });
+      s2El.appendChild(s2Badge);
+      s2El.appendChild(removeBtn);
+    } else {
+      const addBtn = document.createElement('button');
+      addBtn.className = 'day-add-btn';
+      addBtn.textContent = '+ activité';
+      addBtn.onclick = (e) => { e.stopPropagation(); openModal2(i); };
+      addBtn.addEventListener('touchend', (e) => { e.preventDefault(); e.stopPropagation(); openModal2(i); }, { passive: false });
+      s2El.appendChild(addBtn);
+    }
+    contentEl.appendChild(s2El);
     div.appendChild(contentEl);
 
-    // Make entire card tappable on iOS Safari
+    // Make entire card tappable — only opens modal1
     const idx = i;
     div.onclick = (e) => {
-      // Don't trigger if tapping on input or toggle
-      if (e.target.tagName === 'INPUT' || e.target.tagName === 'LABEL' || 
-          e.target.closest('.ios-toggle') || e.target.closest('.day-run-inputs')) return;
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'LABEL' ||
+          e.target.closest('.ios-toggle') || e.target.closest('.day-run-inputs') ||
+          e.target.closest('.day-seance2') || e.target.closest('.day-add-btn')) return;
       openModal(idx);
     };
 
@@ -807,7 +887,7 @@ function renderDays() {
       wrap.appendChild(allureRow);
       wrap.appendChild(denivRow);
       div.appendChild(wrap);
-    } else if (isRenfo) {
+    } else if (isRenfo || isStretching) {
       const label = document.createElement('label');
       label.className = 'ios-toggle';
       const stopToggle = (e) => e.stopPropagation();
@@ -986,6 +1066,37 @@ function openModal(day) {
     opts.appendChild(div);
   });
   document.getElementById('modal').classList.add('open');
+}
+
+
+function openModal2(day) {
+  modalDay = day;
+  const w = getWeek(currentWeek);
+  const current = w.seances[day].s2;
+  const opts = document.getElementById('modal-options');
+  const title = document.getElementById('modal-title');
+  if (title) title.textContent = 'Ajouter une activité';
+  opts.innerHTML = '';
+  // Show all options including '-' to remove
+  const options = current ? [...SEANCES] : SEANCES.filter(s => s !== '-');
+  options.forEach(s => {
+    const div = document.createElement('div');
+    div.className = 'seance-option' + (s === current ? ' selected' : '');
+    div.innerHTML = `<span class="badge ${badgeClass(s)}">${s}</span> ${s}`;
+    div.onclick = () => { selectSeance2(s); };
+    div.addEventListener('touchend', (e) => { e.preventDefault(); e.stopPropagation(); selectSeance2(s); }, { passive: false });
+    opts.appendChild(div);
+  });
+  document.getElementById('modal').classList.add('open');
+}
+
+function selectSeance2(s) {
+  const w = getWeek(currentWeek);
+  w.seances[modalDay].s2 = s === '-' ? null : s;
+  closeModal();
+  renderDays();
+  renderStats();
+  renderConclusion();
 }
 
 function selectSeance(s) {
@@ -1173,11 +1284,16 @@ function renderRecap() {
     div.onclick = () => { currentWeek = w; localStorage.setItem('prepa_current_week', w); document.getElementById('week-label').textContent = 'SEMAINE '+w; renderAll(); showPage('semaine', document.querySelector('.nav-btn')); };
     div.innerHTML = `
       <div style="flex:1">
-        <div class="recap-week">SEMAINE ${w}</div>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:3px;">
+          <div class="recap-week">SEMAINE ${w}</div>
+          <div style="display:flex;gap:4px;align-items:center;">
+            ${w === 2 ? '<span class="recap-badge recap-badge-injury">🩹 blessure</span>' : ''}
+            <span class="recap-badge ${badgeCls}">${badgeTxt}</span>
+          </div>
+        </div>
         <div class="recap-title">${statusIcon} ${pct > 0 ? pct+'% réalisé' : 'Non démarrée'}</div>
         <div class="recap-km">${details || `${validated}/4 séances`}</div>
-      </div>
-      <span class="recap-badge ${badgeCls}">${badgeTxt}</span>`;
+      </div>`;
     list.appendChild(div);
   }
   const totalEl = document.getElementById('recap-total-km');
@@ -1522,6 +1638,7 @@ function generateShareCard() {
   wd.seances.forEach((s, i) => {
     const isRun = isRunning(s.s1);
     const isRenfo = s.s1 === 'RENFO';
+    const isStretching = s.s1 === 'STRETCHING';
     const km = parseKm(wd.distances[i]);
     const allure = (wd.allures||[])[i] || '';
     const deniv = parseDeniv((wd.denivelés||[])[i]);
@@ -1669,10 +1786,12 @@ function showPage(name, btn) {
   document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
   document.getElementById('page-'+name).classList.add('active');
   btn.classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'instant' });
   if (name === 'recap') renderRecap();
-  if (name === 'courses') renderCourses();
+  if (name === 'infos') { renderCourses(); initShareWeekSelect(); }
+  if (name === 'renfo') renderRenfo();
   if (name === 'stats') { save(); renderStatsPage(); }
-  if (name === 'donnees') initShareWeekSelect();
+
   if (name === 'donnees') updateStorageInfo();
 }
 
