@@ -142,6 +142,8 @@
   .pr-input { background: transparent; border: none; color: #333333; font-family: 'Bebas Neue', sans-serif; font-size: 26px; width: 120px; outline: none; text-align: right; padding: 0; }
   .pr-input:focus { opacity: 0.8; }
   .pr-input::placeholder { color: #E0E0E0; }
+  .course-notes { width: 100%; background: transparent; border: none; border-top: 1px solid #F0EDE8; padding: 10px 0 0; color: #555555; font-family: 'DM Sans', sans-serif; font-size: 12px; line-height: 1.6; resize: none; outline: none; min-height: 56px; margin-top: 10px; }
+  .course-notes::placeholder { color: #CCCCCC; }
 
   /* iOS Toggle */
   .ios-toggle { position: relative; width: 44px; height: 26px; flex-shrink: 0; }
@@ -770,6 +772,11 @@ function renderDays() {
     const nameEl = document.createElement('div');
     nameEl.className = 'day-name';
     nameEl.textContent = day;
+    const todayIdx = (new Date().getDay() + 6) % 7; // 0=Mon, 6=Sun
+    if (i === todayIdx) {
+      nameEl.style.color = '#1A1A1A';
+      nameEl.style.fontWeight = '600';
+    }
     div.appendChild(nameEl);
 
     // content (seances)
@@ -1068,7 +1075,6 @@ function openModal(day) {
   document.getElementById('modal').classList.add('open');
 }
 
-
 function openModal2(day) {
   modalDay = day;
   const w = getWeek(currentWeek);
@@ -1355,7 +1361,8 @@ function renderCourses() {
       <div class="course-pr-block">
         <span class="pr-label">TEMPS</span>
         <input class="pr-input" placeholder="—h——" value="${stored.pr||c.pr||''}" oninput="updatePR(${i}, this.value)">
-      </div>`;
+      </div>
+      <textarea class="course-notes" placeholder="Ressenti, conditions, points clés..." oninput="updateCourseNotes(${i}, this.value)">${stored.notes||''}</textarea>`;
     list.appendChild(div);
   });
 }
@@ -1363,6 +1370,11 @@ function renderCourses() {
 function updatePR(i, val) {
   if (!data['course_'+i]) data['course_'+i] = {};
   data['course_'+i].pr = val;
+}
+
+function updateCourseNotes(i, val) {
+  if (!data['course_'+i]) data['course_'+i] = {};
+  data['course_'+i].notes = val;
 }
 
 function renderStatsPage() {
