@@ -175,6 +175,7 @@
   .objective-note { font-size: 11px; color: #666666; margin-top: 4px; font-style: italic; }
   .objective-date { font-family: 'DM Mono', monospace; font-size: 10px; color: #999999; margin-top: 6px; }
 
+  .chart-wrap { background:#FFFFFF;border-radius:4px;padding:16px 10px 12px;border:1px solid #E0DDD8; }
   /* BLOCK CARDS */
   .block { background: #FFFFFF; border-radius: 4px; padding: 16px; margin: 0 14px 14px; box-shadow: none; border: 1px solid #E0DDD8; }
   .block .section-title { margin-bottom: 10px; }
@@ -263,7 +264,7 @@
 <div class="modal-overlay" id="modal">
   <div class="modal">
     <div class="modal-handle"></div>
-    <div class="modal-title">Choisir une séance</div>
+    <div class="modal-title" id="modal-title">Choisir une séance</div>
     <div id="modal-options"></div>
   </div>
 </div>
@@ -399,7 +400,7 @@
   </div>
   <div class="section">
     <div class="section-title">Charge kilométrique</div>
-    <div style="background:#FFFFFF;border-radius:4px;padding:16px 10px 12px;border:1px solid #E0DDD8;">
+    <div class="chart-wrap">
       <canvas id="chart-km" style="width:100%;display:block;"></canvas>
     </div>
     <div style="display:flex;gap:10px;margin-top:10px;">
@@ -410,7 +411,7 @@
   </div>
   <div class="section">
     <div class="section-title">VFC — Variabilité Fréquence Cardiaque</div>
-    <div style="background:#FFFFFF;border-radius:4px;padding:16px 10px 12px;border:1px solid #E0DDD8;">
+    <div class="chart-wrap">
       <canvas id="chart-vfc" style="width:100%;display:block;"></canvas>
     </div>
     <div style="display:flex;gap:10px;margin-top:10px;">
@@ -421,7 +422,7 @@
   </div>
   <div class="section">
     <div class="section-title">Forme & bien-être</div>
-    <div style="background:#FFFFFF;border-radius:4px;padding:16px 10px 12px;border:1px solid #E0DDD8;">
+    <div class="chart-wrap">
       <canvas id="chart-kpi" style="width:100%;display:block;"></canvas>
     </div>
     <div style="display:flex;gap:10px;margin-top:10px;">
@@ -1483,23 +1484,6 @@ function drawChart(canvasId, labels, rawData, color, unit, isLine, fixedMin, fix
     ctx.fillText(val.toFixed(0), pad.left - 3, y + 3);
   }
 
-  // Objective line (km chart only)
-  if (!isLine) {
-    const objY = pad.top + chartH - ((30 - minVal) / range) * chartH;
-    ctx.beginPath();
-    ctx.setLineDash([5, 4]);
-    ctx.strokeStyle = color + '55';
-    ctx.lineWidth = 1.5;
-    ctx.moveTo(pad.left, objY);
-    ctx.lineTo(pad.left + chartW, objY);
-    ctx.stroke();
-    ctx.setLineDash([]);
-    ctx.fillStyle = color + '99';
-    ctx.font = `${isMobile ? 7 : 8}px DM Mono, monospace`;
-    ctx.textAlign = 'left';
-    ctx.fillText('obj. 30km', pad.left + 4, objY - 3);
-  }
-
   if (isLine) {
     const points = [];
     dataVals.forEach((v, i) => {
@@ -1591,6 +1575,21 @@ function drawChart(canvasId, labels, rawData, color, unit, isLine, fixedMin, fix
         }
       }
     });
+  }
+
+  // Objective line drawn AFTER bars so it's always visible on top
+  if (!isLine) {
+    const objY = pad.top + chartH - ((30 - minVal) / range) * chartH;
+    ctx.beginPath();
+    ctx.setLineDash([4, 4]);
+    ctx.strokeStyle = '#1A1A1A';
+    ctx.lineWidth = 1;
+    ctx.globalAlpha = 0.25;
+    ctx.moveTo(pad.left, objY);
+    ctx.lineTo(pad.left + chartW, objY);
+    ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.globalAlpha = 1;
   }
 
   // X labels — show every other label on mobile to avoid overlap
