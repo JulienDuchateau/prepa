@@ -365,30 +365,28 @@
 <!-- PAGE: RENFO -->
 <div class="page" id="page-renfo">
   <div class="header">
-    <div class="header-eyebrow">Séance type · 22 min</div>
+    <div class="header-eyebrow">Séance type · Kettlebell 12kg · Tapis</div>
     <div class="header-title">RENFO</div>
-    <div class="header-sub">Kettlebell 12kg · Tapis</div>
+    <div class="header-sub" id="renfo-counter">0/6</div>
   </div>
 
   <div class="block" style="margin-top:0;">
     <div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:12px;padding-bottom:6px;border-bottom:1px solid #E0DDD8;">
-      <div class="section-title" style="margin:0;padding:0;border:none;">Circuit principal</div>
-      <div style="font-family:'DM Mono',monospace;font-size:11px;color:#999999;" id="renfo-counter">0/5</div>
+      <div class="section-title" style="margin:0;padding:0;border:none;">Séance 1</div>
+      <div style="font-family:'DM Mono',monospace;font-size:11px;color:#999999;" id="renfo-counter-s1">0/4</div>
     </div>
-    <div id="renfo-list"></div>
+    <div id="renfo-list-s1"></div>
   </div>
 
   <div class="block">
-    <div class="section-title">Retour au calme</div>
-    <div style="font-family:'DM Sans',sans-serif;font-size:13px;color:#666666;line-height:1.8;">
-      30s étirement ischio-jambiers<br>
-      30s hip flexor stretch<br>
-      30s pigeon au sol<br>
-      30s respiration profonde
+    <div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:12px;padding-bottom:6px;border-bottom:1px solid #E0DDD8;">
+      <div class="section-title" style="margin:0;padding:0;border:none;">Séance 2</div>
+      <div style="font-family:'DM Mono',monospace;font-size:11px;color:#999999;" id="renfo-counter-s2">0/2</div>
     </div>
+    <div id="renfo-list-s2"></div>
   </div>
 
-  <button class="save-btn" onclick="resetRenfo()">Réinitialiser la séance</button>
+  <button class="save-btn" onclick="resetRenfo()">Réinitialiser</button>
 </div>
 
 <!-- PAGE: STATS -->
@@ -551,63 +549,75 @@ const SEANCE_ICONS = {
   '-': ''
 };
 
-const RENFO_EXERCISES = [
-  { id: 'squat',   name: 'Squats kettlebell',   detail: '4×12 reps · Goblet squat · Descente 3s · Repos 60s', sets: '4×12' },
-  { id: 'fente',   name: 'Fentes bulgares',      detail: '3×8 reps/côté · KB main opposée · Repos 60s', sets: '3×8/c' },
-  { id: 'hip',     name: 'Hip thrust',           detail: '4×12 reps · KB sur hanches · 2s contraction · Repos 60s', sets: '4×12' },
-  { id: 'pompes',  name: 'Pompes',               detail: '4×10 reps · Descente 3s / explosion · Repos 45s', sets: '4×10' },
-  { id: 'gainage', name: 'Gainage dynamique',    detail: '3×30s · Planche + taps épaules + mountain climbers · Repos 40s', sets: '3×30s' },
+const RENFO_S1 = [
+  { id: 'squat',   name: 'Squats kettlebell',  detail: 'Goblet squat · Descente 3s · Repos 60s', sets: '4×12' },
+  { id: 'fente',   name: 'Fentes bulgares',    detail: 'KB main opposée · Repos 60s', sets: '3×8/c' },
+  { id: 'hip',     name: 'Hip thrust',         detail: 'KB sur hanches · 2s contraction · Repos 60s', sets: '4×12' },
+  { id: 'mollet',  name: 'Extensions mollets', detail: 'Unipodal si possible · Repos 45s', sets: '4×15' },
+];
+
+const RENFO_S2 = [
+  { id: 'pompes',  name: 'Pompes',             detail: 'Descente 3s / explosion · Repos 45s', sets: '4×10' },
+  { id: 'gainage', name: 'Gainage dynamique',  detail: 'Planche + taps épaules + mountain climbers · Repos 40s', sets: '3×30s' },
 ];
 
 let renfoChecked = {};
 
+function buildExerciseRow(ex) {
+  const row = document.createElement('div');
+  row.style.cssText = 'display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid #F0EDE8;';
+  const info = document.createElement('div');
+  info.style.cssText = 'flex:1;';
+  info.innerHTML = `<div style="font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;color:${renfoChecked[ex.id] ? '#AAAAAA' : '#1A1A1A'};${renfoChecked[ex.id] ? 'text-decoration:line-through;' : ''}">${ex.name}</div><div style="font-family:'DM Mono',monospace;font-size:9px;color:#AAAAAA;margin-top:3px;letter-spacing:0.05em;">${ex.sets} · ${ex.detail}</div>`;
+  const label = document.createElement('label');
+  label.className = 'ios-toggle';
+  label.onclick = (e) => e.stopPropagation();
+  const cb = document.createElement('input');
+  cb.type = 'checkbox';
+  cb.checked = !!renfoChecked[ex.id];
+  cb.onchange = function() { renfoChecked[ex.id] = this.checked; renderRenfo(); };
+  cb.addEventListener('touchend', (e) => e.stopPropagation());
+  const track = document.createElement('div');
+  track.className = 'ios-toggle-track';
+  const thumb = document.createElement('div');
+  thumb.className = 'ios-toggle-thumb';
+  label.appendChild(cb); label.appendChild(track); label.appendChild(thumb);
+  row.appendChild(info); row.appendChild(label);
+  return row;
+}
+
 function renderRenfo() {
-  const list = document.getElementById('renfo-list');
-  if (!list) return;
-  list.innerHTML = '';
-  let count = 0;
-  RENFO_EXERCISES.forEach(ex => {
-    if (renfoChecked[ex.id]) count++;
-    const row = document.createElement('div');
-    row.style.cssText = 'display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid #F0EDE8;';
+  const list1 = document.getElementById('renfo-list-s1');
+  const list2 = document.getElementById('renfo-list-s2');
+  if (!list1 || !list2) return;
+  list1.innerHTML = '';
+  list2.innerHTML = '';
 
-    const info = document.createElement('div');
-    info.style.cssText = 'flex:1;';
-    info.innerHTML = `<div style="font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;color:${renfoChecked[ex.id] ? '#AAAAAA' : '#1A1A1A'};${renfoChecked[ex.id] ? 'text-decoration:line-through;' : ''}">${ex.name}</div><div style="font-family:'DM Mono',monospace;font-size:9px;color:#AAAAAA;margin-top:3px;letter-spacing:0.05em;">${ex.sets} · ${ex.detail}</div>`;
-
-    const label = document.createElement('label');
-    label.className = 'ios-toggle';
-    label.onclick = (e) => e.stopPropagation();
-    const cb = document.createElement('input');
-    cb.type = 'checkbox';
-    cb.checked = !!renfoChecked[ex.id];
-    cb.onchange = function() {
-      renfoChecked[ex.id] = this.checked;
-      renderRenfo();
-    };
-    cb.addEventListener('touchend', (e) => e.stopPropagation());
-    const track = document.createElement('div');
-    track.className = 'ios-toggle-track';
-    const thumb = document.createElement('div');
-    thumb.className = 'ios-toggle-thumb';
-    label.appendChild(cb);
-    label.appendChild(track);
-    label.appendChild(thumb);
-
-    row.appendChild(info);
-    row.appendChild(label);
-    list.appendChild(row);
+  // Session 1
+  const s1Count = RENFO_S1.filter(ex => renfoChecked[ex.id]).length;
+  RENFO_S1.forEach((ex, idx) => {
+    const row = buildExerciseRow(ex);
+    if (idx === RENFO_S1.length - 1) row.style.borderBottom = 'none';
+    list1.appendChild(row);
   });
+  const c1 = document.getElementById('renfo-counter-s1');
+  if (c1) { c1.textContent = s1Count + '/' + RENFO_S1.length; c1.style.color = s1Count === RENFO_S1.length ? '#2D6A2D' : '#999999'; }
 
-  // Remove border on last row
-  if (list.lastChild) list.lastChild.style.borderBottom = 'none';
+  // Session 2
+  const s2Count = RENFO_S2.filter(ex => renfoChecked[ex.id]).length;
+  RENFO_S2.forEach((ex, idx) => {
+    const row = buildExerciseRow(ex);
+    if (idx === RENFO_S2.length - 1) row.style.borderBottom = 'none';
+    list2.appendChild(row);
+  });
+  const c2 = document.getElementById('renfo-counter-s2');
+  if (c2) { c2.textContent = s2Count + '/' + RENFO_S2.length; c2.style.color = s2Count === RENFO_S2.length ? '#2D6A2D' : '#999999'; }
 
-  // Update counter
+  // Global counter in header
+  const total = RENFO_S1.length + RENFO_S2.length;
+  const done = s1Count + s2Count;
   const counter = document.getElementById('renfo-counter');
-  if (counter) {
-    counter.textContent = count + '/' + RENFO_EXERCISES.length;
-    counter.style.color = count === RENFO_EXERCISES.length ? '#2D6A2D' : '#999999';
-  }
+  if (counter) { counter.textContent = done + '/' + total + ' exercices'; counter.style.color = done === total ? '#2D6A2D' : '#888888'; }
 }
 
 function resetRenfo() {
@@ -672,7 +682,7 @@ const SUNDAY_PLAN = [
   { week: 2, date: '4 mai',     label: '12km / 350m D+',           icon: '🏃', km: 12,   dplus: 350,  note: 'Reprise trail — allure confortable' },
   { week: 3, date: '11 mai',    label: '15km / 500m D+',           icon: '🏃', km: 15,   dplus: 500,  note: 'Montée en charge' },
   { week: 4, date: '18 mai',    label: '18km / 700m D+',           icon: '⚡', km: 18,   dplus: 700,  note: 'Simulation course — séance clé' },
-  { week: 5, date: '25 mai',    label: '10km / 200m D+',           icon: '🟢', km: 10,   dplus: 200,  note: 'Affûtage — jambes fraîches' },
+  { week: 5, date: '25 mai',    label: '12km / 500m D+',           icon: '🏃', km: 12,   dplus: 500,  note: 'Affûtage — allure confortable, jambes fraîches' },
   { week: 6, date: '31 mai',    label: 'TRAIL DES GORETS 🏁',      icon: '🏆', km: 18,   dplus: 1000, note: 'Objectif sub 2h30 — bonne hydratation !' },
 ];
 
@@ -1625,19 +1635,18 @@ function generateShareCard() {
   section.style.display = 'block';
 
   // Compute stats
-  let kmFacile = 0, kmIntense = 0, totalDeniv = 0;
+  let kmTotal = 0, totalDeniv = 0;
   let allSecsRun = [], validated = 0;
   wd.seances.forEach((s, i) => {
     const km = parseKm(wd.distances[i]);
     const d = parseDeniv((wd.denivelés||[])[i]);
-    if (isRunning(s.s1)) { kmFacile += km; totalDeniv += d; }
-    if (s.s1 === 'RUNNING INTENSE') { kmIntense += km; }
+    if (isRunning(s.s1)) { kmTotal += km; totalDeniv += d; }
     const secs = paceToSeconds((wd.allures||[])[i]);
     if (isRunning(s.s1) && km > 0 && secs) allSecsRun.push(secs);
     if (isRunning(s.s1) && km > 0) validated++;
     if (s.s1 === 'RENFO' && wd.checked[i]) validated++;
   });
-  const totalKm = (kmFacile + kmIntense);
+  const totalKm = kmTotal;
   const avgPaceSecs = allSecsRun.length ? allSecsRun.reduce((a,b)=>a+b,0)/allSecsRun.length : null;
   const avgPace = avgPaceSecs ? secondsToPace(avgPaceSecs) : '—';
   const pct = Math.min(validated, 4) * 25;
