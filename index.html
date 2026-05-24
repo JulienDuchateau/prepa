@@ -372,7 +372,7 @@
 
   <div class="block" style="margin-top:0;">
     <div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:12px;padding-bottom:6px;border-bottom:1px solid #E0DDD8;">
-      <div class="section-title" style="margin:0;padding:0;border:none;">Séance 1</div>
+      <div class="section-title" style="margin:0;padding:0;border:none;">Séance 1 — Bas du corps</div>
       <div style="font-family:'DM Mono',monospace;font-size:11px;color:#999999;" id="renfo-counter-s1">0/4</div>
     </div>
     <div id="renfo-list-s1"></div>
@@ -380,13 +380,21 @@
 
   <div class="block">
     <div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:12px;padding-bottom:6px;border-bottom:1px solid #E0DDD8;">
-      <div class="section-title" style="margin:0;padding:0;border:none;">Séance 2</div>
+      <div class="section-title" style="margin:0;padding:0;border:none;">Séance 2 — Haut du corps</div>
       <div style="font-family:'DM Mono',monospace;font-size:11px;color:#999999;" id="renfo-counter-s2">0/2</div>
     </div>
     <div id="renfo-list-s2"></div>
   </div>
 
-  <button class="save-btn" onclick="resetRenfo()">Réinitialiser</button>
+  <div class="block">
+    <div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:12px;padding-bottom:6px;border-bottom:1px solid #E0DDD8;">
+      <div class="section-title" style="margin:0;padding:0;border:none;">Séance 3 — Tibial</div>
+      <div style="font-family:'DM Mono',monospace;font-size:11px;color:#999999;" id="renfo-counter-s3">0/4</div>
+    </div>
+    <div id="renfo-list-s3"></div>
+  </div>
+
+  <button class="save-btn" style="background:transparent;color:#888888;border:1px solid #CCCCCC;" onclick="resetRenfo()">Réinitialiser</button>
 </div>
 
 <!-- PAGE: STATS -->
@@ -519,13 +527,13 @@
     <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
     SEMAINE
   </button>
-  <button class="nav-btn" onclick="showPage('renfo', this)">
-    <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><polygon points="12 2 22 12 12 22 2 12"/></svg>
-    RENFO
-  </button>
   <button class="nav-btn" onclick="showPage('stats', this)">
     <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
     STATS
+  </button>
+  <button class="nav-btn" onclick="showPage('renfo', this)">
+    <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><polygon points="12 2 22 12 12 22 2 12"/></svg>
+    RENFO
   </button>
   <button class="nav-btn" onclick="showPage('recap', this)">
     <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
@@ -554,6 +562,13 @@ const RENFO_S1 = [
   { id: 'fente',   name: 'Fentes bulgares',    detail: 'KB main opposée · Repos 60s', sets: '3×8/c' },
   { id: 'hip',     name: 'Hip thrust',         detail: 'KB sur hanches · 2s contraction · Repos 60s', sets: '4×12' },
   { id: 'mollet',  name: 'Extensions mollets', detail: 'Unipodal si possible · Repos 45s', sets: '4×15' },
+];
+
+const RENFO_S3 = [
+  { id: 'talons',    name: 'Marche sur les talons',      detail: 'Pointes relevées · En couloir ou dehors', sets: '2×30m' },
+  { id: 'dorsal',    name: 'Relevé de pointe dorsale',   detail: 'Assis, talon au sol · Remontée lente · Faisable au bureau', sets: '3×20/p' },
+  { id: 'elastique', name: 'Résistance élastique',       detail: 'Flexions dorsales contre résistance · Le + efficace', sets: '3×15/p' },
+  { id: 'unipodal',  name: 'Équilibre unipodal',         detail: 'Debout sur un pied · Yeux fermés pour complexifier', sets: '3×30s' },
 ];
 
 const RENFO_S2 = [
@@ -613,9 +628,24 @@ function renderRenfo() {
   const c2 = document.getElementById('renfo-counter-s2');
   if (c2) { c2.textContent = s2Count + '/' + RENFO_S2.length; c2.style.color = s2Count === RENFO_S2.length ? '#2D6A2D' : '#999999'; }
 
+  // Session 3 — Tibial
+  const list3 = document.getElementById('renfo-list-s3');
+  if (list3) {
+    list3.innerHTML = '';
+    const s3Count = RENFO_S3.filter(ex => renfoChecked[ex.id]).length;
+    RENFO_S3.forEach((ex, idx) => {
+      const row = buildExerciseRow(ex);
+      if (idx === RENFO_S3.length - 1) row.style.borderBottom = 'none';
+      list3.appendChild(row);
+    });
+    const c3 = document.getElementById('renfo-counter-s3');
+    if (c3) { c3.textContent = s3Count + '/' + RENFO_S3.length; c3.style.color = s3Count === RENFO_S3.length ? '#2D6A2D' : '#999999'; }
+  }
+
   // Global counter in header
-  const total = RENFO_S1.length + RENFO_S2.length;
-  const done = s1Count + s2Count;
+  const s3Count2 = RENFO_S3.filter(ex => renfoChecked[ex.id]).length;
+  const total = RENFO_S1.length + RENFO_S2.length + RENFO_S3.length;
+  const done = s1Count + s2Count + s3Count2;
   const counter = document.getElementById('renfo-counter');
   if (counter) { counter.textContent = done + '/' + total + ' exercices'; counter.style.color = done === total ? '#2D6A2D' : '#888888'; }
 }
@@ -1437,7 +1467,7 @@ function renderStatsPage() {
   document.getElementById('stat-vfc-max').textContent = vfcFilled.length ? Math.max(...vfcFilled).toFixed(0) : '—';
   document.getElementById('stat-vfc-min').textContent = vfcFilled.length ? Math.min(...vfcFilled).toFixed(0) : '—';
   document.getElementById('stat-vfc-avg').textContent = vfcFilled.length ? (vfcFilled.reduce((a,b)=>a+b,0)/vfcFilled.length).toFixed(0) : '—';
-  drawChart('chart-vfc', labels, vfcData, '#555555', 'ms', true, 20, 100, currentWeek - 1);
+  drawChart('chart-vfc', labels, vfcData, '#555555', 'ms', true, 35, 70, currentWeek - 1);
 }
 
 function drawChart(canvasId, labels, rawData, color, unit, isLine, fixedMin, fixedMax, highlightIdx) {
