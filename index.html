@@ -567,7 +567,6 @@ const RENFO_S1 = [
 const RENFO_S3 = [
   { id: 'talons',    name: 'Marche sur les talons',      detail: 'Pointes relevées · En couloir ou dehors', sets: '2×30m' },
   { id: 'dorsal',    name: 'Relevé de pointe dorsale',   detail: 'Assis, talon au sol · Remontée lente · Faisable au bureau', sets: '3×20/p' },
-  { id: 'elastique', name: 'Résistance élastique',       detail: 'Flexions dorsales contre résistance · Le + efficace', sets: '3×15/p' },
   { id: 'unipodal',  name: 'Équilibre unipodal',         detail: 'Debout sur un pied · Yeux fermés pour complexifier', sets: '3×30s' },
 ];
 
@@ -660,6 +659,7 @@ const KPIS = ['Motivation','Forme générale','Forme des jambes','Sommeil','Resp
 const COURSES = [
   { name: 'TRAIL DES GORETS', date: '31 Mai 2026', iso: '2026-05-31', dist: '18 km', dplus: '1000m', type: 'trail', pr: '' },
   { name: 'UTCAM', date: '5 Juillet 2026', iso: '2026-07-05', dist: '30 km', dplus: '2150m', type: 'trail', pr: '' },
+  { name: 'TRAIL DE LA COLLE', date: '9 Juillet 2026', iso: '2026-07-09', dist: '12 km', dplus: '390m', type: 'trail', pr: '' },
   { name: 'SEMI MARATHON DE NICE', date: '19 Avril 2026', iso: '2026-04-19', dist: '21,1 km', dplus: '', type: 'route', pr: '1h49' },
   { name: 'PROM CLASSIC', date: '4 Janvier 2026', iso: '2026-01-04', dist: '10 km', dplus: '', type: 'route', pr: '' },
   { name: 'MARATHON NICE-CANNES', date: '8 Novembre 2026', iso: '2026-11-08', dist: '42,2 km', dplus: '', type: 'route', pr: '' },
@@ -708,12 +708,19 @@ function getWeek(w) {
 }
 
 const SUNDAY_PLAN = [
-  { week: 1, date: '27 avril',  label: '45 min allure tranquille', icon: '🟡', km: null, dplus: null, note: 'Récup post-semi — jambes légères' },
-  { week: 2, date: '4 mai',     label: '12km / 350m D+',           icon: '🏃', km: 12,   dplus: 350,  note: 'Reprise trail — allure confortable' },
-  { week: 3, date: '11 mai',    label: '15km / 500m D+',           icon: '🏃', km: 15,   dplus: 500,  note: 'Montée en charge' },
-  { week: 4, date: '18 mai',    label: '18km / 700m D+',           icon: '⚡', km: 18,   dplus: 700,  note: 'Simulation course — séance clé' },
-  { week: 5, date: '25 mai',    label: '12km / 500m D+',           icon: '🏃', km: 12,   dplus: 500,  note: 'Affûtage — allure confortable, jambes fraîches' },
-  { week: 6, date: '31 mai',    label: 'TRAIL DES GORETS 🏁',      icon: '🏆', km: 18,   dplus: 1000, note: 'Objectif sub 2h30 — bonne hydratation !' },
+  { week: 1, date: '27 avril',      label: '45 min allure tranquille',  icon: '🟡', km: null, dplus: null,  note: 'Récup post-semi — jambes légères' },
+  { week: 2, date: '4 mai',         label: '12km / 350m D+',            icon: '🏃', km: 12,   dplus: 350,   note: 'Reprise trail — allure confortable' },
+  { week: 3, date: '11 mai',        label: '15km / 500m D+',            icon: '🏃', km: 15,   dplus: 500,   note: 'Montée en charge' },
+  { week: 4, date: '18 mai',        label: '18km / 700m D+',            icon: '⚡', km: 18,   dplus: 700,   note: 'Simulation course — séance clé' },
+  { week: 5, date: '25 mai',        label: '12km / 500m D+',            icon: '🏃', km: 12,   dplus: 500,   note: 'Affûtage — allure confortable, jambes fraîches' },
+  { week: 6, date: '31 mai',        label: 'TRAIL DES GORETS 🏁',       icon: '🏆', km: 18,   dplus: 1000,  note: 'Objectif sub 2h30 — bonne hydratation !' },
+  { week: 7, date: '1 juin',        label: '7-10km plat',               icon: '🟡', km: 10,   dplus: 100,   note: 'Récup post Trail des Gorets — jambes légères' },
+  { week: 8, date: '7 juin',        label: '7-10km plat',               icon: '🟡', km: 10,   dplus: 100,   note: 'Récup — 0 à 100m D+ max' },
+  { week: 9, date: '14 juin',       label: '15km / 600-700m D+',        icon: '🏃', km: 15,   dplus: 650,   note: 'Reprise dénivelé — allure confortable' },
+  { week: 10, date: '21 juin',      label: '20km / 1000-1100m D+',      icon: '⚡', km: 20,   dplus: 1050,  note: 'Semaine de charge — séance clé' },
+  { week: 11, date: '28 juin',      label: '24-25km / 1300-1500m D+',   icon: '⚡', km: 25,   dplus: 1400,  note: 'Pic de charge — effort soutenu' },
+  { week: 12, date: '5 juil',       label: '10-12km / 300-400m D+',     icon: '🟢', km: 12,   dplus: 350,   note: 'Tapering — jambes fraîches pour l\'UTCAM' },
+  { week: 13, date: '5 juillet',    label: 'UTCAM 🏁',                  icon: '🏆', km: 30,   dplus: 2150,  note: 'Objectif — bonne hydratation, gestion effort !' },
 ];
 
 const TRAIL_START_WEEK = 1; 
@@ -1183,11 +1190,11 @@ function renderObjective() {
   document.getElementById('objective-note').textContent = obj.note;
   document.getElementById('objective-date').textContent = 'Dimanche ' + obj.date;
   // Special style for race week
-  if (obj.week === 6) {
+  if (obj.week === 6 || obj.week === 13) {
     block.style.background = '#F5FFF8';
     block.style.borderColor = '#CCCCCC';
     document.getElementById('objective-eyebrow').style.color = '#888888';
-  } else if (obj.week === 4) {
+  } else if (obj.week === 4 || obj.week === 10 || obj.week === 11) {
     block.style.background = '#FFFAF5';
     block.style.borderColor = '#CCCCCC';
   } else {
@@ -1467,7 +1474,7 @@ function renderStatsPage() {
   document.getElementById('stat-vfc-max').textContent = vfcFilled.length ? Math.max(...vfcFilled).toFixed(0) : '—';
   document.getElementById('stat-vfc-min').textContent = vfcFilled.length ? Math.min(...vfcFilled).toFixed(0) : '—';
   document.getElementById('stat-vfc-avg').textContent = vfcFilled.length ? (vfcFilled.reduce((a,b)=>a+b,0)/vfcFilled.length).toFixed(0) : '—';
-  drawChart('chart-vfc', labels, vfcData, '#555555', 'ms', true, 35, 70, currentWeek - 1);
+  drawChart('chart-vfc', labels, vfcData, '#555555', 'ms', true, 35, 65, currentWeek - 1);
 }
 
 function drawChart(canvasId, labels, rawData, color, unit, isLine, fixedMin, fixedMax, highlightIdx) {
