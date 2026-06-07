@@ -122,6 +122,14 @@
   .recap-badge-mid { background: #888888; color: #FFFFFF; }
   .recap-badge-empty { background: #F0EDE8; color: #999999; }
   .recap-badge-injury { background: #FDF0F0; color: #C08080; border: 1px solid #EDD5D5; }
+  .recap-badge-recovery { background: #EFF4FB; color: #6B8DB8; border: 1px solid #C8D8EE; }
+  .recap-row.injury { background: #FEF8F8; border-color: #EDD5D5; }
+  .recap-row.injury::before { background: #E8A0A0; }
+  .recap-row.recovery { background: #F2F6FC; border-color: #C8D8EE; }
+  .recap-row.recovery::before { background: #8FB8D8; }
+  .recap-row.race { background: #FDFAF2; border-color: #E8D9A0; }
+  .recap-row.race::before { background: #C8A84B; }
+  .recap-badge-race { background: #FBF5E0; color: #A07820; border: 1px solid #E8D9A0; }
   .recap-status { font-size: 12px; }
 
   /* COURSES PAGE */
@@ -1317,11 +1325,15 @@ function renderRecap() {
       (wd.notes && wd.notes.trim().length > 0) ||
       (wd.vfc && wd.vfc.trim().length > 0)
     );
-    let statusIcon = !hasData ? '○' : pct === 100 ? '✅' : pct >= 50 ? '⚠️' : '❌';
+    const isInjury = w === 2;
+    const isRecovery = w === 1 || w === 7;
+    const isRace = w === 6;
+    const isSpecial = isInjury || isRecovery || isRace;
+    let statusIcon = !hasData ? '○' : isSpecial ? '—' : pct === 100 ? '✅' : pct >= 50 ? '⚠️' : '❌';
     const div = document.createElement('div');
-    const rowCls = !hasData ? 'empty' : pct === 100 ? 'done' : pct >= 50 ? 'inprogress' : 'empty';
-    const badgeCls = !hasData ? 'recap-badge-empty' : pct === 100 ? 'recap-badge-ok' : pct >= 50 ? 'recap-badge-mid' : 'recap-badge-empty';
-    const badgeTxt = !hasData ? 'À VENIR' : pct === 100 ? '✓ RÉUSSIE' : pct >= 50 ? `${pct}%` : pct > 0 ? `${pct}%` : 'À VENIR';
+    const rowCls = !hasData ? 'empty' : isInjury ? 'injury' : isRecovery ? 'recovery' : isRace ? 'race' : pct === 100 ? 'done' : pct >= 50 ? 'inprogress' : 'empty';
+    const badgeCls = !hasData ? 'recap-badge-empty' : isInjury ? 'recap-badge-injury' : isRecovery ? 'recap-badge-recovery' : isRace ? 'recap-badge-race' : pct === 100 ? 'recap-badge-ok' : pct >= 50 ? 'recap-badge-mid' : 'recap-badge-empty';
+    const badgeTxt = !hasData ? 'À VENIR' : isInjury ? '🩹 blessure' : isRecovery ? '🔄 récup' : isRace ? '🏁 course' : pct === 100 ? '✓ RÉUSSIE' : pct >= 50 ? `${pct}%` : pct > 0 ? `${pct}%` : 'À VENIR';
     // Total D+
     const totalDeniv = wd ? (wd.denivelés || []).reduce((a,b) => a+parseDeniv(b), 0) : 0;
     const kmTxt = km !== '0.0' && km !== '0' ? `${km} km` : '';
@@ -1339,12 +1351,9 @@ function renderRecap() {
       <div style="flex:1">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:3px;">
           <div class="recap-week">SEMAINE ${w}</div>
-          <div style="display:flex;gap:4px;align-items:center;">
-            ${w === 2 ? '<span class="recap-badge recap-badge-injury">🩹 blessure</span>' : ''}
-            <span class="recap-badge ${badgeCls}">${badgeTxt}</span>
-          </div>
+          <span class="recap-badge ${badgeCls}">${badgeTxt}</span>
         </div>
-        <div class="recap-title">${statusIcon} ${pct > 0 ? pct+'% réalisé' : 'Non démarrée'}</div>
+        <div class="recap-title">${statusIcon}${isSpecial ? '' : (pct > 0 ? ' '+pct+'% réalisé' : ' Non démarrée')}</div>
         <div class="recap-km">${details || `${validated}/4 séances`}</div>
       </div>`;
     list.appendChild(div);
