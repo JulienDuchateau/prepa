@@ -1325,7 +1325,7 @@ function renderRecap() {
       (wd.notes && wd.notes.trim().length > 0) ||
       (wd.vfc && wd.vfc.trim().length > 0)
     );
-    const isInjury = w === 2;
+    const isInjury = false;
     const isRecovery = w === 1 || w === 7;
     const isRace = w === 6;
     const isSpecial = isInjury || isRecovery || isRace;
