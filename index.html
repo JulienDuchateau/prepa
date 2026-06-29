@@ -590,8 +590,7 @@ const SUNDAY_PLAN = [
   { week: 8,  date: '14 juin',   label: '15km / 600-700m D+',       icon: '🏃', km: 15,   dplus: 650,   note: 'Reprise dénivelé — allure confortable' },
   { week: 9,  date: '21 juin',   label: '20km / 1000-1100m D+',     icon: '⚡', km: 20,   dplus: 1050,  note: 'Semaine de charge — séance clé' },
   { week: 10, date: '28 juin',   label: '24-25km / 1300-1500m D+',  icon: '⚡', km: 25,   dplus: 1400,  note: 'Pic de charge — effort soutenu' },
-  { week: 11, date: '5 juil',    label: '10-12km / 300-400m D+',    icon: '🟢', km: 12,   dplus: 350,   note: "Tapering — jambes fraîches pour l'UTCAM" },
-  { week: 12, date: '5 juillet', label: 'UTCAM 🏁',                 icon: '🏆', km: 30,   dplus: 2150,  note: 'Objectif — bonne hydratation, gestion effort !' },
+  { week: 11, date: '5 juillet', label: 'UTCAM 🏁',                 icon: '🏆', km: 30,   dplus: 2150,  note: 'Objectif — bonne hydratation, gestion effort !' },
 ];
 
 const TRAIL_START_WEEK = 1; 
@@ -1061,7 +1060,7 @@ function renderObjective() {
   document.getElementById('objective-note').textContent = obj.note;
   document.getElementById('objective-date').textContent = 'Dimanche ' + obj.date;
   // Special style for race week
-  if (obj.week === 6 || obj.week === 12) {
+  if (obj.week === 6 || obj.week === 11) {
     block.style.background = '#F5FFF8';
     block.style.borderColor = '#CCCCCC';
     document.getElementById('objective-eyebrow').style.color = '#888888';
@@ -1191,7 +1190,7 @@ function renderRecap() {
     );
     const isInjury = false;
     const isRecovery = w === 1 || w === 7;
-    const isRace = w === 6;
+    const isRace = w === 6 || w === 11;
     const isSpecial = isInjury || isRecovery || isRace;
     let statusIcon = !hasData ? '○' : isSpecial ? '—' : pct === 100 ? '✅' : pct >= 50 ? '⚠️' : '❌';
     const div = document.createElement('div');
@@ -1313,7 +1312,7 @@ function renderStatsPage() {
   document.getElementById('stat-km-max').textContent = kmFilled.length ? Math.max(...kmFilled).toFixed(1) : '—';
   document.getElementById('stat-km-total').textContent = kmFilled.length ? kmFilled.reduce((a,b)=>a+b,0).toFixed(0) : '—';
   document.getElementById('stat-km-avg').textContent = kmFilled.length ? (kmFilled.reduce((a,b)=>a+b,0)/kmFilled.length).toFixed(1) : '—';
-  drawChart('chart-km', labels, kmData, '#333333', 'km', false, 0, 50, currentWeek - 1, {recovery:[0,6], race:[5]});
+  drawChart('chart-km', labels, kmData, '#333333', 'km', false, 0, 50, currentWeek - 1, {recovery:[0,6], race:[5,10]});
 
   // KPI chart
   const kpiData = [];
