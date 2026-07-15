@@ -131,26 +131,6 @@
   .recap-row.race::before { background: #C8A84B; }
   .recap-badge-race { background: #FBF5E0; color: #A07820; border: 1px solid #E8D9A0; }
   .recap-status { font-size: 12px; }
-
-  /* COURSES PAGE */
-  .course-card { background: #FFFFFF; border: 1px solid #E0DDD8; border-radius: 4px; padding: 14px 14px 14px 18px; margin-bottom: 10px; box-shadow: none; position: relative; overflow: hidden; }
-  .course-card::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 5px; border-radius: 4px 0 0 4px; }
-  .course-type-trail::before { background: #555555; }
-  .course-type-route::before { background: #1A1A1A; }
-  .course-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }
-  .course-name { font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 600; color: #1A1A1A; letter-spacing: -0.01em; line-height: 1.2; }
-  .course-status { font-family: 'DM Mono', monospace; font-size: 9px; padding: 3px 8px; border-radius: 20px; font-weight: 500; flex-shrink: 0; }
-  .status-trail { background: #F0EDE8; color: #555555; border: 1px solid #E0DDD8; }
-  .status-route { background: #1A1A1A; color: #FFFFFF; }
-  .course-date { font-family: 'DM Mono', monospace; font-size: 11px; color: #999999; margin-top: 4px; }
-  .course-inline-details { display: flex; align-items: center; gap: 6px; margin-top: 10px; font-family: 'DM Mono', monospace; font-size: 11px; color: #666666; }
-  .course-sep { color: #E0E0E0; }
-  .course-pr-block { margin-top: 14px; padding-top: 12px; border-top: 1px solid #E0E0E0; display: flex; align-items: center; justify-content: space-between; }
-  .pr-label { font-family: 'DM Mono', monospace; font-size: 10px; color: #999999; letter-spacing: 0.1em; }
-  .pr-input { background: transparent; border: none; color: #333333; font-family: 'Bebas Neue', sans-serif; font-size: 26px; width: 120px; outline: none; text-align: right; padding: 0; }
-  .pr-input:focus { opacity: 0.8; }
-  .pr-input::placeholder { color: #E0E0E0; }
-  .course-notes { width: 100%; background: transparent; border: none; border-top: 1px solid #F0EDE8; padding: 10px 0 0; color: #555555; font-family: 'DM Sans', sans-serif; font-size: 12px; line-height: 1.6; resize: none; outline: none; min-height: 56px; margin-top: 10px; }
   .course-notes::placeholder { color: #CCCCCC; }
 
   /* iOS Toggle */
@@ -437,9 +417,9 @@
 <!-- PAGE: INFOS -->
 <div class="page" id="page-infos">
   <div class="header">
-    <div class="header-eyebrow">Calendrier & Données</div>
-    <div class="header-title">INFOS</div>
-    <div class="header-sub">Courses · Sauvegarde · Partage</div>
+    <div class="header-eyebrow">Gestion des données</div>
+    <div class="header-title">DATA</div>
+    <div class="header-sub">Sauvegarde · Partage</div>
   </div>
   <div class="section">
     <div class="section-title">Calendrier</div>
@@ -509,8 +489,8 @@
     RÉCAP
   </button>
   <button class="nav-btn" onclick="showPage('infos', this)">
-    <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-    INFOS
+    <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v6c0 1.66 4.03 3 9 3s9-1.34 9-3V5"/><path d="M3 11v6c0 1.66 4.03 3 9 3s9-1.34 9-3v-6"/></svg>
+    DATA
   </button>
 </nav>
 
@@ -528,14 +508,6 @@ const SEANCE_ICONS = {
   'REPOS': '😴',
   '-': ''
 };
-const COURSES = [
-  { name: 'TRAIL DES GORETS', date: '31 Mai 2026', iso: '2026-05-31', dist: '18 km', dplus: '1000m', type: 'trail', pr: '' },
-  { name: 'UTCAM', date: '5 Juillet 2026', iso: '2026-07-05', dist: '30 km', dplus: '2150m', type: 'trail', pr: '' },
-  { name: 'SEMI MARATHON DE NICE', date: '19 Avril 2026', iso: '2026-04-19', dist: '21,1 km', dplus: '', type: 'route', pr: '1h49' },
-  { name: 'PROM CLASSIC', date: '4 Janvier 2026', iso: '2026-01-04', dist: '10 km', dplus: '', type: 'route', pr: '' },
-  { name: 'MARATHON NICE-CANNES', date: '8 Novembre 2026', iso: '2026-11-08', dist: '42,2 km', dplus: '', type: 'route', pr: '' },
-];
-
 let currentWeek = 1;
 let modalDay = null;
 let data = {};
@@ -1224,77 +1196,6 @@ function renderRecap() {
   if (totalEl) totalEl.textContent = grandTotalKm > 0 ? grandTotalKm.toFixed(1) : '—';
 }
 
-function renderCourses() {
-  const list = document.getElementById('courses-list');
-  list.innerHTML = '';
-  const now = new Date();
-  // Sort by date: upcoming first, past last
-  const sorted = COURSES
-    .map((c, i) => ({ ...c, originalIndex: i }))
-    .sort((a, b) => {
-      const dA = a.iso ? new Date(a.iso) : new Date('9999-12-31');
-      const dB = b.iso ? new Date(b.iso) : new Date('9999-12-31');
-      const pastA = dA < now;
-      const pastB = dB < now;
-      // Past courses go to the bottom
-      if (pastA && !pastB) return 1;
-      if (!pastA && pastB) return -1;
-      // Among upcoming: closest first
-      // Among past: most recent first
-      return pastA ? dB - dA : dA - dB;
-    });
-  sorted.forEach((c) => {
-    const i = c.originalIndex;
-    const stored = data['course_'+i] || {};
-    const div = document.createElement('div');
-    div.className = 'course-card course-type-' + c.type;
-    const typeLabel = c.type === 'trail' ? 'TRAIL' : 'ROUTE';
-    const statusCls = c.type === 'trail' ? 'status-trail' : 'status-route';
-    const details = [c.dist, c.dplus, typeLabel].filter(Boolean).join(' <span class="course-sep">·</span> ');
-    const daysLeft = c.iso ? Math.ceil((new Date(c.iso) - now) / 86400000) : null;
-    if (daysLeft !== null && daysLeft < 0) div.classList.add('course-past');
-    const doneBadge = (daysLeft !== null && daysLeft < 0) ? `<span style="display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:50%;border:1.5px solid #22C55E;color:#22C55E;font-size:10px;font-weight:700;margin-left:6px;">✓</span>` : '';
-    let countdownHtml = '';
-    if (daysLeft !== null) {
-      if (daysLeft > 0) {
-        countdownHtml = `<span style="font-family:'DM Mono',monospace;font-size:10px;color:#888888;">J-${daysLeft}</span>`;
-      } else if (daysLeft === 0) {
-        countdownHtml = `<span style="font-family:'DM Mono',monospace;font-size:10px;color:#111111;font-weight:600;">AUJOURD'HUI 🏁</span>`;
-      } else {
-        countdownHtml = `<span style="font-family:'DM Mono',monospace;font-size:10px;color:#AAAAAA;">Terminée</span>`;
-      }
-    }
-    div.innerHTML = `
-      <div class="course-header">
-        <div>
-          <div class="course-name" style="display:flex;align-items:center;gap:6px;">${c.name}${doneBadge}</div>
-          <div class="course-date">${c.date}</div>
-        </div>
-        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;">
-          <span class="course-status ${statusCls}">${typeLabel}</span>
-          ${countdownHtml}
-        </div>
-      </div>
-      <div class="course-inline-details">${details}</div>
-      <div class="course-pr-block">
-        <span class="pr-label">TEMPS</span>
-        <input class="pr-input" placeholder="—h——" value="${stored.pr||c.pr||''}" oninput="updatePR(${i}, this.value)">
-      </div>
-      <textarea class="course-notes" placeholder="Ressenti, conditions, points clés..." oninput="updateCourseNotes(${i}, this.value)">${stored.notes||''}</textarea>`;
-    list.appendChild(div);
-  });
-}
-
-function updatePR(i, val) {
-  if (!data['course_'+i]) data['course_'+i] = {};
-  data['course_'+i].pr = val;
-}
-
-function updateCourseNotes(i, val) {
-  if (!data['course_'+i]) data['course_'+i] = {};
-  data['course_'+i].notes = val;
-}
-
 function renderStatsPage() {
   const kmData = [];
   const labels = [];
@@ -1498,7 +1399,7 @@ function drawChart(canvasId, labels, rawData, color, unit, isLine, fixedMin, fix
       ctx.fillStyle = grad;
       ctx.fill();
       // Show value only on highlighted bar or every other bar on mobile
-      if (!isMobile || i === highlightIdx || i % 2 === 0) {
+      if (!isMobile || i === highlightIdx || i % 2 === 0 || isRecovery || isRace) {
         if (v > 0) {
           ctx.fillStyle = isHighlight ? '#888888' : isRace ? '#A07820' : isRecovery ? '#4A88B8' : color;
           ctx.font = `bold ${isMobile ? 7 : 8}px DM Mono, monospace`;
@@ -1730,7 +1631,7 @@ function showPage(name, btn) {
   btn.classList.add('active');
   window.scrollTo({ top: 0, behavior: 'instant' });
   if (name === 'recap') renderRecap();
-  if (name === 'infos') { renderCourses(); initShareWeekSelect(); }
+  if (name === 'infos') { initShareWeekSelect(); }
   if (name === 'stats') { save(); renderStatsPage(); }
 
   if (name === 'donnees') updateStorageInfo();
