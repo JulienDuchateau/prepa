@@ -1499,7 +1499,7 @@ function drawChart(canvasId, labels, rawData, color, unit, isLine, fixedMin, fix
       ctx.fill();
       // Show value only on highlighted bar or every other bar on mobile
       if (!isMobile || i === highlightIdx || i % 2 === 0) {
-        if (bh > 12) { // Only if bar is tall enough
+        if (v > 0) {
           ctx.fillStyle = isHighlight ? '#888888' : isRace ? '#A07820' : isRecovery ? '#4A88B8' : color;
           ctx.font = `bold ${isMobile ? 7 : 8}px DM Mono, monospace`;
           ctx.textAlign = 'center';
