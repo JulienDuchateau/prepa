@@ -531,7 +531,6 @@ const SEANCE_ICONS = {
 const COURSES = [
   { name: 'TRAIL DES GORETS', date: '31 Mai 2026', iso: '2026-05-31', dist: '18 km', dplus: '1000m', type: 'trail', pr: '' },
   { name: 'UTCAM', date: '5 Juillet 2026', iso: '2026-07-05', dist: '30 km', dplus: '2150m', type: 'trail', pr: '' },
-  { name: 'TRAIL DE LA COLLE', date: '9 Juillet 2026', iso: '2026-07-09', dist: '12 km', dplus: '390m', type: 'trail', pr: '' },
   { name: 'SEMI MARATHON DE NICE', date: '19 Avril 2026', iso: '2026-04-19', dist: '21,1 km', dplus: '', type: 'route', pr: '1h49' },
   { name: 'PROM CLASSIC', date: '4 Janvier 2026', iso: '2026-01-04', dist: '10 km', dplus: '', type: 'route', pr: '' },
   { name: 'MARATHON NICE-CANNES', date: '8 Novembre 2026', iso: '2026-11-08', dist: '42,2 km', dplus: '', type: 'route', pr: '' },
@@ -1189,7 +1188,7 @@ function renderRecap() {
       (wd.vfc && wd.vfc.trim().length > 0)
     );
     const isInjury = false;
-    const isRecovery = w === 1 || w === 7;
+    const isRecovery = w === 1 || w === 7 || w === 12;
     const isRace = w === 6 || w === 11;
     const isSpecial = isInjury || isRecovery || isRace;
     let statusIcon = !hasData ? '○' : isSpecial ? '—' : pct === 100 ? '✅' : pct >= 50 ? '⚠️' : '❌';
@@ -1312,7 +1311,7 @@ function renderStatsPage() {
   document.getElementById('stat-km-max').textContent = kmFilled.length ? Math.max(...kmFilled).toFixed(1) : '—';
   document.getElementById('stat-km-total').textContent = kmFilled.length ? kmFilled.reduce((a,b)=>a+b,0).toFixed(0) : '—';
   document.getElementById('stat-km-avg').textContent = kmFilled.length ? (kmFilled.reduce((a,b)=>a+b,0)/kmFilled.length).toFixed(1) : '—';
-  drawChart('chart-km', labels, kmData, '#333333', 'km', false, 0, 50, currentWeek - 1, {recovery:[0,6], race:[5,10]});
+  drawChart('chart-km', labels, kmData, '#333333', 'km', false, 0, 50, currentWeek - 1, {recovery:[0,6,11], race:[5,10]});
 
   // KPI chart
   const kpiData = [];
