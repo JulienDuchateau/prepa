@@ -1147,7 +1147,7 @@ function renderRecap() {
       (wd.vfc && wd.vfc.trim().length > 0)
     );
     const isInjury = false;
-    const isRecovery = w === 1 || w === 7 || w === 12;
+    const isRecovery = w === 1 || w === 7 || w === 12 || w === 17;
     const isRace = w === 6 || w === 11;
     const isSpecial = isInjury || isRecovery || isRace;
     let statusIcon = !hasData ? '○' : isSpecial ? '—' : pct === 100 ? '✅' : pct >= 50 ? '⚠️' : '❌';
@@ -1190,6 +1190,8 @@ let chartOffset = {}; // per chart, offset from the end
 function initChartSwipe(canvasId) {
   const container = document.getElementById('container-' + canvasId);
   if (!container) return;
+  if (container.dataset.swipeInit) return; // already initialized
+  container.dataset.swipeInit = '1';
   if (!chartOffset[canvasId]) chartOffset[canvasId] = 0;
 
   let startX = 0;
@@ -1266,7 +1268,7 @@ function renderStatsPage() {
   initChartSwipe('chart-km');
   const sliceKm = getChartSlice(kmData, labels, 'chart-km');
   // Adjust special week indices to slice
-  const recoveryInSlice = [0,6,11].map(i => i - sliceKm.start).filter(i => i >= 0 && i < CHART_PAGE_SIZE);
+  const recoveryInSlice = [0,6,11,16].map(i => i - sliceKm.start).filter(i => i >= 0 && i < CHART_PAGE_SIZE);
   const raceInSlice = [5,10].map(i => i - sliceKm.start).filter(i => i >= 0 && i < CHART_PAGE_SIZE);
   const hlKm = (currentWeek - 1) >= sliceKm.start && (currentWeek - 1) < sliceKm.end ? (currentWeek - 1) - sliceKm.start : -1;
   drawChart('chart-km', sliceKm.sliceLabels, sliceKm.sliceData, '#333333', 'km', false, 0, 50, hlKm, {recovery: recoveryInSlice, race: raceInSlice});
@@ -1705,13 +1707,11 @@ function showPage(name, btn) {
 
 // Redraw charts on resize/orientation change
 if (window.ResizeObserver) {
-  const kmCanvas = document.getElementById('chart-km');
-  if (kmCanvas) {
+  const statsPage = document.getElementById('page-stats');
+  if (statsPage) {
     new ResizeObserver(() => {
-      if (document.getElementById('page-stats').classList.contains('active')) {
-        renderStatsPage();
-      }
-    }).observe(kmCanvas.parentElement);
+      if (statsPage.classList.contains('active')) renderStatsPage();
+    }).observe(statsPage);
   }
 }
 window.addEventListener('orientationchange', () => {
