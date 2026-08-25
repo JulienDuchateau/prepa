@@ -224,6 +224,11 @@
   .sc-footer { margin-top: 16px; display: flex; justify-content: space-between; align-items: center; }
   .sc-brand { font-family: 'DM Mono', monospace; font-size: 7px; color: #CCCCCC; letter-spacing: 0.15em; text-transform: uppercase; }
 
+  /* SWIPEABLE CHARTS */
+  .chart-container { position: relative; overflow: hidden; touch-action: pan-y; }
+  .chart-pagination { display: flex; justify-content: center; gap: 5px; margin-top: 8px; }
+  .chart-dot { width: 5px; height: 5px; border-radius: 50%; background: #E0DDD8; cursor: pointer; transition: background 0.2s; }
+  .chart-dot.active { background: #1A1A1A; }
   /* SAVE BTN */
   .save-btn { display: flex; align-items: center; justify-content: center; gap: 8px; width: calc(100% - 28px); margin: 0 14px 14px; padding: 14px; background: #1A1A1A; border-radius: 2px; border: none; color: #FFFFFF; font-family: 'DM Mono', monospace; font-size: 12px; font-weight: 500; cursor: pointer; letter-spacing: 0.2em; text-transform: uppercase; transition: opacity 0.2s; }
   .save-btn:active { opacity: 0.8; }
@@ -360,7 +365,7 @@
   <div class="section">
     <div class="section-title">Charge kilométrique</div>
     <div class="chart-wrap">
-      <canvas id="chart-km" style="width:100%;display:block;"></canvas>
+      <div class="chart-container" id="container-chart-km"><canvas id="chart-km" style="width:100%;display:block;"></canvas></div>
     </div>
     <div style="display:flex;gap:10px;margin-top:10px;">
       <div class="stat-card" style="flex:1"><div class="stat-val" id="stat-km-max">—</div><div class="stat-label">MAX KM</div></div>
@@ -371,7 +376,7 @@
   <div class="section">
     <div class="section-title">VFC — Variabilité Fréquence Cardiaque</div>
     <div class="chart-wrap">
-      <canvas id="chart-vfc" style="width:100%;display:block;"></canvas>
+      <div class="chart-container" id="container-chart-vfc"><canvas id="chart-vfc" style="width:100%;display:block;"></canvas></div>
     </div>
     <div style="display:flex;gap:10px;margin-top:10px;">
       <div class="stat-card" style="flex:1"><div class="stat-val" style="color:#1A1A1A" id="stat-vfc-max">—</div><div class="stat-label">MAX MS</div></div>
@@ -382,7 +387,7 @@
   <div class="section">
     <div class="section-title">Forme & bien-être</div>
     <div class="chart-wrap">
-      <canvas id="chart-kpi" style="width:100%;display:block;"></canvas>
+      <div class="chart-container" id="container-chart-kpi"><canvas id="chart-kpi" style="width:100%;display:block;"></canvas></div>
     </div>
     <div style="display:flex;gap:10px;margin-top:10px;">
       <div class="stat-card" style="flex:1"><div class="stat-val" style="color:#111111" id="stat-kpi-max">—</div><div class="stat-label">MAX /5</div></div>
@@ -1178,6 +1183,70 @@ function renderRecap() {
   if (totalEl) totalEl.textContent = grandTotalKm > 0 ? grandTotalKm.toFixed(1) : '—';
 }
 
+// Chart pagination state — show last 10 weeks, swipe to go back
+const CHART_PAGE_SIZE = 10;
+let chartOffset = {}; // per chart, offset from the end
+
+function initChartSwipe(canvasId) {
+  const container = document.getElementById('container-' + canvasId);
+  if (!container) return;
+  if (!chartOffset[canvasId]) chartOffset[canvasId] = 0;
+
+  let startX = 0;
+  const onStart = (e) => { startX = e.touches ? e.touches[0].clientX : e.clientX; };
+  const onEnd = (e) => {
+    const endX = e.changedTouches ? e.changedTouches[0].clientX : e.clientX;
+    const diff = startX - endX;
+    if (Math.abs(diff) < 30) return;
+    const totalPages = Math.ceil(20 / CHART_PAGE_SIZE);
+    if (diff > 0 && chartOffset[canvasId] > 0) {
+      chartOffset[canvasId]--;
+      renderStatsPage();
+    } else if (diff < 0 && chartOffset[canvasId] < totalPages - 1) {
+      chartOffset[canvasId]++;
+      renderStatsPage();
+    }
+  };
+  container.addEventListener('touchstart', onStart, { passive: true });
+  container.addEventListener('touchend', onEnd, { passive: true });
+  container.addEventListener('mousedown', onStart);
+  container.addEventListener('mouseup', onEnd);
+}
+
+function getChartSlice(data, labels, canvasId) {
+  const total = data.length;
+  const offset = chartOffset[canvasId] || 0;
+  // offset=0 → last 10 weeks, offset=1 → weeks 10 before that, etc
+  const end = total - offset * CHART_PAGE_SIZE;
+  const start = Math.max(0, end - CHART_PAGE_SIZE);
+  return {
+    sliceData: data.slice(start, end),
+    sliceLabels: labels.slice(start, end),
+    highlightInSlice: (total - 1) - start, // currentWeek position in slice
+    start, end, offset,
+    totalPages: Math.ceil(total / CHART_PAGE_SIZE)
+  };
+}
+
+function renderChartPagination(canvasId, totalPages, offset) {
+  const container = document.getElementById('container-' + canvasId);
+  if (!container) return;
+  let pag = container.querySelector('.chart-pagination');
+  if (!pag) {
+    pag = document.createElement('div');
+    pag.className = 'chart-pagination';
+    container.appendChild(pag);
+  }
+  pag.innerHTML = '';
+  for (let i = totalPages - 1; i >= 0; i--) {
+    const dot = document.createElement('div');
+    dot.className = 'chart-dot' + (i === offset ? ' active' : '');
+    const page = i;
+    dot.onclick = () => { chartOffset[canvasId] = page; renderStatsPage(); };
+    pag.appendChild(dot);
+  }
+}
+
 function renderStatsPage() {
   const kmData = [];
   const labels = [];
@@ -1194,7 +1263,14 @@ function renderStatsPage() {
   document.getElementById('stat-km-max').textContent = kmFilled.length ? Math.max(...kmFilled).toFixed(1) : '—';
   document.getElementById('stat-km-total').textContent = kmFilled.length ? kmFilled.reduce((a,b)=>a+b,0).toFixed(0) : '—';
   document.getElementById('stat-km-avg').textContent = kmFilled.length ? (kmFilled.reduce((a,b)=>a+b,0)/kmFilled.length).toFixed(1) : '—';
-  drawChart('chart-km', labels, kmData, '#333333', 'km', false, 0, 50, currentWeek - 1, {recovery:[0,6,11], race:[5,10]});
+  initChartSwipe('chart-km');
+  const sliceKm = getChartSlice(kmData, labels, 'chart-km');
+  // Adjust special week indices to slice
+  const recoveryInSlice = [0,6,11].map(i => i - sliceKm.start).filter(i => i >= 0 && i < CHART_PAGE_SIZE);
+  const raceInSlice = [5,10].map(i => i - sliceKm.start).filter(i => i >= 0 && i < CHART_PAGE_SIZE);
+  const hlKm = (currentWeek - 1) >= sliceKm.start && (currentWeek - 1) < sliceKm.end ? (currentWeek - 1) - sliceKm.start : -1;
+  drawChart('chart-km', sliceKm.sliceLabels, sliceKm.sliceData, '#333333', 'km', false, 0, 50, hlKm, {recovery: recoveryInSlice, race: raceInSlice});
+  renderChartPagination('chart-km', sliceKm.totalPages, sliceKm.offset);
 
   // KPI chart
   const kpiData = [];
@@ -1211,7 +1287,11 @@ function renderStatsPage() {
   document.getElementById('stat-kpi-max').textContent = kpiFilled.length ? Math.max(...kpiFilled).toFixed(1) : '—';
   document.getElementById('stat-kpi-min').textContent = kpiFilled.length ? Math.min(...kpiFilled).toFixed(1) : '—';
   document.getElementById('stat-kpi-avg').textContent = kpiFilled.length ? (kpiFilled.reduce((a,b)=>a+b,0)/kpiFilled.length).toFixed(1) : '—';
-  drawChart('chart-kpi', labels, kpiData, '#333333', 'kpi', true, 0, 5, currentWeek - 1);
+  initChartSwipe('chart-kpi');
+  const sliceKpi = getChartSlice(kpiData, labels, 'chart-kpi');
+  const hlKpi = (currentWeek - 1) >= sliceKpi.start && (currentWeek - 1) < sliceKpi.end ? (currentWeek - 1) - sliceKpi.start : -1;
+  drawChart('chart-kpi', sliceKpi.sliceLabels, sliceKpi.sliceData, '#333333', 'kpi', true, 0, 5, hlKpi);
+  renderChartPagination('chart-kpi', sliceKpi.totalPages, sliceKpi.offset);
 
   // VFC chart
   // Abscisse : numéros de semaine (S1→S20)
@@ -1227,7 +1307,11 @@ function renderStatsPage() {
   document.getElementById('stat-vfc-max').textContent = vfcFilled.length ? Math.max(...vfcFilled).toFixed(0) : '—';
   document.getElementById('stat-vfc-min').textContent = vfcFilled.length ? Math.min(...vfcFilled).toFixed(0) : '—';
   document.getElementById('stat-vfc-avg').textContent = vfcFilled.length ? (vfcFilled.reduce((a,b)=>a+b,0)/vfcFilled.length).toFixed(0) : '—';
-  drawChart('chart-vfc', labels, vfcData, '#555555', 'ms', true, 35, 65, currentWeek - 1);
+  initChartSwipe('chart-vfc');
+  const sliceVfc = getChartSlice(vfcData, labels, 'chart-vfc');
+  const hlVfc = (currentWeek - 1) >= sliceVfc.start && (currentWeek - 1) < sliceVfc.end ? (currentWeek - 1) - sliceVfc.start : -1;
+  drawChart('chart-vfc', sliceVfc.sliceLabels, sliceVfc.sliceData, '#555555', 'ms', true, 35, 65, hlVfc);
+  renderChartPagination('chart-vfc', sliceVfc.totalPages, sliceVfc.offset);
 }
 
 function drawChart(canvasId, labels, rawData, color, unit, isLine, fixedMin, fixedMax, highlightIdx, specialWeeks) {
