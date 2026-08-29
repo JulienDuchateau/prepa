@@ -215,11 +215,8 @@
   .sc-brand { font-family: 'DM Mono', monospace; font-size: 7px; color: #CCCCCC; letter-spacing: 0.15em; text-transform: uppercase; }
 
   /* SWIPEABLE CHARTS */
-  .chart-container { position: relative; overflow: hidden; touch-action: pan-y; }
-  .chart-container canvas { transition: transform 0.35s ease, opacity 0.35s ease; }
-  .chart-pagination { display: flex; justify-content: center; gap: 5px; margin-top: 8px; }
-  .chart-dot { width: 5px; height: 5px; border-radius: 50%; background: #E0DDD8; cursor: pointer; transition: background 0.2s; }
-  .chart-dot.active { background: #1A1A1A; }
+  .chart-container { position: relative; overflow-x: auto; overflow-y: hidden; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+  .chart-container::-webkit-scrollbar { display: none; }
 
   /* CALENDRIER */
   .cal-scroll { overflow-y: auto; max-height: calc(100vh - 180px); -webkit-overflow-scrolling: touch; padding: 0 14px; }
@@ -305,7 +302,10 @@
     <div class="days-grid" id="days-grid"></div>
     <div id="objective-block" class="objective-block" style="display:none;margin-top:10px;">
       <div class="objective-eyebrow" id="objective-eyebrow">🗓 Objectif dimanche</div>
-      <div class="objective-main" id="objective-main"></div>
+      <div style="display:flex;align-items:baseline;justify-content:space-between;gap:10px;">
+        <div class="objective-main" id="objective-main" style="flex:1;"></div>
+        <div id="objective-km-badge" style="font-family:'Bebas Neue',sans-serif;font-size:24px;color:#1A1A1A;white-space:nowrap;flex-shrink:0;"></div>
+      </div>
       <div class="objective-note" id="objective-note"></div>
       <div class="objective-date" id="objective-date"></div>
     </div>
@@ -584,13 +584,21 @@ const SUNDAY_PLAN = [
   { week: 9,  date: '21 juin',   label: '20km / 1000-1100m D+',     icon: '⚡', km: 20,   dplus: 1050,  note: 'Semaine de charge — séance clé' },
   { week: 10, date: '28 juin',   label: '24-25km / 1300-1500m D+',  icon: '⚡', km: 25,   dplus: 1400,  note: 'Pic de charge — effort soutenu' },
   { week: 11, date: '5 juillet', label: 'UTCAM 🏁',                 icon: '🏆', km: 30,   dplus: 2150,  note: 'Objectif — bonne hydratation, gestion effort !' },
+  { week: 19, date: '30 août',   label: '3x5km à 5:20/km',           icon: '⚡', km: 24,   dplus: null,  note: '3km éch. + 3×5km (1km récup entre) + 3km retour' },
+  { week: 20, date: '7 sept',    label: '14-16km footing facile',     icon: '🏃', km: 16,   dplus: null,  note: 'Préserver les jambes avant Valberg' },
+  { week: 21, date: '13 sept',   label: 'VALBERG 21km/950m D+ 🏁',   icon: '🏆', km: 21,   dplus: 950,   note: 'Course trail — gestion effort montagne' },
+  { week: 22, date: '20 sept',   label: '12-14km footing très facile',icon: '🟡', km: 14,   dplus: null,  note: 'Récup post trail Valberg' },
+  { week: 23, date: '27 sept',   label: '4x5km à 5:20/km',           icon: '⚡', km: 26,   dplus: null,  note: '3km éch. + 4×5km (1km récup) + 3km retour' },
+  { week: 24, date: '4 oct',     label: '5x5km à 5:20/km',           icon: '⚡', km: 30,   dplus: null,  note: '3km éch. + 5×5km (800m récup) + 2km retour' },
+  { week: 25, date: '11 oct',    label: '24km à 5:20/km — SIMULATION',icon: '🔥', km: 30,   dplus: null,  note: '3km éch. + 24km allure marathon + 3km retour 🔥' },
+  { week: 26, date: '18 oct',    label: '2x5km à 5:20/km — tapering', icon: '🟢', km: 16,   dplus: null,  note: '3km éch. + 2×5km + 3km retour — début tapering' },
+  { week: 27, date: '25 oct',    label: '10km à 5:20/km',             icon: '🟢', km: 16,   dplus: null,  note: '3km éch. + 10km + 3km retour' },
+  { week: 28, date: '1 nov',     label: '8-10km footing facile',      icon: '🟢', km: 10,   dplus: null,  note: 'Dernière sortie — jambes fraîches' },
+  { week: 29, date: '8 nov',     label: 'MARATHON NICE-CANNES 🏁',    icon: '🏆', km: 42,   dplus: null,  note: 'Objectif sub 3h45 — allure 5:20/km 🏅' },
 ];
 
-const TRAIL_START_WEEK = 1; 
 function getSundayObjective() {
-  const offset = currentWeek - TRAIL_START_WEEK;
-  if (offset < 0 || offset >= SUNDAY_PLAN.length) return null;
-  return SUNDAY_PLAN[offset];
+  return SUNDAY_PLAN.find(p => p.week === currentWeek) || null;
 }
 
 function parseKm(val) {
@@ -1038,14 +1046,15 @@ function renderObjective() {
   if (!obj) { block.style.display = 'none'; return; }
   block.style.display = 'block';
   document.getElementById('objective-main').textContent = obj.icon + ' ' + obj.label;
+  document.getElementById('objective-km-badge').textContent = obj.km ? obj.km + ' km' : '';
   document.getElementById('objective-note').textContent = obj.note;
   document.getElementById('objective-date').textContent = 'Dimanche ' + obj.date;
   // Special style for race week
-  if (obj.week === 6 || obj.week === 11) {
+  if (obj.week === 6 || obj.week === 11 || obj.week === 21 || obj.week === 29) {
     block.style.background = '#F5FFF8';
     block.style.borderColor = '#CCCCCC';
     document.getElementById('objective-eyebrow').style.color = '#888888';
-  } else if (obj.week === 4 || obj.week === 9 || obj.week === 10) {
+  } else if (obj.week === 4 || obj.week === 9 || obj.week === 10 || obj.week === 19 || obj.week === 23 || obj.week === 24 || obj.week === 25) {
     block.style.background = '#FFFAF5';
     block.style.borderColor = '#CCCCCC';
   } else {
@@ -1094,7 +1103,7 @@ function saveWeek() {
 
 function changeWeek(d) {
   saveWeek();
-  currentWeek = Math.max(1, Math.min(20, currentWeek + d));
+  currentWeek = Math.max(1, Math.min(29, currentWeek + d));
   localStorage.setItem('prepa_current_week', currentWeek);
   document.getElementById('week-label').textContent = 'SEMAINE ' + currentWeek;
   renderAll();
@@ -1126,7 +1135,7 @@ function secondsToPace(secs) {
 }
 
 // S1 starts Monday April 21, 2026
-const WEEK1_START = new Date(2026, 3, 21); // month is 0-indexed
+const WEEK1_START = new Date(2026, 3, 20); // Monday April 20, 2026
 
 function getDateForWeekDay(week, dayIdx) {
   const d = new Date(WEEK1_START);
@@ -1141,7 +1150,7 @@ function getActivityForDate(date) {
   const daysSinceStart = Math.floor(diffMs / 86400000);
   const weekIdx = Math.floor(daysSinceStart / 7) + 1;
   const dayIdx = daysSinceStart % 7;
-  if (weekIdx < 1 || weekIdx > 20) return null;
+  if (weekIdx < 1 || weekIdx > 29) return null;
   const wd = data[getKey(weekIdx)];
   if (!wd) return null;
   const seance = wd.seances[dayIdx];
@@ -1150,7 +1159,7 @@ function getActivityForDate(date) {
   const km = parseKm(wd.distances[dayIdx]);
   const checked = !!wd.checked[dayIdx];
   // Check if it's a race day
-  const raceDates = ['2026-05-31', '2026-07-05'];
+  const raceDates = ['2026-05-31', '2026-07-05', '2026-09-13', '2026-11-08'];
   const dateStr = date.getFullYear() + '-' + String(date.getMonth()+1).padStart(2,'0') + '-' + String(date.getDate()).padStart(2,'0');
   if (raceDates.includes(dateStr) && isRunning(s) && km > 0) return 'race';
   if (isRunning(s) && km > 0) return 'run';
@@ -1251,11 +1260,12 @@ function renderCalendrier() {
     scroll.appendChild(monthDiv);
   });
 
-  // Scroll to current month
-  setTimeout(() => {
-    const currentEl = scroll.querySelector('.cal-month:not(.faded)');
+  // Scroll to current month — target .current explicitly (not :not(.faded),
+  // which breaks once the observer below strips .faded from every month)
+  requestAnimationFrame(() => {
+    const currentEl = scroll.querySelector('.cal-month.current');
     if (currentEl) currentEl.scrollIntoView({ block: 'center', behavior: 'instant' });
-  }, 50);
+  });
 
   // Intersection observer for fade effect
   if (window.IntersectionObserver) {
@@ -1287,7 +1297,7 @@ function renderRecap() {
   const list = document.getElementById('recap-list');
   list.innerHTML = '';
   let grandTotalKm = 0;
-  for (let w = 1; w <= 20; w++) {
+  for (let w = 1; w <= 29; w++) {
     const wd = data[getKey(w)];
     let kmTotal = 0, alluresFacile = [], alluresIntense = [];
     if (wd) {
@@ -1327,8 +1337,8 @@ function renderRecap() {
       (wd.notes && wd.notes.trim().length > 0) ||
       (wd.vfc && wd.vfc.trim().length > 0)
     );
-    const isRecovery = w === 1 || w === 7 || w === 12 || w === 17;
-    const isRace = w === 6 || w === 11;
+    const isRecovery = w === 1 || w === 7 || w === 12 || w === 17 || w === 22;
+    const isRace = w === 6 || w === 11 || w === 21 || w === 29;
     const isSpecial = isRecovery || isRace;
     let statusIcon = !hasData ? '○' : isSpecial ? '—' : pct === 100 ? '✅' : pct >= 50 ? '⚠️' : '❌';
     const div = document.createElement('div');
@@ -1363,99 +1373,10 @@ function renderRecap() {
   if (totalEl) totalEl.textContent = grandTotalKm > 0 ? grandTotalKm.toFixed(1) : '—';
 }
 
-// Chart pagination state — show last 10 weeks, swipe to go back
-const CHART_PAGE_SIZE = 10;
-let chartOffset = {}; // per chart, offset from the end
-
-function slideChart(canvasId, direction) {
-  const canvas = document.getElementById(canvasId);
-  if (!canvas) return;
-  const slideOut = direction === 'left' ? '-100%' : '100%';
-  const slideIn = direction === 'left' ? '100%' : '-100%';
-  // Slide out
-  canvas.style.transform = `translateX(${slideOut})`;
-  canvas.style.opacity = '0';
-  setTimeout(() => {
-    renderStatsPage();
-    // Jump to opposite side instantly
-    canvas.style.transition = 'none';
-    canvas.style.transform = `translateX(${slideIn})`;
-    canvas.style.opacity = '0';
-    // Force reflow
-    canvas.offsetHeight;
-    // Slide in with animation
-    canvas.style.transition = 'transform 0.35s ease, opacity 0.35s ease';
-    canvas.style.transform = 'translateX(0)';
-    canvas.style.opacity = '1';
-  }, 200);
-}
-
-function initChartSwipe(canvasId) {
-  const container = document.getElementById('container-' + canvasId);
-  if (!container) return;
-  if (container.dataset.swipeInit) return;
-  container.dataset.swipeInit = '1';
-  if (!chartOffset[canvasId]) chartOffset[canvasId] = 0;
-
-  let startX = 0;
-  const onStart = (e) => { startX = e.touches ? e.touches[0].clientX : e.clientX; };
-  const onEnd = (e) => {
-    const endX = e.changedTouches ? e.changedTouches[0].clientX : e.clientX;
-    const diff = startX - endX;
-    if (Math.abs(diff) < 30) return;
-    const totalPages = Math.ceil(20 / CHART_PAGE_SIZE);
-    if (diff > 0 && chartOffset[canvasId] > 0) {
-      chartOffset[canvasId]--;
-      slideChart(canvasId, 'left');
-    } else if (diff < 0 && chartOffset[canvasId] < totalPages - 1) {
-      chartOffset[canvasId]++;
-      slideChart(canvasId, 'right');
-    }
-  };
-  container.addEventListener('touchstart', onStart, { passive: true });
-  container.addEventListener('touchend', onEnd, { passive: true });
-  container.addEventListener('mousedown', onStart);
-  container.addEventListener('mouseup', onEnd);
-}
-
-function getChartSlice(data, labels, canvasId) {
-  const total = data.length;
-  const offset = chartOffset[canvasId] || 0;
-  // offset=0 → last 10 weeks, offset=1 → weeks 10 before that, etc
-  const end = total - offset * CHART_PAGE_SIZE;
-  const start = Math.max(0, end - CHART_PAGE_SIZE);
-  return {
-    sliceData: data.slice(start, end),
-    sliceLabels: labels.slice(start, end),
-    highlightInSlice: (total - 1) - start, // currentWeek position in slice
-    start, end, offset,
-    totalPages: Math.ceil(total / CHART_PAGE_SIZE)
-  };
-}
-
-function renderChartPagination(canvasId, totalPages, offset) {
-  const container = document.getElementById('container-' + canvasId);
-  if (!container) return;
-  let pag = container.querySelector('.chart-pagination');
-  if (!pag) {
-    pag = document.createElement('div');
-    pag.className = 'chart-pagination';
-    container.appendChild(pag);
-  }
-  pag.innerHTML = '';
-  for (let i = totalPages - 1; i >= 0; i--) {
-    const dot = document.createElement('div');
-    dot.className = 'chart-dot' + (i === offset ? ' active' : '');
-    const page = i;
-    dot.onclick = () => { const dir = page > chartOffset[canvasId] ? 'right' : 'left'; chartOffset[canvasId] = page; slideChart(canvasId, dir); };
-    pag.appendChild(dot);
-  }
-}
-
 function renderStatsPage() {
   const kmData = [];
   const labels = [];
-  for (let w = 1; w <= 20; w++) {
+  for (let w = 1; w <= 29; w++) {
     labels.push(''+w);
     const wd = data[getKey(w)];
     const km = wd ? wd.seances.reduce((total, s, i) => {
@@ -1468,18 +1389,11 @@ function renderStatsPage() {
   document.getElementById('stat-km-max').textContent = kmFilled.length ? Math.max(...kmFilled).toFixed(1) : '—';
   document.getElementById('stat-km-total').textContent = kmFilled.length ? kmFilled.reduce((a,b)=>a+b,0).toFixed(0) : '—';
   document.getElementById('stat-km-avg').textContent = kmFilled.length ? (kmFilled.reduce((a,b)=>a+b,0)/kmFilled.length).toFixed(1) : '—';
-  initChartSwipe('chart-km');
-  const sliceKm = getChartSlice(kmData, labels, 'chart-km');
-  // Adjust special week indices to slice
-  const recoveryInSlice = [0,6,11,16].map(i => i - sliceKm.start).filter(i => i >= 0 && i < CHART_PAGE_SIZE);
-  const raceInSlice = [5,10].map(i => i - sliceKm.start).filter(i => i >= 0 && i < CHART_PAGE_SIZE);
-  const hlKm = (currentWeek - 1) >= sliceKm.start && (currentWeek - 1) < sliceKm.end ? (currentWeek - 1) - sliceKm.start : -1;
-  drawChart('chart-km', sliceKm.sliceLabels, sliceKm.sliceData, '#333333', 'km', false, 0, 50, hlKm, {recovery: recoveryInSlice, race: raceInSlice});
-  renderChartPagination('chart-km', sliceKm.totalPages, sliceKm.offset);
+  drawChart('chart-km', labels, kmData, '#333333', 'km', false, 0, 50, currentWeek - 1, {recovery:[0,6,11,16,21], race:[5,10,20,28]});
 
   // KPI chart
   const kpiData = [];
-  for (let w = 1; w <= 20; w++) {
+  for (let w = 1; w <= 29; w++) {
     const wd = data[getKey(w)];
     if (wd && wd.kpis && wd.kpis.some(v => v > 0)) {
       const avg = wd.kpis.reduce((a,b) => a+b, 0) / wd.kpis.length;
@@ -1492,16 +1406,11 @@ function renderStatsPage() {
   document.getElementById('stat-kpi-max').textContent = kpiFilled.length ? Math.max(...kpiFilled).toFixed(1) : '—';
   document.getElementById('stat-kpi-min').textContent = kpiFilled.length ? Math.min(...kpiFilled).toFixed(1) : '—';
   document.getElementById('stat-kpi-avg').textContent = kpiFilled.length ? (kpiFilled.reduce((a,b)=>a+b,0)/kpiFilled.length).toFixed(1) : '—';
-  initChartSwipe('chart-kpi');
-  const sliceKpi = getChartSlice(kpiData, labels, 'chart-kpi');
-  const hlKpi = (currentWeek - 1) >= sliceKpi.start && (currentWeek - 1) < sliceKpi.end ? (currentWeek - 1) - sliceKpi.start : -1;
-  drawChart('chart-kpi', sliceKpi.sliceLabels, sliceKpi.sliceData, '#333333', 'kpi', true, 0, 5, hlKpi);
-  renderChartPagination('chart-kpi', sliceKpi.totalPages, sliceKpi.offset);
+  drawChart('chart-kpi', labels, kpiData, '#333333', 'kpi', true, 0, 5, currentWeek - 1);
 
-  // VFC chart
-  // VFC : échelle 35→65ms
+  // VFC chart — échelle 35→65ms
   const vfcData = [];
-  for (let w = 1; w <= 20; w++) {
+  for (let w = 1; w <= 29; w++) {
     const wd = data[getKey(w)];
     const v = wd && wd.vfc ? parseVfc(wd.vfc) : null;
     vfcData.push(v);
@@ -1510,11 +1419,16 @@ function renderStatsPage() {
   document.getElementById('stat-vfc-max').textContent = vfcFilled.length ? Math.max(...vfcFilled).toFixed(0) : '—';
   document.getElementById('stat-vfc-min').textContent = vfcFilled.length ? Math.min(...vfcFilled).toFixed(0) : '—';
   document.getElementById('stat-vfc-avg').textContent = vfcFilled.length ? (vfcFilled.reduce((a,b)=>a+b,0)/vfcFilled.length).toFixed(0) : '—';
-  initChartSwipe('chart-vfc');
-  const sliceVfc = getChartSlice(vfcData, labels, 'chart-vfc');
-  const hlVfc = (currentWeek - 1) >= sliceVfc.start && (currentWeek - 1) < sliceVfc.end ? (currentWeek - 1) - sliceVfc.start : -1;
-  drawChart('chart-vfc', sliceVfc.sliceLabels, sliceVfc.sliceData, '#555555', 'ms', true, 35, 65, hlVfc);
-  renderChartPagination('chart-vfc', sliceVfc.totalPages, sliceVfc.offset);
+  drawChart('chart-vfc', labels, vfcData, '#555555', 'ms', true, 35, 65, currentWeek - 1);
+
+  // Auto-scroll each chart to show the most recent weeks, only on first open
+  ['chart-km', 'chart-kpi', 'chart-vfc'].forEach(id => {
+    const container = document.getElementById('container-' + id);
+    if (container && !container.dataset.autoScrolled) {
+      container.scrollLeft = container.scrollWidth;
+      container.dataset.autoScrolled = '1';
+    }
+  });
 }
 
 function drawChart(canvasId, labels, rawData, color, unit, isLine, fixedMin, fixedMax, highlightIdx, specialWeeks) {
@@ -1525,16 +1439,19 @@ function drawChart(canvasId, labels, rawData, color, unit, isLine, fixedMin, fix
   const ctx = canvas.getContext('2d');
   const dpr = window.devicePixelRatio || 1;
 
-  // Responsive: read CSS width, compute height from ratio
-  const W = canvas.parentElement.clientWidth - 20 || 320;
-  const H = Math.round(W * 0.48); // ~16:7.5 ratio — taller on narrow screens
+  // Fixed width per week — canvas overflows inside a scrollable container
+  const container = canvas.parentElement;
+  const containerW = (container.clientWidth || 320) - 20;
+  const PX_PER_WEEK = 34;
+  const W = Math.max(containerW, labels.length * PX_PER_WEEK);
+  const H = Math.round(containerW * 0.5);
   canvas.width = W * dpr;
   canvas.height = H * dpr;
   canvas.style.width = W + 'px';
   canvas.style.height = H + 'px';
   ctx.scale(dpr, dpr);
 
-  const isMobile = W < 380;
+  const isMobile = containerW < 380;
   const dataVals = rawData;
   const hasData = dataVals.some(v => v !== null && v > 0);
   const maxVal = fixedMax !== undefined ? fixedMax : (hasData ? Math.max(...dataVals.filter(v=>v>0)) * 1.2 : 10);
@@ -1622,13 +1539,11 @@ function drawChart(canvasId, labels, rawData, color, unit, isLine, fixedMin, fix
         ctx.arc(p.x, p.y, r, 0, Math.PI * 2);
         ctx.fillStyle = color;
         ctx.fill();
-        // Show value label every other point on mobile
-        if (!isMobile || idx % 2 === 0) {
-          ctx.fillStyle = color;
-          ctx.font = `bold ${isMobile ? 8 : 9}px DM Mono, monospace`;
-          ctx.textAlign = 'center';
-          ctx.fillText(p.v.toFixed(1), p.x, p.y - 8);
-        }
+        // Show value on every point since chart scrolls now
+        ctx.fillStyle = color;
+        ctx.font = `bold ${isMobile ? 8 : 9}px DM Mono, monospace`;
+        ctx.textAlign = 'center';
+        ctx.fillText(p.v.toFixed(1), p.x, p.y - 8);
       });
     }
   } else {
@@ -1667,14 +1582,12 @@ function drawChart(canvasId, labels, rawData, color, unit, isLine, fixedMin, fix
       ctx.roundRect(x, y, bw, bh, [3, 3, 0, 0]);
       ctx.fillStyle = grad;
       ctx.fill();
-      // Show value only on highlighted bar or every other bar on mobile
-      if (!isMobile || i === highlightIdx || i % 2 === 0 || isRecovery || isRace) {
-        if (v > 0) {
-          ctx.fillStyle = isHighlight ? '#888888' : isRace ? '#A07820' : isRecovery ? '#4A88B8' : color;
-          ctx.font = `bold ${isMobile ? 7 : 8}px DM Mono, monospace`;
-          ctx.textAlign = 'center';
-          ctx.fillText(v.toFixed(0), x + bw/2, y - 2);
-        }
+      // Show value on every bar since chart scrolls now
+      if (v > 0) {
+        ctx.fillStyle = isHighlight ? '#888888' : isRace ? '#A07820' : isRecovery ? '#4A88B8' : color;
+        ctx.font = `bold ${isMobile ? 7 : 8}px DM Mono, monospace`;
+        ctx.textAlign = 'center';
+        ctx.fillText(v.toFixed(0), x + bw/2, y - 2);
       }
     });
   }
@@ -1694,10 +1607,8 @@ function drawChart(canvasId, labels, rawData, color, unit, isLine, fixedMin, fix
     ctx.globalAlpha = 1;
   }
 
-  // X labels — show every other label on mobile to avoid overlap
+  // X labels — all visible since chart scrolls horizontally now
   labels.forEach((l, i) => {
-    const showLabel = isMobile ? (i % 2 === 0) : true;
-    if (!showLabel && i !== highlightIdx) return;
     const isHighlight = i === highlightIdx;
     ctx.fillStyle = isHighlight ? '#888888' : '#999999';
     ctx.font = `${isHighlight ? 'bold ' : ''}${isMobile ? 7 : 8}px DM Mono, monospace`;
@@ -1710,7 +1621,7 @@ function initShareWeekSelect() {
   const sel = document.getElementById('share-week-select');
   if (!sel) return;
   sel.innerHTML = '';
-  for (let w = 1; w <= 20; w++) {
+  for (let w = 1; w <= 29; w++) {
     const opt = document.createElement('option');
     opt.value = w;
     opt.textContent = 'Semaine ' + w;
@@ -1885,10 +1796,10 @@ function updateStorageInfo() {
     size += (localStorage.key(i).length + (localStorage.getItem(localStorage.key(i)) || '').length) * 2;
   }
   const kb = (size / 1024).toFixed(1);
-  const weeksWithData = Array.from({length:20},(_,i)=>i+1).filter(w => data[getKey(w)]).length;
+  const weeksWithData = Array.from({length:29},(_,i)=>i+1).filter(w => data[getKey(w)]).length;
   el.innerHTML = `
     <div style="display:flex;justify-content:space-between"><span>Clés stockées</span><span style="color:#111111;font-weight:500">${keys}</span></div>
-    <div style="display:flex;justify-content:space-between"><span>Semaines remplies</span><span style="color:#111111;font-weight:500">${weeksWithData} / 20</span></div>
+    <div style="display:flex;justify-content:space-between"><span>Semaines remplies</span><span style="color:#111111;font-weight:500">${weeksWithData} / 29</span></div>
     <div style="display:flex;justify-content:space-between"><span>Taille estimée</span><span style="color:#555555;font-weight:500">${kb} Ko</span></div>
     <div style="display:flex;justify-content:space-between"><span>Dernière export</span><span style="color:#666666">voir fichier</span></div>
   `;
@@ -1924,7 +1835,7 @@ window.addEventListener('orientationchange', () => {
 
 load();
 const savedWeek = parseInt(localStorage.getItem('prepa_current_week') || '1');
-if (savedWeek >= 1 && savedWeek <= 20) currentWeek = savedWeek;
+if (savedWeek >= 1 && savedWeek <= 29) currentWeek = savedWeek;
 document.getElementById('week-label').textContent = 'SEMAINE ' + currentWeek;
 renderAll();
 renderRecap();
