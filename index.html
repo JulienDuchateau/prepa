@@ -1391,7 +1391,7 @@ function renderStatsPage() {
   document.getElementById('stat-km-max').textContent = kmFilled.length ? Math.max(...kmFilled).toFixed(1) : '—';
   document.getElementById('stat-km-total').textContent = kmFilled.length ? kmFilled.reduce((a,b)=>a+b,0).toFixed(0) : '—';
   document.getElementById('stat-km-avg').textContent = kmFilled.length ? (kmFilled.reduce((a,b)=>a+b,0)/kmFilled.length).toFixed(1) : '—';
-  drawChart('chart-km', labels, kmData, '#333333', 'km', false, 0, 50, currentWeek - 1, {recovery:[0,6,11,16,21], race:[5,10,20,28]});
+  drawChart('chart-km', labels, kmData, '#333333', 'km', false, 0, 60, currentWeek - 1, {recovery:[0,6,11,16,21], race:[5,10,20,28]});
 
   // KPI chart
   const kpiData = [];
