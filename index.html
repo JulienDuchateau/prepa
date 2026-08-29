@@ -1373,6 +1373,8 @@ function renderRecap() {
   if (totalEl) totalEl.textContent = grandTotalKm > 0 ? grandTotalKm.toFixed(1) : '—';
 }
 
+const CHART_PX_PER_WEEK = 34; // shared with drawChart's canvas width calc
+
 function renderStatsPage() {
   const kmData = [];
   const labels = [];
@@ -1421,11 +1423,12 @@ function renderStatsPage() {
   document.getElementById('stat-vfc-avg').textContent = vfcFilled.length ? (vfcFilled.reduce((a,b)=>a+b,0)/vfcFilled.length).toFixed(0) : '—';
   drawChart('chart-vfc', labels, vfcData, '#555555', 'ms', true, 35, 65, currentWeek - 1);
 
-  // Auto-scroll each chart to show the most recent weeks, only on first open
+  // Auto-scroll each chart so the current week sits at the right edge, only on first open
   ['chart-km', 'chart-kpi', 'chart-vfc'].forEach(id => {
     const container = document.getElementById('container-' + id);
     if (container && !container.dataset.autoScrolled) {
-      container.scrollLeft = container.scrollWidth;
+      const targetScroll = (currentWeek * CHART_PX_PER_WEEK) - container.clientWidth;
+      container.scrollLeft = Math.max(0, Math.min(targetScroll, container.scrollWidth - container.clientWidth));
       container.dataset.autoScrolled = '1';
     }
   });
@@ -1442,8 +1445,7 @@ function drawChart(canvasId, labels, rawData, color, unit, isLine, fixedMin, fix
   // Fixed width per week — canvas overflows inside a scrollable container
   const container = canvas.parentElement;
   const containerW = (container.clientWidth || 320) - 20;
-  const PX_PER_WEEK = 34;
-  const W = Math.max(containerW, labels.length * PX_PER_WEEK);
+  const W = Math.max(containerW, labels.length * CHART_PX_PER_WEEK);
   const H = Math.round(containerW * 0.5);
   canvas.width = W * dpr;
   canvas.height = H * dpr;
