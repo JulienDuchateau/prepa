@@ -865,19 +865,30 @@ function updateAllure(i, val) {
   w.allures[i] = val;
 }
 
+function formatDuration(totalSeconds) {
+  if (!totalSeconds || totalSeconds <= 0) return '—';
+  const h = Math.floor(totalSeconds / 3600);
+  const m = Math.round((totalSeconds % 3600) / 60);
+  if (h > 0) return `${h}h${String(m).padStart(2,'0')}`;
+  return `${m}min`;
+}
+
 function renderStats() {
   const w = getWeek(currentWeek);
-  let kmFacile = 0, kmIntense = 0;
+  let kmFacile = 0, kmIntense = 0, totalSeconds = 0;
   w.seances.forEach((s, i) => {
     const km = parseKm(w.distances[i]);
     if (s.s1 === 'RUNNING FACILE') kmFacile += km;
     if (s.s1 === 'RUNNING INTENSE') kmIntense += km;
+    const paceSecs = paceToSeconds((w.allures||[])[i]);
+    if (isRunning(s.s1) && km > 0 && paceSecs) totalSeconds += km * paceSecs;
   });
   const totalKm = kmFacile + kmIntense;
+  const intensePct = totalKm > 0 ? Math.round((kmIntense / totalKm) * 100) : null;
   document.getElementById('stats-row').innerHTML = `
-    <div class="stat-card"><div class="stat-val run">${kmFacile.toFixed(1)}</div><div class="stat-label">🏃 FACILE</div></div>
-    <div class="stat-card"><div class="stat-val" style="color:#555555">${kmIntense.toFixed(1)}</div><div class="stat-label">⚡ INTENSE</div></div>
-    <div class="stat-card"><div class="stat-val run">${totalKm.toFixed(1)}</div><div class="stat-label">KM TOTAL</div></div>`;
+    <div class="stat-card"><div class="stat-val run">${totalKm.toFixed(1)}</div><div class="stat-label">KM TOTAL</div></div>
+    <div class="stat-card"><div class="stat-val run">${formatDuration(totalSeconds)}</div><div class="stat-label">TEMPS</div></div>
+    <div class="stat-card"><div class="stat-val" style="color:#555555">${intensePct !== null ? intensePct+'%' : '—'}</div><div class="stat-label">⚡ INTENSE</div></div>`;
 }
 
 function renderKpis() {
