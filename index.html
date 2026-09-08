@@ -81,7 +81,7 @@
   .badge-intense { background: #1A1A1A; color: #FFFFFF; border: 1px solid #1A1A1A; }
   .badge-renfo { background: #F0EDE8; color: #555555; border: 1px solid #E0DDD8; }
   .badge-stretching { background: #E8F2E8; color: #2D6A2D; border: 1px solid #C5DEC5; }
-  .badge-repos { background: #F4F1EC; color: #AAAAAA; border: 1px solid #E0DDD8; }
+  .badge-repos { background: #EFF4FB; color: #6B8DB8; border: 1px solid #C8D8EE; }
 
   /* STATS ROW */
   .stats-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
@@ -90,7 +90,12 @@
   .stat-val.run { color: #1A1A1A; }
   .stat-label { font-family: 'DM Mono', monospace; font-size: 9px; color: #888888; letter-spacing: 0.1em; margin-top: 2px; }
 
-    /* KPI CIRCLES */
+  
+  /* TERRAIN TAG (Route / Trail) */
+  .terrain-pill { display: inline-flex; align-items: center; gap: 2px; font-family: 'DM Mono', monospace; font-size: 8px; letter-spacing: 0.06em; text-transform: uppercase; border-radius: 10px; padding: 2px 7px; margin-left: 6px; cursor: pointer; -webkit-tap-highlight-color: transparent; color: #AAAAAA; border: 1px solid #E0DDD8; background: transparent; }
+  .terrain-pill.trail { color: #8A6D3B; border-color: #D9C79E; background: #FBF6EC; }
+
+  /* KPI CIRCLES */
   .kpi-list { display: flex; flex-direction: column; gap: 5px; }
   .kpi-row { background: #FAFAF8; border: none; border-radius: 2px; padding: 10px 12px; display: flex; align-items: center; border-bottom: 1px solid #F0EDE8; }
   .kpi-name { font-size: 12px; flex: 1; color: #1A1A1A; }
@@ -194,7 +199,7 @@
   .sc-badge { font-family: 'DM Mono', monospace; font-size: 8px; padding: 2px 6px; border-radius: 2px; font-weight: 600; text-transform: uppercase; flex-shrink: 0; }
   .sc-badge-run { background: #1A1A1A; color: #FFFFFF; }
   .sc-badge-renfo { background: #F0EDE8; color: #555555; border: 1px solid #E0DDD8; }
-  .sc-badge-repos { color: #CCCCCC; font-size: 8px; }
+  .sc-badge-repos { color: #6B8DB8; font-size: 8px; }
   .sc-session-data { font-family: 'DM Mono', monospace; font-size: 8px; color: #AAAAAA; margin-left: auto; }
   .sc-check { font-size: 10px; color: #1A1A1A; }
   .sc-kpis { display: flex; gap: 8px; margin-bottom: 16px; }
@@ -530,6 +535,10 @@ const SEANCE_ICONS = {
   'REPOS': '😴',
   '-': ''
 };
+
+// Display labels — internal value stays 'REPOS' for backward compatibility with saved data
+const SEANCE_LABELS = { 'REPOS': 'RÉCUPÉRATION' };
+function labelFor(s) { return SEANCE_LABELS[s] || s; }
 let currentWeek = 1;
 let modalDay = null;
 let data = {};
@@ -540,10 +549,12 @@ function defaultWeek(w) {
   return {
     seances: DAYS.map(() => ({ s1: 'REPOS', s2: null })),
     checked: DAYS.map(() => false),
+    checked2: DAYS.map(() => false),
     distances: DAYS.map(() => ''),
     allures: DAYS.map(() => ''),
     denivelés: DAYS.map(() => ''),
     kpis: KPIS.map(() => 0),
+    terrain: DAYS.map(() => 'route'),
     vfc: '',
     sommeil: '',
     rpe: '',
@@ -565,6 +576,8 @@ function getWeek(w) {
   const wd = data[getKey(w)];
   if (!wd.allures) wd.allures = DAYS.map(() => '');
   if (!wd.denivelés) wd.denivelés = DAYS.map(() => '');
+  if (!wd.terrain) wd.terrain = DAYS.map(() => 'route');
+  if (!wd.checked2) wd.checked2 = DAYS.map(() => false);
   if (!wd.vfc) wd.vfc = '';
   wd.seances.forEach(s => { if (s.s2 === undefined) s.s2 = null; });
   if (!wd.sommeil) wd.sommeil = '';
@@ -669,7 +682,8 @@ function renderDays() {
     const isRun = isRunning(s.s1);
     const isRenfo = s.s1 === 'RENFO';
     const isStretching = s.s1 === 'STRETCHING';
-    const isValidated = isRun ? (parseKm(w.distances[i]) > 0) : ((isRenfo || isStretching) ? !!w.checked[i] : false);
+    const s2Validated = s.s2 === 'RENFO' && !!(w.checked2 && w.checked2[i]);
+    const isValidated = (isRun ? (parseKm(w.distances[i]) > 0) : ((isRenfo || isStretching) ? !!w.checked[i] : false)) || s2Validated;
     const div = document.createElement('div');
     div.className = 'day-card' + (isValidated ? ' validated' : '');
 
@@ -692,8 +706,17 @@ function renderDays() {
     const s1Badge = document.createElement('span');
     s1Badge.className = 'badge ' + badgeClass(s.s1);
     const icon = SEANCE_ICONS[s.s1] || '';
-    s1Badge.textContent = (icon ? icon + ' ' : '') + s.s1;
+    s1Badge.textContent = (icon ? icon + ' ' : '') + labelFor(s.s1);
     s1El.appendChild(s1Badge);
+    if (isRun) {
+      const terrain = w.terrain[i] || 'route';
+      const terrainPill = document.createElement('span');
+      terrainPill.className = 'terrain-pill' + (terrain === 'trail' ? ' trail' : '');
+      terrainPill.textContent = terrain === 'trail' ? 'Trail' : 'Route';
+      terrainPill.onclick = (e) => { e.stopPropagation(); toggleTerrain(i); };
+      terrainPill.addEventListener('touchend', (e) => { e.preventDefault(); e.stopPropagation(); toggleTerrain(i); }, { passive: false });
+      s1El.appendChild(terrainPill);
+    }
     contentEl.appendChild(s1El);
 
     // Second activity (s2)
@@ -703,15 +726,39 @@ function renderDays() {
       const s2Badge = document.createElement('span');
       s2Badge.className = 'badge ' + badgeClass(s.s2);
       const icon2 = SEANCE_ICONS[s.s2] || '';
-      s2Badge.textContent = (icon2 ? icon2 + ' ' : '') + s.s2;
+      s2Badge.textContent = (icon2 ? icon2 + ' ' : '') + labelFor(s.s2);
       s2Badge.onclick = (e) => { e.stopPropagation(); openModal2(i); };
       s2Badge.addEventListener('touchend', (e) => { e.preventDefault(); e.stopPropagation(); openModal2(i); }, { passive: false });
+      s2El.appendChild(s2Badge);
+
+      // Toggle for RENFO/STRETCHING as second activity — lets it count toward the weekly total
+      if (s.s2 === 'RENFO' || s.s2 === 'STRETCHING') {
+        const label2 = document.createElement('label');
+        label2.className = 'ios-toggle';
+        label2.style.cssText = 'transform:scale(0.8);margin:0 2px;';
+        const stopToggle2 = (e) => e.stopPropagation();
+        label2.onclick = stopToggle2;
+        label2.addEventListener('touchend', stopToggle2);
+        const cb2 = document.createElement('input');
+        cb2.type = 'checkbox';
+        cb2.checked = !!w.checked2[i];
+        cb2.onchange = function() { toggleCheck2(i); };
+        cb2.addEventListener('touchend', (e) => e.stopPropagation());
+        const track2 = document.createElement('div');
+        track2.className = 'ios-toggle-track';
+        const thumb2 = document.createElement('div');
+        thumb2.className = 'ios-toggle-thumb';
+        label2.appendChild(cb2);
+        label2.appendChild(track2);
+        label2.appendChild(thumb2);
+        s2El.appendChild(label2);
+      }
+
       const removeBtn = document.createElement('span');
       removeBtn.textContent = '×';
       removeBtn.style.cssText = 'color:#CCCCCC;cursor:pointer;font-size:12px;margin-left:2px;';
       removeBtn.onclick = (e) => { e.stopPropagation(); w.seances[i].s2 = null; renderDays(); };
       removeBtn.addEventListener('touchend', (e) => { e.preventDefault(); e.stopPropagation(); w.seances[i].s2 = null; renderDays(); }, { passive: false });
-      s2El.appendChild(s2Badge);
       s2El.appendChild(removeBtn);
     } else {
       const addBtn = document.createElement('button');
@@ -779,25 +826,28 @@ function renderDays() {
       allureRow.appendChild(allureInp);
       allureRow.appendChild(allureUnit);
 
-      // Dénivelé row
-      const denivRow = document.createElement('div');
-      denivRow.className = 'day-input-row';
-      const denivInp = document.createElement('input');
-      denivInp.className = 'day-field-input deniv';
-      denivInp.type = 'text';
-      denivInp.inputMode = 'numeric';
-      denivInp.placeholder = '0';
-      denivInp.value = w.denivelés[i] || '';
-      denivInp.oninput = function() { updateDeniv(i, this.value); };
-      const denivUnit = document.createElement('span');
-      denivUnit.className = 'day-field-unit';
-      denivUnit.textContent = 'm↑';
-      denivRow.appendChild(denivInp);
-      denivRow.appendChild(denivUnit);
-
       wrap.appendChild(kmRow);
       wrap.appendChild(allureRow);
-      wrap.appendChild(denivRow);
+
+      // Dénivelé row — only for Trail terrain
+      if ((w.terrain[i] || 'route') === 'trail') {
+        const denivRow = document.createElement('div');
+        denivRow.className = 'day-input-row';
+        const denivInp = document.createElement('input');
+        denivInp.className = 'day-field-input deniv';
+        denivInp.type = 'text';
+        denivInp.inputMode = 'numeric';
+        denivInp.placeholder = '0';
+        denivInp.value = w.denivelés[i] || '';
+        denivInp.oninput = function() { updateDeniv(i, this.value); };
+        const denivUnit = document.createElement('span');
+        denivUnit.className = 'day-field-unit';
+        denivUnit.textContent = 'm↑';
+        denivRow.appendChild(denivInp);
+        denivRow.appendChild(denivUnit);
+        wrap.appendChild(denivRow);
+      }
+
       div.appendChild(wrap);
     } else if (isRenfo || isStretching) {
       const label = document.createElement('label');
@@ -857,6 +907,21 @@ function updateDeniv(i, val) {
   const w = getWeek(currentWeek);
   if (!w.denivelés) w.denivelés = DAYS.map(() => '');
   w.denivelés[i] = val;
+}
+
+function toggleCheck2(i) {
+  const w = getWeek(currentWeek);
+  if (!w.checked2) w.checked2 = DAYS.map(() => false);
+  w.checked2[i] = !w.checked2[i];
+  renderDays();
+  renderConclusion();
+}
+
+function toggleTerrain(i) {
+  const w = getWeek(currentWeek);
+  if (!w.terrain) w.terrain = DAYS.map(() => 'route');
+  w.terrain[i] = (w.terrain[i] === 'trail') ? 'route' : 'trail';
+  renderDays();
 }
 
 function updateAllure(i, val) {
@@ -929,6 +994,7 @@ function renderConclusion() {
   w.seances.forEach((seance, i) => {
     if (isRunning(seance.s1) && parseKm(w.distances[i]) > 0) validated++;
     else if (seance.s1 === 'RENFO' && !!w.checked[i]) validated++;
+    if (seance.s2 === 'RENFO' && !!(w.checked2 && w.checked2[i])) validated++;
   });
   const capped = Math.min(validated, 4);
   const pct = capped * 25;
@@ -985,7 +1051,7 @@ function openModal(day) {
   SEANCES.forEach(s => {
     const div = document.createElement('div');
     div.className = 'seance-option' + (s === current ? ' selected' : '');
-    div.innerHTML = `<span class="badge ${badgeClass(s)}">${s}</span> ${s}`;
+    div.innerHTML = `<span class="badge ${badgeClass(s)}">${labelFor(s)}</span> ${labelFor(s)}`;
     div.onclick = () => { selectSeance(s); };
     div.addEventListener('touchend', (e) => { e.preventDefault(); e.stopPropagation(); selectSeance(s); }, { passive: false });
     opts.appendChild(div);
@@ -1006,7 +1072,7 @@ function openModal2(day) {
   options.forEach(s => {
     const div = document.createElement('div');
     div.className = 'seance-option' + (s === current ? ' selected' : '');
-    div.innerHTML = `<span class="badge ${badgeClass(s)}">${s}</span> ${s}`;
+    div.innerHTML = `<span class="badge ${badgeClass(s)}">${labelFor(s)}</span> ${labelFor(s)}`;
     div.onclick = () => { selectSeance2(s); };
     div.addEventListener('touchend', (e) => { e.preventDefault(); e.stopPropagation(); selectSeance2(s); }, { passive: false });
     opts.appendChild(div);
@@ -1169,12 +1235,13 @@ function getActivityForDate(date) {
   const s = seance.s1;
   const km = parseKm(wd.distances[dayIdx]);
   const checked = !!wd.checked[dayIdx];
+  const s2Renfo = seance.s2 === 'RENFO' && !!(wd.checked2 && wd.checked2[dayIdx]);
   // Check if it's a race day
   const raceDates = ['2026-05-31', '2026-07-05', '2026-09-13', '2026-11-08'];
   const dateStr = date.getFullYear() + '-' + String(date.getMonth()+1).padStart(2,'0') + '-' + String(date.getDate()).padStart(2,'0');
   if (raceDates.includes(dateStr) && isRunning(s) && km > 0) return 'race';
   if (isRunning(s) && km > 0) return 'run';
-  if (s === 'RENFO' && checked) return 'renfo';
+  if ((s === 'RENFO' && checked) || s2Renfo) return 'renfo';
   return null;
 }
 
@@ -1336,6 +1403,7 @@ function renderRecap() {
       wd.seances.forEach((s, i) => {
         if (isRunning(s.s1) && parseKm(wd.distances[i]) > 0) validated++;
         else if (s.s1 === 'RENFO' && !!wd.checked[i]) validated++;
+        if (s.s2 === 'RENFO' && !!(wd.checked2 && wd.checked2[i])) validated++;
       });
     }
 
@@ -1661,6 +1729,7 @@ function generateShareCard() {
     if (isRunning(s.s1) && km > 0 && secs) allSecsRun.push(secs);
     if (isRunning(s.s1) && km > 0) validated++;
     if (s.s1 === 'RENFO' && wd.checked[i]) validated++;
+    if (s.s2 === 'RENFO' && wd.checked2 && wd.checked2[i]) validated++;
   });
   const totalKm = kmTotal;
   const avgPaceSecs = allSecsRun.length ? allSecsRun.reduce((a,b)=>a+b,0)/allSecsRun.length : null;
@@ -1683,7 +1752,7 @@ function generateShareCard() {
     if (isRun) badgeHtml = `<span class="sc-badge sc-badge-run">${s.s1 === 'RUNNING FACILE' ? 'R.FACILE' : 'R.INTENSE'}</span>`;
     else if (isRenfo) badgeHtml = `<span class="sc-badge sc-badge-renfo">RENFO</span>`;
     else if (isStretching) badgeHtml = `<span class="sc-badge sc-badge-renfo">STRETCHING</span>`;
-    else badgeHtml = `<span class="sc-badge sc-badge-repos">REPOS</span>`;
+    else badgeHtml = `<span class="sc-badge sc-badge-repos">RÉCUP</span>`;
     let dataStr = '';
     if (isRun && km > 0) dataStr = `${km.toFixed(1)}km${allure ? ' · '+allure : ''}${deniv > 0 ? ' · '+deniv+'m' : ''}`;
     const check = isVal ? ' <span class="sc-check">✓</span>' : '';
