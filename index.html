@@ -46,9 +46,7 @@
   .week-label { flex: 1; text-align: center; font-family: 'Bebas Neue', sans-serif; font-size: 22px; letter-spacing: 0.15em; color: #1A1A1A; }
 
   /* CONCLUSION BANNER */
-  .conclusion { margin: 0 14px 12px; padding: 12px 14px; border-radius: 4px; border: 1px solid #E0DDD8; background: #FFFFFF; display: flex; align-items: center; justify-content: space-between; box-shadow: none; border-left: 2px solid #1A1A1A; }
-  .conclusion-status { font-size: 14px; font-weight: 500; }
-  .conclusion-score { font-family: 'DM Mono', monospace; font-size: 13px; color: #666666; }
+  .rings-status { text-align: center; font-size: 13px; font-weight: 500; margin-bottom: 10px; }
   .status-ok { color: #1A1A1A; font-weight: 600; }
   .status-mid { color: #666666; }
 
@@ -95,15 +93,6 @@
   .terrain-pill { display: inline-flex; align-items: center; gap: 2px; font-family: 'DM Mono', monospace; font-size: 8px; letter-spacing: 0.06em; text-transform: uppercase; border-radius: 10px; padding: 2px 7px; margin-left: 6px; cursor: pointer; -webkit-tap-highlight-color: transparent; color: #AAAAAA; border: 1px solid #E0DDD8; background: transparent; }
   .terrain-pill.trail { color: #8A6D3B; border-color: #D9C79E; background: #FBF6EC; }
 
-  /* KPI CIRCLES */
-  .kpi-list { display: flex; flex-direction: column; gap: 5px; }
-  .kpi-row { background: #FAFAF8; border: none; border-radius: 2px; padding: 10px 12px; display: flex; align-items: center; border-bottom: 1px solid #F0EDE8; }
-  .kpi-name { font-size: 12px; flex: 1; color: #1A1A1A; }
-  .circles { display: flex; gap: 6px; align-items: center; }
-  .circle { width: 20px; height: 20px; border-radius: 50%; border: 1.5px solid #C8C4BE; background: transparent; cursor: pointer; transition: all 0.15s; flex-shrink: 0; }
-  .circle.filled { background: #F4F1EC; border: 2.5px solid #1A1A1A; }
-  .circle:active { transform: scale(1.2); }
-
   /* NOTES */
   .notes-area { width: 100%; background: #FFFFFF; border: 1px solid #E0E0E0; border-radius: 6px; padding: 12px; color: #1A1A1A; font-family: 'DM Sans', sans-serif; font-size: 13px; line-height: 1.5; resize: none; outline: none; min-height: 90px; }
   .notes-area:focus { border-color: #1A1A1A; outline: none; }
@@ -145,11 +134,20 @@
   .chip-marathon { background: #1A1A1A; color: #FFFFFF; border: 1px solid #1A1A1A; }
 
   /* Progress bar */
-  .progress-wrap { margin: 0 14px 12px; }
-  .progress-track { height: 3px; background: #E0DDD8; border-radius: 0px; overflow: hidden; }
-  .progress-fill { height: 100%; border-radius: 0px; transition: width 0.6s ease; background: #1A1A1A; }
-  .progress-fill.full { background: #1A1A1A; }
-  .progress-labels { display: flex; justify-content: space-between; margin-top: 5px; font-family: 'DM Mono', monospace; font-size: 10px; color: #666666; }
+  /* ACHIEVEMENT RINGS */
+  .rings-block { display: flex; align-items: center; justify-content: center; gap: 20px; }
+  .rings-svg { width: 108px; height: 108px; flex-shrink: 0; }
+  .ring-track { fill: none; stroke: #E0DDD8; }
+  .ring-fill { fill: none; stroke-linecap: round; transition: stroke-dashoffset 0.7s ease; }
+  .ring-1 { stroke: #1A1A1A; }
+  .ring-2 { stroke: #555555; }
+  .ring-3 { stroke: #888888; }
+  .rings-legend { display: flex; flex-direction: column; gap: 8px; font-family: 'DM Mono', monospace; font-size: 11px; color: #555555; }
+  .rings-legend-item { display: flex; align-items: center; gap: 6px; }
+  .ring-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .dot-1 { background: #1A1A1A; }
+  .dot-2 { background: #555555; }
+  .dot-3 { background: #888888; }
 
   /* SUNDAY OBJECTIVE */
   .objective-block { background: #F4F1EC; border: none; border-radius: 2px; padding: 12px 14px; margin-bottom: 12px; border-left: 2px solid #1A1A1A; }
@@ -202,12 +200,6 @@
   .sc-badge-repos { color: #6B8DB8; font-size: 8px; }
   .sc-session-data { font-family: 'DM Mono', monospace; font-size: 8px; color: #AAAAAA; margin-left: auto; }
   .sc-check { font-size: 10px; color: #1A1A1A; }
-  .sc-kpis { display: flex; gap: 8px; margin-bottom: 16px; }
-  .sc-kpi { flex: 1; text-align: center; }
-  .sc-kpi-name { font-family: 'DM Mono', monospace; font-size: 6px; color: #BBBBBB; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 4px; }
-  .sc-circles { display: flex; gap: 2px; justify-content: center; }
-  .sc-circle { width: 7px; height: 7px; border-radius: 50%; border: 1px solid #C8C4BE; }
-  .sc-circle.filled { border: 1.5px solid #1A1A1A; background: #F4F1EC; }
   .sc-bottom { display: flex; align-items: flex-end; justify-content: space-between; }
   .sc-vfc-label { font-family: 'DM Mono', monospace; font-size: 7px; color: #AAAAAA; letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 2px; }
   .sc-vfc-val { font-family: 'Bebas Neue', sans-serif; font-size: 24px; color: #1A1A1A; line-height: 1; }
@@ -288,17 +280,23 @@
     <button class="week-arrow" onclick="changeWeek(1)">›</button>
   </div>
 
-  <div class="conclusion" id="conclusion">
-    <div class="conclusion-status" id="conclusion-status"><span class="status-mid">En cours</span></div>
-    <div class="conclusion-score" id="conclusion-score">0/4</div>
-  </div>
-  <div class="progress-wrap">
-    <div class="progress-track">
-      <div class="progress-fill" id="progress-fill" style="width:0%"></div>
-    </div>
-    <div class="progress-labels">
-      <span id="progress-label-left">0%</span>
-      <span id="progress-label-right">Objectif : 4 séances</span>
+  <div class="block" style="margin-top:0;">
+    <div class="section-title">Accomplissement</div>
+    <div class="rings-status" id="conclusion-status"><span class="status-mid">En cours</span></div>
+    <div class="rings-block">
+      <svg viewBox="0 0 120 120" class="rings-svg">
+        <circle cx="60" cy="60" r="52" class="ring-track" stroke-width="10"/>
+        <circle cx="60" cy="60" r="40" class="ring-track" stroke-width="8"/>
+        <circle cx="60" cy="60" r="28" class="ring-track" stroke-width="6"/>
+        <circle cx="60" cy="60" r="52" id="ring-seances" class="ring-fill ring-1" stroke-width="10" transform="rotate(-90 60 60)"/>
+        <circle cx="60" cy="60" r="40" id="ring-km" class="ring-fill ring-2" stroke-width="8" transform="rotate(-90 60 60)"/>
+        <circle cx="60" cy="60" r="28" id="ring-stretch" class="ring-fill ring-3" stroke-width="6" transform="rotate(-90 60 60)"/>
+      </svg>
+      <div class="rings-legend">
+        <div class="rings-legend-item"><span class="ring-dot dot-1"></span><span id="legend-seances">0/5 séances</span></div>
+        <div class="rings-legend-item"><span class="ring-dot dot-2"></span><span id="legend-km">0 / 40 km</span></div>
+        <div class="rings-legend-item"><span class="ring-dot dot-3"></span><span id="legend-stretch">0/2 stretching</span></div>
+      </div>
     </div>
   </div>
 
@@ -319,11 +317,6 @@
   <div class="block">
     <div class="section-title">Récapitulatif</div>
     <div class="stats-row" id="stats-row"></div>
-  </div>
-
-  <div class="block">
-    <div class="section-title">KPIs — Bilan de semaine</div>
-    <div class="kpi-list" id="kpi-list"></div>
   </div>
 
   <div class="block">
@@ -398,17 +391,6 @@
       <div class="stat-card" style="flex:1"><div class="stat-val" style="color:#1A1A1A" id="stat-vfc-max">—</div><div class="stat-label">MAX MS</div></div>
       <div class="stat-card" style="flex:1"><div class="stat-val" style="color:#888888" id="stat-vfc-min">—</div><div class="stat-label">MIN MS</div></div>
       <div class="stat-card" style="flex:1"><div class="stat-val" style="color:#666666" id="stat-vfc-avg">—</div><div class="stat-label">MOY MS</div></div>
-    </div>
-  </div>
-  <div class="section">
-    <div class="section-title">Forme & bien-être</div>
-    <div class="chart-wrap">
-      <div class="chart-container" id="container-chart-kpi"><canvas id="chart-kpi" style="width:100%;display:block;"></canvas></div>
-    </div>
-    <div style="display:flex;gap:10px;margin-top:10px;">
-      <div class="stat-card" style="flex:1"><div class="stat-val" style="color:#111111" id="stat-kpi-max">—</div><div class="stat-label">MAX /5</div></div>
-      <div class="stat-card" style="flex:1"><div class="stat-val" style="color:#555555" id="stat-kpi-min">—</div><div class="stat-label">MIN /5</div></div>
-      <div class="stat-card" style="flex:1"><div class="stat-val" style="color:#666666" id="stat-kpi-avg">—</div><div class="stat-label">MOY /5</div></div>
     </div>
   </div>
 </div>
@@ -525,7 +507,6 @@
 const DAYS = ['LUN','MAR','MER','JEU','VEN','SAM','DIM'];
 
 const SEANCES = ['RUNNING FACILE','RUNNING INTENSE','RENFO','STRETCHING','REPOS','-'];
-const KPIS = ['Motivation','Forme générale','Forme des jambes','Sommeil','Respect du plan'];
 
 const SEANCE_ICONS = {
   'RUNNING FACILE': '🏃',
@@ -553,7 +534,6 @@ function defaultWeek(w) {
     distances: DAYS.map(() => ''),
     allures: DAYS.map(() => ''),
     denivelés: DAYS.map(() => ''),
-    kpis: KPIS.map(() => 0),
     terrain: DAYS.map(() => 'route'),
     vfc: '',
     sommeil: '',
@@ -659,18 +639,6 @@ function renderCountdown() {
     c.innerHTML = `<span>J-${dMarathon}</span><span>Marathon Nice-Cannes</span>`;
     row.appendChild(c);
   }
-}
-
-function animateCounter(el, from, to, suffix) {
-  const dur = 400;
-  const start = performance.now();
-  function step(ts) {
-    const p = Math.min((ts - start) / dur, 1);
-    const ease = 1 - Math.pow(1 - p, 3);
-    el.textContent = Math.round(from + (to - from) * ease) + suffix;
-    if (p < 1) requestAnimationFrame(step);
-  }
-  requestAnimationFrame(step);
 }
 
 function renderDays() {
@@ -956,69 +924,49 @@ function renderStats() {
     <div class="stat-card"><div class="stat-val" style="color:#555555">${intensePct !== null ? intensePct+'%' : '—'}</div><div class="stat-label">⚡ INTENSE</div></div>`;
 }
 
-function renderKpis() {
-  const w = getWeek(currentWeek);
-  const list = document.getElementById('kpi-list');
-  list.innerHTML = '';
-  KPIS.forEach((kpi, i) => {
-    const div = document.createElement('div');
-    div.className = 'kpi-row';
-    const nameEl = document.createElement('div');
-    nameEl.className = 'kpi-name';
-    nameEl.textContent = kpi;
-    const circlesEl = document.createElement('div');
-    circlesEl.className = 'circles';
-    for (let c = 1; c <= 5; c++) {
-      const dot = document.createElement('div');
-      dot.className = 'circle' + (w.kpis[i] >= c ? ' filled' : '');
-      dot.onclick = () => setKpi(i, c);
-      dot.addEventListener('touchend', (e) => { e.preventDefault(); setKpi(i, c); }, { passive: false });
-      circlesEl.appendChild(dot);
-    }
-    div.appendChild(nameEl);
-    div.appendChild(circlesEl);
-    list.appendChild(div);
-  });
+function setRing(id, pct, radius) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  const circumference = 2 * Math.PI * radius;
+  el.style.strokeDasharray = `${circumference}`;
+  el.style.strokeDashoffset = `${circumference * (1 - Math.min(pct, 1))}`;
 }
 
-function setKpi(i, val) {
-  const w = getWeek(currentWeek);
-  w.kpis[i] = val;
-  renderKpis();
-}
-
-let _lastPct = 0;
+let _lastFullState = false;
 function renderConclusion() {
   const w = getWeek(currentWeek);
   let validated = 0;
+  let totalKm = 0;
+  let stretchCount = 0;
   w.seances.forEach((seance, i) => {
-    if (isRunning(seance.s1) && parseKm(w.distances[i]) > 0) validated++;
+    const km = parseKm(w.distances[i]);
+    if (isRunning(seance.s1) && km > 0) { validated++; totalKm += km; }
     else if (seance.s1 === 'RENFO' && !!w.checked[i]) validated++;
     if (seance.s2 === 'RENFO' && !!(w.checked2 && w.checked2[i])) validated++;
+    if (seance.s1 === 'STRETCHING') stretchCount++;
+    if (seance.s2 === 'STRETCHING') stretchCount++;
   });
-  const capped = Math.min(validated, 4);
-  const pct = capped * 25;
-  let status, cls;
-  const wasFull = _lastPct === 100;
-  if (pct === 100) {
+
+  const seancesPct = validated / 5;
+  const kmPct = totalKm / 40;
+  const stretchPct = stretchCount / 2;
+  const isFull = seancesPct >= 1 && kmPct >= 1 && stretchPct >= 1;
+
+  setRing('ring-seances', seancesPct, 52);
+  setRing('ring-km', kmPct, 40);
+  setRing('ring-stretch', stretchPct, 28);
+
+  document.getElementById('legend-seances').textContent = `${validated}/5 séances`;
+  document.getElementById('legend-km').textContent = `${totalKm.toFixed(1)} / 40 km`;
+  document.getElementById('legend-stretch').textContent = `${stretchCount}/2 stretching`;
+
+  if (isFull) {
     document.getElementById('conclusion-status').innerHTML = '<span class="status-ok">✅ Semaine réussie</span>';
-    if (!wasFull && navigator.vibrate) navigator.vibrate([50, 30, 80]);
+    if (!_lastFullState && navigator.vibrate) navigator.vibrate([50, 30, 80]);
   } else {
     document.getElementById('conclusion-status').innerHTML = '<span class="status-mid">En cours</span>';
   }
-  document.getElementById('conclusion-score').textContent = `${validated}/4`;
-
-  // Progress bar
-  const fill = document.getElementById('progress-fill');
-  const labelLeft = document.getElementById('progress-label-left');
-  if (fill) {
-    fill.style.width = pct + '%';
-    fill.className = 'progress-fill' + (pct === 100 ? ' full' : '');
-  }
-  if (labelLeft) animateCounter(labelLeft, _lastPct, pct, '%');
-  _lastPct = pct;
-  const labelRight = document.getElementById('progress-label-right');
-  if (labelRight) labelRight.textContent = pct === 100 ? '✓ Semaine réussie' : `Objectif : 4 séances`;
+  _lastFullState = isFull;
 }
 
 function toggleCheck(i) {
@@ -1190,7 +1138,7 @@ function renderAll() {
   renderCountdown();
   renderObjective();
   renderDays();
-  renderKpis();
+  renderConclusion();
   renderVfc();
   renderNotes();
 }
@@ -1397,7 +1345,7 @@ function renderRecap() {
     grandTotalKm += kmTotal;
     const avgFacile = alluresFacile.length ? secondsToPace(alluresFacile.reduce((a,b)=>a+b,0)/alluresFacile.length) : null;
     const avgIntense = alluresIntense.length ? secondsToPace(alluresIntense.reduce((a,b)=>a+b,0)/alluresIntense.length) : null;
-    const avgKpi = wd ? (wd.kpis.reduce((a,b)=>a+b,0)/KPIS.length).toFixed(1) : '-';
+
     let validated = 0;
     if (wd) {
       wd.seances.forEach((s, i) => {
@@ -1407,12 +1355,11 @@ function renderRecap() {
       });
     }
 
-    const pct = Math.min(validated, 4) * 25;
+    const pct = Math.min(validated, 5) * 20;
     // A week is "started" only if it has real data
     const hasData = wd && (
       validated > 0 ||
       (wd.distances && wd.distances.some(d => parseKm(d) > 0)) ||
-      (wd.kpis && wd.kpis.some(k => k > 0)) ||
       (wd.notes && wd.notes.trim().length > 0) ||
       (wd.vfc && wd.vfc.trim().length > 0)
     );
@@ -1432,8 +1379,7 @@ function renderRecap() {
       avgFacile ? `🏃 ${avgFacile}/km` : '',
       avgIntense ? `⚡ ${avgIntense}/km` : ''
     ].filter(Boolean).join(' · ');
-    const kpiTxt = avgKpi !== '-' && avgKpi !== '0.0' ? `KPI ${avgKpi}/5` : '';
-    const details = [kmTxt, denivTxt, paceTxt, kpiTxt].filter(Boolean).join(' · ');
+    const details = [kmTxt, denivTxt, paceTxt].filter(Boolean).join(' · ');
     div.className = 'recap-row ' + rowCls;
     if (rowCls === 'empty' && !hasData) div.style.opacity = '0.45';
     div.onclick = () => { currentWeek = w; localStorage.setItem('prepa_current_week', w); document.getElementById('week-label').textContent = 'SEMAINE '+w; renderAll(); showPage('semaine', document.querySelector('.nav-btn')); };
@@ -1444,7 +1390,7 @@ function renderRecap() {
           <span class="recap-badge ${badgeCls}">${badgeTxt}</span>
         </div>
         <div class="recap-title">${statusIcon}${isSpecial ? '' : (pct > 0 ? ' '+pct+'% réalisé' : ' Non démarrée')}</div>
-        <div class="recap-km">${details || `${validated}/4 séances`}</div>
+        <div class="recap-km">${details || `${validated}/5 séances`}</div>
       </div>`;
     list.appendChild(div);
   }
@@ -1472,23 +1418,6 @@ function renderStatsPage() {
   document.getElementById('stat-km-avg').textContent = kmFilled.length ? (kmFilled.reduce((a,b)=>a+b,0)/kmFilled.length).toFixed(1) : '—';
   drawChart('chart-km', labels, kmData, '#333333', 'km', false, 0, 60, currentWeek - 1, {recovery:[0,6,11,16,21], race:[5,10,20,28]});
 
-  // KPI chart
-  const kpiData = [];
-  for (let w = 1; w <= 29; w++) {
-    const wd = data[getKey(w)];
-    if (wd && wd.kpis && wd.kpis.some(v => v > 0)) {
-      const avg = wd.kpis.reduce((a,b) => a+b, 0) / wd.kpis.length;
-      kpiData.push(parseFloat(avg.toFixed(2)));
-    } else {
-      kpiData.push(null);
-    }
-  }
-  const kpiFilled = kpiData.filter(v => v !== null);
-  document.getElementById('stat-kpi-max').textContent = kpiFilled.length ? Math.max(...kpiFilled).toFixed(1) : '—';
-  document.getElementById('stat-kpi-min').textContent = kpiFilled.length ? Math.min(...kpiFilled).toFixed(1) : '—';
-  document.getElementById('stat-kpi-avg').textContent = kpiFilled.length ? (kpiFilled.reduce((a,b)=>a+b,0)/kpiFilled.length).toFixed(1) : '—';
-  drawChart('chart-kpi', labels, kpiData, '#333333', 'kpi', true, 0, 5, currentWeek - 1);
-
   // VFC chart — échelle 35→65ms
   const vfcData = [];
   for (let w = 1; w <= 29; w++) {
@@ -1500,10 +1429,10 @@ function renderStatsPage() {
   document.getElementById('stat-vfc-max').textContent = vfcFilled.length ? Math.max(...vfcFilled).toFixed(0) : '—';
   document.getElementById('stat-vfc-min').textContent = vfcFilled.length ? Math.min(...vfcFilled).toFixed(0) : '—';
   document.getElementById('stat-vfc-avg').textContent = vfcFilled.length ? (vfcFilled.reduce((a,b)=>a+b,0)/vfcFilled.length).toFixed(0) : '—';
-  drawChart('chart-vfc', labels, vfcData, '#555555', 'ms', true, 35, 65, currentWeek - 1);
+  drawChart('chart-vfc', labels, vfcData, '#555555', 'ms', true, 35, 65, currentWeek - 1, null, {min: 48, max: 57});
 
   // Auto-scroll each chart so the current week sits at the right edge, only on first open
-  ['chart-km', 'chart-kpi', 'chart-vfc'].forEach(id => {
+  ['chart-km', 'chart-vfc'].forEach(id => {
     const container = document.getElementById('container-' + id);
     if (container && !container.dataset.autoScrolled) {
       const targetScroll = (currentWeek * CHART_PX_PER_WEEK) - container.clientWidth;
@@ -1513,7 +1442,7 @@ function renderStatsPage() {
   });
 }
 
-function drawChart(canvasId, labels, rawData, color, unit, isLine, fixedMin, fixedMax, highlightIdx, specialWeeks) {
+function drawChart(canvasId, labels, rawData, color, unit, isLine, fixedMin, fixedMax, highlightIdx, specialWeeks, baselineZone) {
   const recoveryIdxs = specialWeeks && specialWeeks.recovery ? specialWeeks.recovery : [];
   const raceIdxs = specialWeeks && specialWeeks.race ? specialWeeks.race : [];
   const canvas = document.getElementById(canvasId);
@@ -1551,6 +1480,28 @@ function drawChart(canvasId, labels, rawData, color, unit, isLine, fixedMin, fix
   ctx.fillStyle = 'rgba(0,0,0,0.015)';
   ctx.roundRect(pad.left, pad.top, chartW, chartH, 6);
   ctx.fill();
+
+  // Baseline reference zone (e.g. personal VFC range) — drawn behind grid/data
+  if (baselineZone) {
+    const zTop = pad.top + chartH - ((baselineZone.max - minVal) / range) * chartH;
+    const zBottom = pad.top + chartH - ((baselineZone.min - minVal) / range) * chartH;
+    ctx.fillStyle = 'rgba(74,136,184,0.08)';
+    ctx.fillRect(pad.left, zTop, chartW, zBottom - zTop);
+    ctx.beginPath();
+    ctx.setLineDash([2, 3]);
+    ctx.strokeStyle = 'rgba(74,136,184,0.35)';
+    ctx.lineWidth = 1;
+    ctx.moveTo(pad.left, zTop);
+    ctx.lineTo(pad.left + chartW, zTop);
+    ctx.moveTo(pad.left, zBottom);
+    ctx.lineTo(pad.left + chartW, zBottom);
+    ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle = 'rgba(74,136,184,0.7)';
+    ctx.font = `${isMobile ? 7 : 8}px DM Mono, monospace`;
+    ctx.textAlign = 'left';
+    ctx.fillText('baseline', pad.left + 4, zTop - 3);
+  }
 
   // Grid lines — fewer on mobile (3 instead of 4)
   const gridLines = isMobile ? 3 : 4;
@@ -1734,8 +1685,7 @@ function generateShareCard() {
   const totalKm = kmTotal;
   const avgPaceSecs = allSecsRun.length ? allSecsRun.reduce((a,b)=>a+b,0)/allSecsRun.length : null;
   const avgPace = avgPaceSecs ? secondsToPace(avgPaceSecs) : '—';
-  const pct = Math.min(validated, 4) * 25;
-  const avgKpi = wd.kpis.some(k=>k>0) ? (wd.kpis.reduce((a,b)=>a+b,0)/wd.kpis.length).toFixed(1) : null;
+  const pct = Math.min(validated, 5) * 20;
 
   // Sessions HTML
   const dayNames = ['LUN','MAR','MER','JEU','VEN','SAM','DIM'];
@@ -1759,16 +1709,6 @@ function generateShareCard() {
     sessionsHtml += `<div class="sc-session"><span class="sc-day">${dayNames[i]}</span>${badgeHtml}<span class="sc-session-data">${dataStr}</span>${check}</div>`;
   });
 
-  // KPIs HTML
-  const kpiNames = ['Motiv.','Forme','Jambes','Sommeil','Plan'];
-  let kpisHtml = '';
-  KPIS.forEach((kpi, i) => {
-    const val = wd.kpis[i] || 0;
-    let circles = '';
-    for (let c = 1; c <= 5; c++) circles += `<div class="sc-circle${val>=c?' filled':''}"></div>`;
-    kpisHtml += `<div class="sc-kpi"><div class="sc-kpi-name">${kpiNames[i]}</div><div class="sc-circles">${circles}</div></div>`;
-  });
-
   card.innerHTML = `
     <div class="sc-eyebrow">Prépa Marathon · Sub 3h45</div>
     <div class="sc-title">SEMAINE ${w}</div>
@@ -1782,7 +1722,6 @@ function generateShareCard() {
     <div class="sc-divider"></div>
     <div class="sc-sessions">${sessionsHtml}</div>
     <div class="sc-divider"></div>
-    <div class="sc-kpis">${kpisHtml}</div>
     <div class="sc-bottom">
       <div>
         <div class="sc-vfc-label">VFC · 7j</div>
@@ -1796,7 +1735,7 @@ function generateShareCard() {
     </div>
     <div class="sc-footer">
       <span class="sc-brand">J.DUCHATEAU · PRÉPA 2026</span>
-      <span class="sc-brand">${pct === 100 ? '✅ Réussie' : validated+'/4 séances'}</span>
+      <span class="sc-brand">${pct === 100 ? '✅ Réussie' : validated+'/5 séances'}</span>
     </div>
   `;
   section.scrollIntoView({ behavior: 'smooth' });
