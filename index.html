@@ -943,8 +943,8 @@ function renderConclusion() {
     if (isRunning(seance.s1) && km > 0) { validated++; totalKm += km; }
     else if (seance.s1 === 'RENFO' && !!w.checked[i]) validated++;
     if (seance.s2 === 'RENFO' && !!(w.checked2 && w.checked2[i])) validated++;
-    if (seance.s1 === 'STRETCHING') stretchCount++;
-    if (seance.s2 === 'STRETCHING') stretchCount++;
+    if (seance.s1 === 'STRETCHING' && !!w.checked[i]) stretchCount++;
+    if (seance.s2 === 'STRETCHING' && !!(w.checked2 && w.checked2[i])) stretchCount++;
   });
 
   const seancesPct = validated / 5;
