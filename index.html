@@ -581,7 +581,7 @@ const SUNDAY_PLAN = [
   { week: 19, date: '30 août',   label: '3x5km à 5:20/km',           icon: '⚡', km: 24,   dplus: null,  note: '3km éch. + 3×5km (1km récup entre) + 3km retour' },
   { week: 20, date: '7 sept',    label: '14-16km footing facile',     icon: '🏃', km: 16,   dplus: null,  note: 'Préserver les jambes avant Valberg' },
   { week: 21, date: '13 sept',   label: 'VALBERG 21km/950m D+ 🏁',   icon: '🏆', km: 21,   dplus: 950,   note: 'Course trail — gestion effort montagne' },
-  { week: 22, date: '20 sept',   label: '12-14km footing très facile',icon: '🟡', km: 14,   dplus: null,  note: 'Récup post trail Valberg' },
+  { week: 22, date: '20 sept',   label: 'Sortie longue - blocs allure marathon',icon: '⚡', km: 15,   dplus: null,  note: '3km éch. (6:00-6:20/km) + 4km bloc1 à 5:20/km + 1km récup (6:10-6:20/km) + 4km bloc2 à 5:20/km + 1km récup (6:10-6:20/km) + 2km retour au calme (5:50-6:00/km)' },
   { week: 23, date: '27 sept',   label: '4x5km à 5:20/km',           icon: '⚡', km: 26,   dplus: null,  note: '3km éch. + 4×5km (1km récup) + 3km retour' },
   { week: 24, date: '4 oct',     label: '5x5km à 5:20/km',           icon: '⚡', km: 30,   dplus: null,  note: '3km éch. + 5×5km (800m récup) + 2km retour' },
   { week: 25, date: '11 oct',    label: '24km à 5:20/km — SIMULATION',icon: '🔥', km: 30,   dplus: null,  note: '3km éch. + 24km allure marathon + 3km retour 🔥' },
@@ -1080,7 +1080,7 @@ function renderObjective() {
     block.style.background = '#F5FFF8';
     block.style.borderColor = '#CCCCCC';
     document.getElementById('objective-eyebrow').style.color = '#888888';
-  } else if (obj.week === 4 || obj.week === 9 || obj.week === 10 || obj.week === 19 || obj.week === 23 || obj.week === 24 || obj.week === 25) {
+  } else if (obj.week === 4 || obj.week === 9 || obj.week === 10 || obj.week === 19 || obj.week === 22 || obj.week === 23 || obj.week === 24 || obj.week === 25) {
     block.style.background = '#FFFAF5';
     block.style.borderColor = '#CCCCCC';
   } else {
@@ -1364,7 +1364,7 @@ function renderRecap() {
       (wd.notes && wd.notes.trim().length > 0) ||
       (wd.vfc && wd.vfc.trim().length > 0)
     );
-    const isRecovery = w === 1 || w === 7 || w === 12 || w === 17 || w === 22;
+    const isRecovery = w === 1 || w === 7 || w === 12 || w === 17;
     const isRace = w === 6 || w === 11 || w === 21 || w === 29;
     const isSpecial = isRecovery || isRace;
     let statusIcon = !hasData ? '○' : isSpecial ? '—' : pct === 100 ? '✅' : pct >= 50 ? '⚠️' : '❌';
@@ -1417,7 +1417,7 @@ function renderStatsPage() {
   document.getElementById('stat-km-max').textContent = kmFilled.length ? Math.max(...kmFilled).toFixed(1) : '—';
   document.getElementById('stat-km-total').textContent = kmFilled.length ? kmFilled.reduce((a,b)=>a+b,0).toFixed(0) : '—';
   document.getElementById('stat-km-avg').textContent = kmFilled.length ? (kmFilled.reduce((a,b)=>a+b,0)/kmFilled.length).toFixed(1) : '—';
-  drawChart('chart-km', labels, kmData, '#333333', 'km', false, 0, 60, currentWeek - 1, {recovery:[0,6,11,16,21], race:[5,10,20,28]});
+  drawChart('chart-km', labels, kmData, '#333333', 'km', false, 0, 60, currentWeek - 1, {recovery:[0,6,11,16], race:[5,10,20,28]});
 
   // VFC chart — échelle 35→65ms
   const vfcData = [];
