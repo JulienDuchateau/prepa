@@ -62,7 +62,7 @@
   .day-name { font-family: 'DM Mono', monospace; font-size: 10px; color: #888888; width: 26px; flex-shrink: 0; }
   .day-content { flex: 1; min-width: 0; }
   .day-seance1 { font-size: 12px; font-weight: 500; }
-  .day-seance2 { font-size: 11px; margin-top: 4px; display: flex; align-items: center; gap: 6px; }
+  .day-seance2 { font-size: 11px; margin-top: 4px; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; row-gap: 4px; }
   .day-add-btn { font-family: 'DM Mono', monospace; font-size: 9px; color: #BBBBBB; cursor: pointer; letter-spacing: 0.05em; padding: 1px 0; border: none; background: none; }
   .day-add-btn:hover { color: #888888; }
   .day-run-inputs { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; flex-shrink: 0; }
@@ -536,6 +536,10 @@ function defaultWeek(w) {
     allures: DAYS.map(() => ''),
     denivelés: DAYS.map(() => ''),
     terrain: DAYS.map(() => 'route'),
+    distances2: DAYS.map(() => ''),
+    allures2: DAYS.map(() => ''),
+    denivelés2: DAYS.map(() => ''),
+    terrain2: DAYS.map(() => 'route'),
     vfc: '',
     sommeil: '',
     rpe: '',
@@ -559,6 +563,10 @@ function getWeek(w) {
   if (!wd.denivelés) wd.denivelés = DAYS.map(() => '');
   if (!wd.terrain) wd.terrain = DAYS.map(() => 'route');
   if (!wd.checked2) wd.checked2 = DAYS.map(() => false);
+  if (!wd.distances2) wd.distances2 = DAYS.map(() => '');
+  if (!wd.allures2) wd.allures2 = DAYS.map(() => '');
+  if (!wd.denivelés2) wd.denivelés2 = DAYS.map(() => '');
+  if (!wd.terrain2) wd.terrain2 = DAYS.map(() => 'route');
   if (!wd.vfc) wd.vfc = '';
   wd.seances.forEach(s => { if (s.s2 === undefined) s.s2 = null; });
   if (!wd.sommeil) wd.sommeil = '';
@@ -651,7 +659,8 @@ function renderDays() {
     const isRun = isRunning(s.s1);
     const isRenfo = s.s1 === 'RENFO';
     const isStretching = s.s1 === 'STRETCHING';
-    const s2Validated = s.s2 === 'RENFO' && !!(w.checked2 && w.checked2[i]);
+    const isRun2 = isRunning(s.s2);
+    const s2Validated = (s.s2 === 'RENFO' && !!(w.checked2 && w.checked2[i])) || (isRun2 && parseKm((w.distances2||[])[i]) > 0);
     const isValidated = (isRun ? (parseKm(w.distances[i]) > 0) : ((isRenfo || isStretching) ? !!w.checked[i] : false)) || s2Validated;
     const div = document.createElement('div');
     div.className = 'day-card' + (isValidated ? ' validated' : '');
@@ -699,6 +708,73 @@ function renderDays() {
       s2Badge.onclick = (e) => { e.stopPropagation(); openModal2(i); };
       s2Badge.addEventListener('touchend', (e) => { e.preventDefault(); e.stopPropagation(); openModal2(i); }, { passive: false });
       s2El.appendChild(s2Badge);
+
+      // Second running session — its own terrain pill + km/allure (and D+ on trail) inputs
+      if (isRun2) {
+        const terrain2 = w.terrain2[i] || 'route';
+        const terrainPill2 = document.createElement('span');
+        terrainPill2.className = 'terrain-pill' + (terrain2 === 'trail' ? ' trail' : '');
+        terrainPill2.textContent = terrain2 === 'trail' ? 'Trail' : 'Route';
+        terrainPill2.onclick = (e) => { e.stopPropagation(); toggleTerrain2(i); };
+        terrainPill2.addEventListener('touchend', (e) => { e.preventDefault(); e.stopPropagation(); toggleTerrain2(i); }, { passive: false });
+        s2El.appendChild(terrainPill2);
+
+        const km2Inp = document.createElement('input');
+        km2Inp.className = 'day-field-input km';
+        km2Inp.type = 'text';
+        km2Inp.inputMode = 'decimal';
+        km2Inp.placeholder = '0';
+        km2Inp.style.width = '32px';
+        km2Inp.value = (w.distances2[i] && parseKm(w.distances2[i]) !== 0) ? w.distances2[i] : '';
+        km2Inp.onclick = (e) => e.stopPropagation();
+        km2Inp.addEventListener('touchend', (e) => e.stopPropagation());
+        km2Inp.oninput = function() { updateDist2(i, this.value); };
+        s2El.appendChild(km2Inp);
+        const km2Unit = document.createElement('span');
+        km2Unit.className = 'day-field-unit';
+        km2Unit.textContent = 'km';
+        s2El.appendChild(km2Unit);
+
+        const allure2Inp = document.createElement('input');
+        allure2Inp.className = 'day-field-input allure';
+        allure2Inp.type = 'text';
+        allure2Inp.inputMode = 'numeric';
+        allure2Inp.placeholder = '0:00';
+        allure2Inp.style.width = '36px';
+        allure2Inp.value = w.allures2[i] || '';
+        allure2Inp.onclick = (e) => e.stopPropagation();
+        allure2Inp.addEventListener('touchend', (e) => e.stopPropagation());
+        allure2Inp.oninput = function() {
+          const raw = this.value.replace(/[^0-9]/g, '').slice(0, 4);
+          if (raw.length === 0) { this.value = ''; }
+          else if (raw.length <= 2) { this.value = raw; }
+          else { this.value = raw.slice(0, raw.length - 2) + ':' + raw.slice(-2); }
+          updateAllure2(i, this.value);
+        };
+        s2El.appendChild(allure2Inp);
+        const allure2Unit = document.createElement('span');
+        allure2Unit.className = 'day-field-unit';
+        allure2Unit.textContent = '/km';
+        s2El.appendChild(allure2Unit);
+
+        if (terrain2 === 'trail') {
+          const deniv2Inp = document.createElement('input');
+          deniv2Inp.className = 'day-field-input deniv';
+          deniv2Inp.type = 'text';
+          deniv2Inp.inputMode = 'numeric';
+          deniv2Inp.placeholder = '0';
+          deniv2Inp.style.width = '28px';
+          deniv2Inp.value = w.denivelés2[i] || '';
+          deniv2Inp.onclick = (e) => e.stopPropagation();
+          deniv2Inp.addEventListener('touchend', (e) => e.stopPropagation());
+          deniv2Inp.oninput = function() { updateDeniv2(i, this.value); };
+          s2El.appendChild(deniv2Inp);
+          const deniv2Unit = document.createElement('span');
+          deniv2Unit.className = 'day-field-unit';
+          deniv2Unit.textContent = 'm↑';
+          s2El.appendChild(deniv2Unit);
+        }
+      }
 
       // Toggle for RENFO/STRETCHING as second activity — lets it count toward the weekly total
       if (s.s2 === 'RENFO' || s.s2 === 'STRETCHING') {
@@ -886,6 +962,51 @@ function toggleCheck2(i) {
   renderConclusion();
 }
 
+function updateDist2(i, val) {
+  const w = getWeek(currentWeek);
+  if (!w.distances2) w.distances2 = DAYS.map(() => '');
+  w.distances2[i] = val;
+  const cards = document.querySelectorAll('.day-card');
+  if (cards[i]) {
+    const s = w.seances[i];
+    const isRun = isRunning(s.s1);
+    const isRenfo = s.s1 === 'RENFO';
+    const isStretching = s.s1 === 'STRETCHING';
+    const s2Validated = (s.s2 === 'RENFO' && !!(w.checked2 && w.checked2[i])) || (isRunning(s.s2) && parseKm(val) > 0);
+    const isValidated = (isRun ? (parseKm(w.distances[i]) > 0) : ((isRenfo || isStretching) ? !!w.checked[i] : false)) || s2Validated;
+    cards[i].className = 'day-card' + (isValidated ? ' validated' : '');
+    cards[i].querySelectorAll('.validated-check').forEach(el => el.remove());
+    if (isValidated) {
+      const check = document.createElement('div');
+      check.className = 'validated-check';
+      check.style.cssText = 'font-size:16px;color:#111111;flex-shrink:0;';
+      check.textContent = '✓';
+      cards[i].appendChild(check);
+    }
+  }
+  renderStats();
+  renderConclusion();
+}
+
+function updateAllure2(i, val) {
+  const w = getWeek(currentWeek);
+  if (!w.allures2) w.allures2 = DAYS.map(() => '');
+  w.allures2[i] = val;
+}
+
+function updateDeniv2(i, val) {
+  const w = getWeek(currentWeek);
+  if (!w.denivelés2) w.denivelés2 = DAYS.map(() => '');
+  w.denivelés2[i] = val;
+}
+
+function toggleTerrain2(i) {
+  const w = getWeek(currentWeek);
+  if (!w.terrain2) w.terrain2 = DAYS.map(() => 'route');
+  w.terrain2[i] = (w.terrain2[i] === 'trail') ? 'route' : 'trail';
+  renderDays();
+}
+
 function toggleTerrain(i) {
   const w = getWeek(currentWeek);
   if (!w.terrain) w.terrain = DAYS.map(() => 'route');
@@ -916,6 +1037,11 @@ function renderStats() {
     if (s.s1 === 'RUNNING INTENSE') kmIntense += km;
     const paceSecs = paceToSeconds((w.allures||[])[i]);
     if (isRunning(s.s1) && km > 0 && paceSecs) totalSeconds += km * paceSecs;
+    const km2 = parseKm((w.distances2||[])[i]);
+    if (s.s2 === 'RUNNING FACILE') kmFacile += km2;
+    if (s.s2 === 'RUNNING INTENSE') kmIntense += km2;
+    const paceSecs2 = paceToSeconds((w.allures2||[])[i]);
+    if (isRunning(s.s2) && km2 > 0 && paceSecs2) totalSeconds += km2 * paceSecs2;
   });
   const totalKm = kmFacile + kmIntense;
   const intensePct = totalKm > 0 ? Math.round((kmIntense / totalKm) * 100) : null;
@@ -943,7 +1069,9 @@ function renderConclusion() {
     const km = parseKm(w.distances[i]);
     if (isRunning(seance.s1) && km > 0) { validated++; totalKm += km; }
     else if (seance.s1 === 'RENFO' && !!w.checked[i]) validated++;
-    if (seance.s2 === 'RENFO' && !!(w.checked2 && w.checked2[i])) validated++;
+    const km2 = parseKm((w.distances2||[])[i]);
+    if (isRunning(seance.s2) && km2 > 0) { validated++; totalKm += km2; }
+    else if (seance.s2 === 'RENFO' && !!(w.checked2 && w.checked2[i])) validated++;
     if (seance.s1 === 'STRETCHING' && !!w.checked[i]) stretchCount++;
     if (seance.s2 === 'STRETCHING' && !!(w.checked2 && w.checked2[i])) stretchCount++;
   });
@@ -1031,6 +1159,11 @@ function openModal2(day) {
 
 function selectSeance2(s) {
   const w = getWeek(currentWeek);
+  // Reset distance if changing away from running
+  if (isRunning(w.seances[modalDay].s2) && !isRunning(s)) {
+    if (!w.distances2) w.distances2 = DAYS.map(() => '');
+    w.distances2[modalDay] = '';
+  }
   w.seances[modalDay].s2 = s === '-' ? null : s;
   closeModal();
   renderDays();
@@ -1183,13 +1316,15 @@ function getActivityForDate(date) {
   if (!seance) return null;
   const s = seance.s1;
   const km = parseKm(wd.distances[dayIdx]);
+  const km2 = parseKm((wd.distances2||[])[dayIdx]);
   const checked = !!wd.checked[dayIdx];
   const s2Renfo = seance.s2 === 'RENFO' && !!(wd.checked2 && wd.checked2[dayIdx]);
+  const s2Run = isRunning(seance.s2) && km2 > 0;
   // Check if it's a race day
   const raceDates = ['2026-05-31', '2026-07-05', '2026-09-13', '2026-11-08'];
   const dateStr = date.getFullYear() + '-' + String(date.getMonth()+1).padStart(2,'0') + '-' + String(date.getDate()).padStart(2,'0');
-  if (raceDates.includes(dateStr) && isRunning(s) && km > 0) return 'race';
-  if (isRunning(s) && km > 0) return 'run';
+  if (raceDates.includes(dateStr) && ((isRunning(s) && km > 0) || s2Run)) return 'race';
+  if ((isRunning(s) && km > 0) || s2Run) return 'run';
   if ((s === 'RENFO' && checked) || s2Renfo) return 'renfo';
   return null;
 }
@@ -1329,6 +1464,7 @@ function renderRecap() {
     let kmTotal = 0, alluresFacile = [], alluresIntense = [];
     if (wd) {
       const allures = wd.allures || [];
+      const allures2 = wd.allures2 || [];
       wd.seances.forEach((s, i) => {
         const km = parseKm(wd.distances[i]);
         const secs = paceToSeconds(allures[i]);
@@ -1339,6 +1475,16 @@ function renderRecap() {
         if (s.s1 === 'RUNNING INTENSE') {
           kmTotal += km;
           if (secs) alluresIntense.push(secs);
+        }
+        const km2 = parseKm((wd.distances2||[])[i]);
+        const secs2 = paceToSeconds(allures2[i]);
+        if (s.s2 === 'RUNNING FACILE') {
+          kmTotal += km2;
+          if (secs2) alluresFacile.push(secs2);
+        }
+        if (s.s2 === 'RUNNING INTENSE') {
+          kmTotal += km2;
+          if (secs2) alluresIntense.push(secs2);
         }
       });
     }
@@ -1352,7 +1498,8 @@ function renderRecap() {
       wd.seances.forEach((s, i) => {
         if (isRunning(s.s1) && parseKm(wd.distances[i]) > 0) validated++;
         else if (s.s1 === 'RENFO' && !!wd.checked[i]) validated++;
-        if (s.s2 === 'RENFO' && !!(wd.checked2 && wd.checked2[i])) validated++;
+        if (isRunning(s.s2) && parseKm((wd.distances2||[])[i]) > 0) validated++;
+        else if (s.s2 === 'RENFO' && !!(wd.checked2 && wd.checked2[i])) validated++;
       });
     }
 
@@ -1361,6 +1508,7 @@ function renderRecap() {
     const hasData = wd && (
       validated > 0 ||
       (wd.distances && wd.distances.some(d => parseKm(d) > 0)) ||
+      (wd.distances2 && wd.distances2.some(d => parseKm(d) > 0)) ||
       (wd.notes && wd.notes.trim().length > 0) ||
       (wd.vfc && wd.vfc.trim().length > 0)
     );
@@ -1373,7 +1521,7 @@ function renderRecap() {
     const badgeCls = !hasData ? 'recap-badge-empty' : isRecovery ? 'recap-badge-recovery' : isRace ? 'recap-badge-race' : pct === 100 ? 'recap-badge-ok' : pct >= 50 ? 'recap-badge-mid' : 'recap-badge-empty';
     const badgeTxt = !hasData ? 'À VENIR' : isRecovery ? '🔄 récup' : isRace ? '🏁 course' : pct === 100 ? '✓ RÉUSSIE' : pct >= 50 ? `${pct}%` : pct > 0 ? `${pct}%` : 'À VENIR';
     // Total D+
-    const totalDeniv = wd ? (wd.denivelés || []).reduce((a,b) => a+parseDeniv(b), 0) : 0;
+    const totalDeniv = wd ? (wd.denivelés || []).reduce((a,b) => a+parseDeniv(b), 0) + (wd.denivelés2 || []).reduce((a,b) => a+parseDeniv(b), 0) : 0;
     const kmTxt = km !== '0.0' && km !== '0' ? `${km} km` : '';
     const denivTxt = totalDeniv > 0 ? `D+ ${totalDeniv}m` : '';
     const paceTxt = [
@@ -1408,7 +1556,10 @@ function renderStatsPage() {
     labels.push(''+w);
     const wd = data[getKey(w)];
     const km = wd ? wd.seances.reduce((total, s, i) => {
-      return isRunning(s.s1) ? total + parseKm(wd.distances[i]) : total;
+      let t = total;
+      if (isRunning(s.s1)) t += parseKm(wd.distances[i]);
+      if (isRunning(s.s2)) t += parseKm((wd.distances2||[])[i]);
+      return t;
     }, 0) : 0;
     kmData.push(parseFloat(km.toFixed(1)));
   }
@@ -1681,6 +1832,12 @@ function generateShareCard() {
     if (isRunning(s.s1) && km > 0 && secs) allSecsRun.push(secs);
     if (isRunning(s.s1) && km > 0) validated++;
     if (s.s1 === 'RENFO' && wd.checked[i]) validated++;
+    const km2 = parseKm((wd.distances2||[])[i]);
+    const d2 = parseDeniv((wd.denivelés2||[])[i]);
+    if (isRunning(s.s2)) { kmTotal += km2; totalDeniv += d2; }
+    const secs2 = paceToSeconds((wd.allures2||[])[i]);
+    if (isRunning(s.s2) && km2 > 0 && secs2) allSecsRun.push(secs2);
+    if (isRunning(s.s2) && km2 > 0) validated++;
     if (s.s2 === 'RENFO' && wd.checked2 && wd.checked2[i]) validated++;
   });
   const totalKm = kmTotal;
@@ -1708,6 +1865,18 @@ function generateShareCard() {
     if (isRun && km > 0) dataStr = `${km.toFixed(1)}km${allure ? ' · '+allure : ''}${deniv > 0 ? ' · '+deniv+'m' : ''}`;
     const check = isVal ? ' <span class="sc-check">✓</span>' : '';
     sessionsHtml += `<div class="sc-session"><span class="sc-day">${dayNames[i]}</span>${badgeHtml}<span class="sc-session-data">${dataStr}</span>${check}</div>`;
+
+    // Second running session that day
+    if (isRunning(s.s2)) {
+      const km2 = parseKm((wd.distances2||[])[i]);
+      const allure2 = (wd.allures2||[])[i] || '';
+      const deniv2 = parseDeniv((wd.denivelés2||[])[i]);
+      const badge2 = `<span class="sc-badge sc-badge-run">${s.s2 === 'RUNNING FACILE' ? 'R.FACILE' : 'R.INTENSE'}</span>`;
+      let dataStr2 = '';
+      if (km2 > 0) dataStr2 = `${km2.toFixed(1)}km${allure2 ? ' · '+allure2 : ''}${deniv2 > 0 ? ' · '+deniv2+'m' : ''}`;
+      const check2 = km2 > 0 ? ' <span class="sc-check">✓</span>' : '';
+      sessionsHtml += `<div class="sc-session"><span class="sc-day"></span>${badge2}<span class="sc-session-data">${dataStr2}</span>${check2}</div>`;
+    }
   });
 
   card.innerHTML = `
