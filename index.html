@@ -119,6 +119,9 @@
   .recap-row.race { background: #FDFAF2; border-color: #E8D9A0; }
   .recap-row.race::before { background: #C8A84B; }
   .recap-badge-race { background: #FBF5E0; color: #A07820; border: 1px solid #E8D9A0; }
+  .recap-row.injury { background: #FCF3F2; border-color: #EBC8C4; }
+  .recap-row.injury::before { background: #C86A62; }
+  .recap-badge-injury { background: #FBEAE8; color: #B04A42; border: 1px solid #EBC8C4; }
   .recap-status { font-size: 12px; }
 
   /* iOS Toggle */
@@ -597,6 +600,7 @@ const SUNDAY_PLAN = [
   { week: 27, date: '25 oct',    label: '10km à 5:20/km',             icon: '🟢', km: 16,   dplus: null,  note: '3km éch. + 10km + 3km retour' },
   { week: 28, date: '1 nov',     label: '8-10km footing facile',      icon: '🟢', km: 10,   dplus: null,  note: 'Dernière sortie — jambes fraîches' },
   { week: 29, date: '8 nov',     label: 'MARATHON NICE-CANNES 🏁',    icon: '🏆', km: 42,   dplus: null,  note: 'Objectif sub 3h45 — allure 5:20/km 🏅' },
+  { week: 30, date: '15 nov',    label: 'Récupération post marathon', icon: '🟡', km: null, dplus: null,  note: 'Repos, marche, étirements — on récupère' },
 ];
 
 function getSundayObjective() {
@@ -1262,7 +1266,7 @@ function saveWeek() {
 
 function changeWeek(d) {
   saveWeek();
-  currentWeek = Math.max(1, Math.min(29, currentWeek + d));
+  currentWeek = Math.max(1, Math.min(30, currentWeek + d));
   localStorage.setItem('prepa_current_week', currentWeek);
   document.getElementById('week-label').textContent = 'SEMAINE ' + currentWeek;
   renderAll();
@@ -1309,7 +1313,7 @@ function getActivityForDate(date) {
   const daysSinceStart = Math.floor(diffMs / 86400000);
   const weekIdx = Math.floor(daysSinceStart / 7) + 1;
   const dayIdx = daysSinceStart % 7;
-  if (weekIdx < 1 || weekIdx > 29) return null;
+  if (weekIdx < 1 || weekIdx > 30) return null;
   const wd = data[getKey(weekIdx)];
   if (!wd) return null;
   const seance = wd.seances[dayIdx];
@@ -1459,7 +1463,7 @@ function renderRecap() {
   const list = document.getElementById('recap-list');
   list.innerHTML = '';
   let grandTotalKm = 0;
-  for (let w = 1; w <= 29; w++) {
+  for (let w = 1; w <= 30; w++) {
     const wd = data[getKey(w)];
     let kmTotal = 0, alluresFacile = [], alluresIntense = [];
     if (wd) {
@@ -1512,14 +1516,15 @@ function renderRecap() {
       (wd.notes && wd.notes.trim().length > 0) ||
       (wd.vfc && wd.vfc.trim().length > 0)
     );
-    const isRecovery = w === 1 || w === 7 || w === 12 || w === 17;
+    const isRecovery = w === 1 || w === 7 || w === 12 || w === 17 || w === 30;
     const isRace = w === 6 || w === 11 || w === 21 || w === 29;
-    const isSpecial = isRecovery || isRace;
-    let statusIcon = !hasData ? '○' : isSpecial ? '—' : pct === 100 ? '✅' : pct >= 50 ? '⚠️' : '❌';
+    const isInjury = w === 26;
+    const isSpecial = isRecovery || isRace || isInjury;
+    let statusIcon = isInjury ? '🩹' : !hasData ? '○' : isSpecial ? '—' : pct === 100 ? '✅' : pct >= 50 ? '⚠️' : '❌';
     const div = document.createElement('div');
-    const rowCls = !hasData ? 'empty' : isRecovery ? 'recovery' : isRace ? 'race' : pct === 100 ? 'done' : pct >= 50 ? 'inprogress' : 'empty';
-    const badgeCls = !hasData ? 'recap-badge-empty' : isRecovery ? 'recap-badge-recovery' : isRace ? 'recap-badge-race' : pct === 100 ? 'recap-badge-ok' : pct >= 50 ? 'recap-badge-mid' : 'recap-badge-empty';
-    const badgeTxt = !hasData ? 'À VENIR' : isRecovery ? '🔄 récup' : isRace ? '🏁 course' : pct === 100 ? '✓ RÉUSSIE' : pct >= 50 ? `${pct}%` : pct > 0 ? `${pct}%` : 'À VENIR';
+    const rowCls = isInjury ? 'injury' : !hasData ? 'empty' : isRecovery ? 'recovery' : isRace ? 'race' : pct === 100 ? 'done' : pct >= 50 ? 'inprogress' : 'empty';
+    const badgeCls = isInjury ? 'recap-badge-injury' : !hasData ? 'recap-badge-empty' : isRecovery ? 'recap-badge-recovery' : isRace ? 'recap-badge-race' : pct === 100 ? 'recap-badge-ok' : pct >= 50 ? 'recap-badge-mid' : 'recap-badge-empty';
+    const badgeTxt = isInjury ? '🩹 blessure' : !hasData ? 'À VENIR' : isRecovery ? '🔄 récup' : isRace ? '🏁 course' : pct === 100 ? '✓ RÉUSSIE' : pct >= 50 ? `${pct}%` : pct > 0 ? `${pct}%` : 'À VENIR';
     // Total D+
     const totalDeniv = wd ? (wd.denivelés || []).reduce((a,b) => a+parseDeniv(b), 0) + (wd.denivelés2 || []).reduce((a,b) => a+parseDeniv(b), 0) : 0;
     const kmTxt = km !== '0.0' && km !== '0' ? `${km} km` : '';
@@ -1530,7 +1535,7 @@ function renderRecap() {
     ].filter(Boolean).join(' · ');
     const details = [kmTxt, denivTxt, paceTxt].filter(Boolean).join(' · ');
     div.className = 'recap-row ' + rowCls;
-    if (rowCls === 'empty' && !hasData) div.style.opacity = '0.45';
+    if (rowCls === 'empty' && !hasData && !isInjury) div.style.opacity = '0.45';
     div.onclick = () => { currentWeek = w; localStorage.setItem('prepa_current_week', w); document.getElementById('week-label').textContent = 'SEMAINE '+w; renderAll(); showPage('semaine', document.querySelector('.nav-btn')); };
     div.innerHTML = `
       <div style="flex:1">
@@ -1539,7 +1544,7 @@ function renderRecap() {
           <span class="recap-badge ${badgeCls}">${badgeTxt}</span>
         </div>
         <div class="recap-title">${statusIcon}${isSpecial ? '' : (pct > 0 ? ' '+pct+'% réalisé' : ' Non démarrée')}</div>
-        <div class="recap-km">${details || `${validated}/5 séances`}</div>
+        <div class="recap-km">${details || (isInjury ? 'Semaine de blessure' : `${validated}/5 séances`)}</div>
       </div>`;
     list.appendChild(div);
   }
@@ -1552,7 +1557,7 @@ const CHART_PX_PER_WEEK = 34; // shared with drawChart's canvas width calc
 function renderStatsPage() {
   const kmData = [];
   const labels = [];
-  for (let w = 1; w <= 29; w++) {
+  for (let w = 1; w <= 30; w++) {
     labels.push(''+w);
     const wd = data[getKey(w)];
     const km = wd ? wd.seances.reduce((total, s, i) => {
@@ -1568,11 +1573,11 @@ function renderStatsPage() {
   document.getElementById('stat-km-max').textContent = kmFilled.length ? Math.max(...kmFilled).toFixed(1) : '—';
   document.getElementById('stat-km-total').textContent = kmFilled.length ? kmFilled.reduce((a,b)=>a+b,0).toFixed(0) : '—';
   document.getElementById('stat-km-avg').textContent = kmFilled.length ? (kmFilled.reduce((a,b)=>a+b,0)/kmFilled.length).toFixed(1) : '—';
-  drawChart('chart-km', labels, kmData, '#333333', 'km', false, 0, 60, currentWeek - 1, {recovery:[0,6,11,16], race:[5,10,20,28]});
+  drawChart('chart-km', labels, kmData, '#333333', 'km', false, 0, 60, currentWeek - 1, {recovery:[0,6,11,16,29], race:[5,10,20,28], injury:[25]});
 
   // VFC chart — échelle 35→65ms
   const vfcData = [];
-  for (let w = 1; w <= 29; w++) {
+  for (let w = 1; w <= 30; w++) {
     const wd = data[getKey(w)];
     const v = wd && wd.vfc ? parseVfc(wd.vfc) : null;
     vfcData.push(v);
@@ -1581,7 +1586,7 @@ function renderStatsPage() {
   document.getElementById('stat-vfc-max').textContent = vfcFilled.length ? Math.max(...vfcFilled).toFixed(0) : '—';
   document.getElementById('stat-vfc-min').textContent = vfcFilled.length ? Math.min(...vfcFilled).toFixed(0) : '—';
   document.getElementById('stat-vfc-avg').textContent = vfcFilled.length ? (vfcFilled.reduce((a,b)=>a+b,0)/vfcFilled.length).toFixed(0) : '—';
-  drawChart('chart-vfc', labels, vfcData, '#555555', 'ms', true, 35, 65, currentWeek - 1, null, {min: 48, max: 57});
+  drawChart('chart-vfc', labels, vfcData, '#555555', 'ms', true, 35, 65, currentWeek - 1, {injury:[25]}, {min: 48, max: 57});
 
   // Auto-scroll each chart so the current week sits at the right edge, only on first open
   ['chart-km', 'chart-vfc'].forEach(id => {
@@ -1597,6 +1602,7 @@ function renderStatsPage() {
 function drawChart(canvasId, labels, rawData, color, unit, isLine, fixedMin, fixedMax, highlightIdx, specialWeeks, baselineZone) {
   const recoveryIdxs = specialWeeks && specialWeeks.recovery ? specialWeeks.recovery : [];
   const raceIdxs = specialWeeks && specialWeeks.race ? specialWeeks.race : [];
+  const injuryIdxs = specialWeeks && specialWeeks.injury ? specialWeeks.injury : [];
   const canvas = document.getElementById(canvasId);
   if (!canvas) return;
   const ctx = canvas.getContext('2d');
@@ -1794,10 +1800,19 @@ function drawChart(canvasId, labels, rawData, color, unit, isLine, fixedMin, fix
   // X labels — all visible since chart scrolls horizontally now
   labels.forEach((l, i) => {
     const isHighlight = i === highlightIdx;
-    ctx.fillStyle = isHighlight ? '#888888' : '#999999';
-    ctx.font = `${isHighlight ? 'bold ' : ''}${isMobile ? 7 : 8}px DM Mono, monospace`;
+    const isInjury = injuryIdxs.includes(i);
+    const lx = pad.left + i * barW + barW/2;
+    ctx.fillStyle = isInjury ? '#C0392B' : isHighlight ? '#888888' : '#999999';
+    ctx.font = `${(isHighlight || isInjury) ? 'bold ' : ''}${isMobile ? 7 : 8}px DM Mono, monospace`;
     ctx.textAlign = 'center';
-    ctx.fillText(l, pad.left + i * barW + barW/2, H - 6);
+    ctx.fillText(l, lx, H - 6);
+    if (isInjury) {
+      ctx.beginPath();
+      ctx.arc(lx, H - 8.5, 7, 0, Math.PI * 2);
+      ctx.strokeStyle = '#C0392B';
+      ctx.lineWidth = 1.2;
+      ctx.stroke();
+    }
   });
 }
 
@@ -1805,7 +1820,7 @@ function initShareWeekSelect() {
   const sel = document.getElementById('share-week-select');
   if (!sel) return;
   sel.innerHTML = '';
-  for (let w = 1; w <= 29; w++) {
+  for (let w = 1; w <= 30; w++) {
     const opt = document.createElement('option');
     opt.value = w;
     opt.textContent = 'Semaine ' + w;
@@ -1987,10 +2002,10 @@ function updateStorageInfo() {
     size += (localStorage.key(i).length + (localStorage.getItem(localStorage.key(i)) || '').length) * 2;
   }
   const kb = (size / 1024).toFixed(1);
-  const weeksWithData = Array.from({length:29},(_,i)=>i+1).filter(w => data[getKey(w)]).length;
+  const weeksWithData = Array.from({length:30},(_,i)=>i+1).filter(w => data[getKey(w)]).length;
   el.innerHTML = `
     <div style="display:flex;justify-content:space-between"><span>Clés stockées</span><span style="color:#111111;font-weight:500">${keys}</span></div>
-    <div style="display:flex;justify-content:space-between"><span>Semaines remplies</span><span style="color:#111111;font-weight:500">${weeksWithData} / 29</span></div>
+    <div style="display:flex;justify-content:space-between"><span>Semaines remplies</span><span style="color:#111111;font-weight:500">${weeksWithData} / 30</span></div>
     <div style="display:flex;justify-content:space-between"><span>Taille estimée</span><span style="color:#555555;font-weight:500">${kb} Ko</span></div>
     <div style="display:flex;justify-content:space-between"><span>Dernière export</span><span style="color:#666666">voir fichier</span></div>
   `;
@@ -2026,7 +2041,7 @@ window.addEventListener('orientationchange', () => {
 
 load();
 const savedWeek = parseInt(localStorage.getItem('prepa_current_week') || '1');
-if (savedWeek >= 1 && savedWeek <= 29) currentWeek = savedWeek;
+if (savedWeek >= 1 && savedWeek <= 30) currentWeek = savedWeek;
 document.getElementById('week-label').textContent = 'SEMAINE ' + currentWeek;
 renderAll();
 renderRecap();
